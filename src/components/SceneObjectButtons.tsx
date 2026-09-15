@@ -42,7 +42,7 @@ export function SceneObjectButtons({
               onClick={() => onProp(prop.object)}
               className="scene-object-button"
             >
-              Use {prop.label}
+              Take a sip from {prop.label}
             </button>
           </li>
         ))}

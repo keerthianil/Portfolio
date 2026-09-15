@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { ROUTES, type RouteId } from "@/data/routes";
+import { NAV_ROUTES, type RouteId } from "@/data/routes";
 import { pick, springIndicator, springPop } from "@/lib/motion";
 
 const LABEL_WIDTH = 70;
@@ -17,6 +17,8 @@ interface BottomNavProps {
   onRotate: (direction: 1 | -1) => void;
   /** Pulses the arrows once, to teach that the scene rotates. */
   showArrowGlow?: boolean;
+  /** Which way the view is fully turned, if either. */
+  limit?: "left" | "right" | null;
 }
 
 export function BottomNav({
@@ -26,6 +28,7 @@ export function BottomNav({
   onClose,
   onRotate,
   showArrowGlow = false,
+  limit = null,
 }: BottomNavProps) {
   const shouldReduce = useReducedMotion();
   const [hovered, setHovered] = useState<RouteId | null>(null);
@@ -63,19 +66,20 @@ export function BottomNav({
   }, []);
 
   const indicatorIndex = hovered
-    ? ROUTES.findIndex((route) => route.id === hovered)
+    ? NAV_ROUTES.findIndex((route) => route.id === hovered)
     : 0;
 
-  const arrowClasses = [
+  const arrowClasses = (disabled: boolean) => [
     "flex h-14 w-14 cursor-pointer items-center justify-center rounded-full",
     "bg-bg/25 hover:bg-bg/50 transition-all duration-200",
     // Press is its own state. Without it a held arrow gives no feedback that
     // the hold registered, which is exactly when the user is holding it.
     "hover:scale-110 active:scale-95 active:bg-bg/60",
     "select-none touch-manipulation group",
-    showArrowGlow
+    showArrowGlow && !disabled
       ? "ring-2 ring-highlight/50 shadow-[0_0_20px_var(--accent-soft)] motion-safe:animate-pulse"
       : "",
+    disabled ? "opacity-35 cursor-not-allowed hover:scale-100" : "",
   ].join(" ");
 
   const arrowIconClasses = (glow: boolean) =>
@@ -132,13 +136,14 @@ export function BottomNav({
           >
             <button
               type="button"
-              className={arrowClasses}
-              aria-label="Rotate the room left"
-              onClick={(event) => rotateOnce(-1, event)}
-              onMouseDown={() => startHold(-1)}
+              className={arrowClasses(limit === "left")}
+              disabled={limit === "left"}
+              aria-label="Look left"
+              onClick={(event) => rotateOnce(1, event)}
+              onMouseDown={() => startHold(1)}
               onMouseUp={endHold}
               onMouseLeave={endHold}
-              onTouchStart={() => startHold(-1)}
+              onTouchStart={() => startHold(1)}
               onTouchEnd={endHold}
               onContextMenu={(event) => event.preventDefault()}
             >
@@ -170,7 +175,7 @@ export function BottomNav({
                 aria-hidden="true"
               />
 
-              {ROUTES.map((route) => {
+              {NAV_ROUTES.map((route) => {
                 const isActive = activeRoute === route.id;
                 return (
                   <button
@@ -202,13 +207,14 @@ export function BottomNav({
 
             <button
               type="button"
-              className={arrowClasses}
-              aria-label="Rotate the room right"
-              onClick={(event) => rotateOnce(1, event)}
-              onMouseDown={() => startHold(1)}
+              className={arrowClasses(limit === "right")}
+              disabled={limit === "right"}
+              aria-label="Look right"
+              onClick={(event) => rotateOnce(-1, event)}
+              onMouseDown={() => startHold(-1)}
               onMouseUp={endHold}
               onMouseLeave={endHold}
-              onTouchStart={() => startHold(1)}
+              onTouchStart={() => startHold(-1)}
               onTouchEnd={endHold}
               onContextMenu={(event) => event.preventDefault()}
             >

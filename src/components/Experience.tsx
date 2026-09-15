@@ -23,6 +23,12 @@ import { WelcomeCard } from "./WelcomeCard";
 
 const ARROW_GLOW_AT_MS = 3000;
 
+/**
+ * How far the room can turn, in radians. About 35 degrees each way, which is
+ * enough to bring a side wall into frame and not enough to see behind the desk.
+ */
+const YAW_LIMIT = 0.62;
+
 export function Experience() {
   const [percent, setPercent] = useState(0);
   const [sceneReady, setSceneReady] = useState(false);
@@ -131,11 +137,30 @@ export function Experience() {
    * frame while an arrow is held, and putting it in state would re-render the
    * whole tree sixty times a second. The scene reads the ref directly.
    */
+  /**
+   * Clamped, not wrapped. A full turn puts you behind the desk looking at the
+   * back of a monitor, which is nothing. The limit is set so panning all the
+   * way brings one side wall into frame and stops there.
+   *
+   * The limit flags are state because the arrows disable at the end of the
+   * travel, and a ref read during render would be stale. They only change when
+   * the limit is actually crossed, so this is two renders per pan rather than
+   * sixty a second.
+   */
+  const [limit, setLimit] = useState<"left" | "right" | null>(null);
   const rotate = useCallback((direction: 1 | -1) => {
-    let next = yaw.current + 0.05 * direction;
-    while (next > Math.PI) next -= 2 * Math.PI;
-    while (next < -Math.PI) next += 2 * Math.PI;
+    const next = Math.max(
+      -YAW_LIMIT,
+      Math.min(YAW_LIMIT, yaw.current + 0.05 * direction),
+    );
     yaw.current = next;
+    const reached =
+      next >= YAW_LIMIT - 1e-4
+        ? "left"
+        : next <= -YAW_LIMIT + 1e-4
+          ? "right"
+          : null;
+    setLimit((current) => (current === reached ? current : reached));
   }, []);
 
   // Arrow keys drive the same rotation, and stop while an overlay is open so
@@ -153,8 +178,8 @@ export function Experience() {
     };
     let frame = 0;
     const tick = () => {
-      if (pressed.left) rotate(-1);
-      if (pressed.right) rotate(1);
+      if (pressed.left) rotate(1);
+      if (pressed.right) rotate(-1);
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
@@ -167,15 +192,35 @@ export function Experience() {
     };
   }, [activeRoute, rotate]);
 
-  const playProp = useCallback((object: string) => {
-    const prop = SCENE_PROPS.find((item) => item.object === object);
-    if (!prop) return;
-    setAnnouncement(prop.announcement);
-    const audio = new Audio(prop.sound);
-    // Missing file, or a browser that refuses without a gesture. Either way the
-    // prop is decorative, so failing silently is the right outcome.
-    audio.play().catch(() => {});
+  /**
+   * The mug. Three sips empty it, and a fourth click fills it again. The sound
+   * is optional: if the file is missing, or the browser refuses to play without
+   * a gesture it recognises, the level still drops and the announcement still
+   * fires, because the sound was never the only feedback.
+   */
+  const [sips, setSips] = useState(0);
+  const drink = useCallback(() => {
+    setSips((count) => {
+      const next = count >= 3 ? 0 : count + 1;
+      setAnnouncement(
+        next === 0
+          ? "Mug refilled."
+          : next === 3
+            ? "Empty."
+            : `Sip ${next} of 3.`,
+      );
+      return next;
+    });
+    const prop = SCENE_PROPS.find((item) => item.object === "mug");
+    if (prop?.sound) new Audio(prop.sound).play().catch(() => {});
   }, []);
+
+  const playProp = useCallback(
+    (object: string) => {
+      if (object === "mug") drink();
+    },
+    [drink],
+  );
 
   return (
     <>
@@ -195,6 +240,7 @@ export function Experience() {
           onNavigate={navigate}
           onProp={playProp}
           onReady={markSceneReady}
+          sips={sips}
         />
       </main>
 
@@ -226,6 +272,7 @@ export function Experience() {
           onClose={close}
           onRotate={rotate}
           showArrowGlow={showArrowGlow && !welcomeOpen}
+          limit={limit}
         />
       )}
 
