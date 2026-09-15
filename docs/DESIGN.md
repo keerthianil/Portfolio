@@ -55,6 +55,16 @@ This is the subject of the site, so it is tested rather than claimed.
 - Pinch zoom stays enabled. No `user-scalable=no`.
 - Never animate `width`, `height`, `top`, `left`, `margin` or `padding`.
 
+## The flat view
+
+The 3D room is an enhancement, never the only route to anything. Every object in
+it is also a real focusable button, so the page works with the canvas removed.
+
+It is replaced automatically when the browser cannot give the page a WebGL
+context, or when the scene throws at runtime, and `?no3d=1` forces it. The
+replacement is not a photograph of the room: a picture of a room you cannot
+touch is worse than no room, so it is the same set of links as a list.
+
 ## Copy
 
 Zero em dashes, zero italics. Short declarative sentences. Word counts are

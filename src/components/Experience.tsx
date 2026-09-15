@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { AnimatePresence } from "motion/react";
 import {
   ROUTE_BY_ID,
@@ -11,6 +17,7 @@ import {
   type RouteId,
 } from "@/data/routes";
 import { CAMERA_LEAD_MS } from "@/lib/motion";
+import { flatStore } from "@/lib/webgl";
 import { BottomNav } from "./BottomNav";
 import { Curtain } from "./Curtain";
 import { LoadingScreen } from "./LoadingScreen";
@@ -19,7 +26,7 @@ import { SceneStage } from "./SceneStage";
 import { TopBar } from "./TopBar";
 import { AboutOverlay } from "./overlay/AboutOverlay";
 import { BeforeAfter } from "./overlay/BeforeAfter";
-import { PlaceholderOverlay } from "./overlay/PlaceholderOverlay";
+import { ResearchOverlay } from "./overlay/ResearchOverlay";
 import { TabOrderGame } from "./overlay/TabOrderGame";
 import { Timeline } from "./overlay/Timeline";
 import { WorkOverlay } from "./overlay/WorkOverlay";
@@ -60,6 +67,17 @@ export function Experience() {
   const mainRef = useRef<HTMLElement>(null);
 
   const markSceneReady = useCallback(() => setSceneReady(true), []);
+
+  /**
+   * Whether the room has to be replaced by the flat view. Read through a store
+   * rather than an effect, so there is no cascading render and no moment where
+   * the value is unknown on the client.
+   */
+  const flat = useSyncExternalStore(
+    flatStore.subscribe,
+    flatStore.getSnapshot,
+    flatStore.getServerSnapshot,
+  );
   const overlayTimer = useRef<number | undefined>(undefined);
 
   // Fake determinate progress. It rises on its own and is held under 100 until
@@ -67,12 +85,14 @@ export function Experience() {
   useEffect(() => {
     const id = window.setInterval(() => {
       setPercent((value) => {
-        if (sceneReady) return Math.min(100, value + 6);
+        // In the flat view nothing will ever report ready, because there is no
+        // canvas to report it.
+        if (sceneReady || flat) return Math.min(100, value + 6);
         return Math.min(92, value + 3);
       });
     }, 45);
     return () => window.clearInterval(id);
-  }, [sceneReady]);
+  }, [sceneReady, flat]);
 
   useEffect(() => {
     if (percent < 100) return;
@@ -245,17 +265,19 @@ export function Experience() {
           onProp={playProp}
           onReady={markSceneReady}
           sips={sips}
+          flat={flat}
         />
       </main>
 
       <SceneObjectButtons
         onNavigate={navigate}
         onProp={playProp}
-        inert={activeRoute !== null || welcomeOpen || !revealed}
+        inert={activeRoute !== null || welcomeOpen || !revealed || !!flat}
       />
 
+
       <AnimatePresence>
-        {revealed && welcomeOpen && (
+        {revealed && welcomeOpen && flat === false && (
           <WelcomeCard
             onDismiss={() => {
               setWelcomeOpen(false);
@@ -275,8 +297,9 @@ export function Experience() {
           onNavigate={navigate}
           onClose={close}
           onRotate={rotate}
-          showArrowGlow={showArrowGlow && !welcomeOpen}
+          showArrowGlow={showArrowGlow && !welcomeOpen && !flat}
           limit={limit}
+          canRotate={flat === false}
         />
       )}
 
@@ -292,7 +315,7 @@ export function Experience() {
           />
         )}
         {activeRoute === "research" && (
-          <PlaceholderOverlay key="research" label="Research" onClose={close} />
+          <ResearchOverlay key="research" onClose={close} />
         )}
         {activeRoute === "timeline" && <Timeline key="timeline" onClose={close} />}
         {activeRoute === "taborder" && (
