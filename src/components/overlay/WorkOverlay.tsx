@@ -1,22 +1,57 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
+import { AnimatePresence } from "motion/react";
 import { Code, ExternalLink, Mail } from "lucide-react";
 import { CONTACT, PROJECTS } from "@/data/projects";
+import { CaseStudy } from "./CaseStudy";
 import { ProjectCard } from "./ProjectCard";
 import { WindowFrame } from "./WindowFrame";
 
-export function WorkOverlay({
-  onClose,
-  onOpenProject,
-}: {
-  onClose: () => void;
-  onOpenProject: (id: string) => void;
-}) {
+export function WorkOverlay({ onClose }: { onClose: () => void }) {
+  /**
+   * The open case study is a sub-route, so the browser back button closes it
+   * and a link to a specific project works.
+   */
+  const [openId, setOpenId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    const parts = window.location.hash.replace(/^#/, "").split("/");
+    return parts[1] ?? null;
+  });
+
+  const openProject = useCallback((id: string) => {
+    setOpenId(id);
+    window.history.replaceState(null, "", `#work/${id}`);
+  }, []);
+
+  const closeProject = useCallback(() => {
+    setOpenId(null);
+    window.history.replaceState(null, "", "#work");
+  }, []);
+
+  /**
+   * Follow the hash. This overlay stays mounted while only the sub-route
+   * changes, so without this a link to #work/tactilenav arriving while
+   * #work/stemally was open left the wrong study on screen.
+   */
+  useEffect(() => {
+    const sync = () => {
+      const parts = window.location.hash.replace(/^#/, "").split("/");
+      setOpenId(parts[0] === "work" ? (parts[1] ?? null) : null);
+    };
+    window.addEventListener("hashchange", sync);
+    return () => window.removeEventListener("hashchange", sync);
+  }, []);
+
   return (
-    <WindowFrame title="Selected work" onClose={onClose}>
+    <WindowFrame
+      title="Projects"
+      onClose={onClose}
+      escapeEnabled={!openId}
+    >
       <div className="mx-auto flex max-w-[1180px] flex-col gap-8 px-5 py-8 sm:px-8 sm:py-10">
         <header className="flex flex-col gap-2">
-          <h2 className="font-display text-3xl sm:text-4xl">Selected work</h2>
+          <h2 className="font-display text-3xl sm:text-4xl">Projects</h2>
           <p className="text-text/80 max-w-2xl text-[15px] leading-relaxed">
             Four products for people the defaults miss. Each one ships with the
             accessibility work tested rather than claimed, and each case study
@@ -29,7 +64,7 @@ export function WorkOverlay({
         <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {PROJECTS.map((project) => (
             <li key={project.id} className="flex">
-              <ProjectCard project={project} onOpen={onOpenProject} />
+              <ProjectCard project={project} onOpen={openProject} />
             </li>
           ))}
 
@@ -73,6 +108,12 @@ export function WorkOverlay({
           </li>
         </ul>
       </div>
+
+      <AnimatePresence>
+        {openId && (
+          <CaseStudy key={openId} id={openId} onClose={closeProject} />
+        )}
+      </AnimatePresence>
     </WindowFrame>
   );
 }

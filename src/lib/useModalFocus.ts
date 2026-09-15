@@ -23,8 +23,17 @@ const FOCUSABLE = [
 export function useModalFocus(
   isOpen: boolean,
   onClose: () => void,
-  returnFocusTo?: React.RefObject<HTMLElement | null>,
+  options?: {
+    returnFocusTo?: React.RefObject<HTMLElement | null>;
+    /**
+     * Set false while a nested dialog is open. Both handlers live on `window`,
+     * so without this an Escape inside the child would close the parent too.
+     */
+    escape?: boolean;
+  },
 ) {
+  const returnFocusTo = options?.returnFocusTo;
+  const escapeEnabled = options?.escape ?? true;
   const containerRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
 
@@ -44,7 +53,7 @@ export function useModalFocus(
   }, [isOpen, returnFocusTo]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !escapeEnabled) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       event.preventDefault();
@@ -52,7 +61,7 @@ export function useModalFocus(
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, escapeEnabled]);
 
   useEffect(() => {
     if (!isOpen) return;
