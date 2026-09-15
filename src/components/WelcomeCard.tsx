@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import Image from "next/image";
 import { CURTAIN_EASE, pick } from "@/lib/motion";
-import { Mark } from "./Mark";
 
 export function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
   const shouldReduce = useReducedMotion();
@@ -36,11 +36,28 @@ export function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
       })}
     >
       <div className="border-border bg-surface/85 pointer-events-auto flex w-full max-w-md flex-col items-center gap-5 rounded-3xl border p-8 text-center shadow-2xl backdrop-blur-md">
+        {/* Not cropped to a circle: the raised hand is the whole point of the
+            pose, and a circular mask cuts it off. It sits on a soft burgundy
+            glow instead. */}
         <span
-          className="border-border text-highlight flex h-16 w-16 items-center justify-center rounded-full border"
+          className="relative flex h-24 w-24 items-center justify-center"
           aria-hidden="true"
         >
-          <Mark className="h-8 w-8" />
+          <span
+            className="absolute inset-0 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle at 50% 55%, var(--accent-soft) 0%, transparent 70%)",
+            }}
+          />
+          <Image
+            src="/images/keerthi.png"
+            alt=""
+            width={242}
+            height={240}
+            priority
+            className="relative h-24 w-24 object-contain"
+          />
         </span>
 
         <div className="flex flex-col gap-1">
