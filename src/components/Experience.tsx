@@ -17,7 +17,10 @@ import { LoadingScreen } from "./LoadingScreen";
 import { SceneObjectButtons } from "./SceneObjectButtons";
 import { SceneStage } from "./SceneStage";
 import { TopBar } from "./TopBar";
+import { BeforeAfter } from "./overlay/BeforeAfter";
 import { PlaceholderOverlay } from "./overlay/PlaceholderOverlay";
+import { TabOrderGame } from "./overlay/TabOrderGame";
+import { Timeline } from "./overlay/Timeline";
 import { WorkOverlay } from "./overlay/WorkOverlay";
 import { WelcomeCard } from "./WelcomeCard";
 
@@ -289,6 +292,13 @@ export function Experience() {
         )}
         {activeRoute === "research" && (
           <PlaceholderOverlay key="research" label="Research" onClose={close} />
+        )}
+        {activeRoute === "timeline" && <Timeline key="timeline" onClose={close} />}
+        {activeRoute === "taborder" && (
+          <TabOrderGame key="taborder" onClose={close} />
+        )}
+        {activeRoute === "beforeafter" && (
+          <BeforeAfter key="beforeafter" onClose={close} />
         )}
       </AnimatePresence>
 
