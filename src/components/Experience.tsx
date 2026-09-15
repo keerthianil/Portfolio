@@ -17,6 +17,8 @@ import { LoadingScreen } from "./LoadingScreen";
 import { SceneObjectButtons } from "./SceneObjectButtons";
 import { SceneStage } from "./SceneStage";
 import { TopBar } from "./TopBar";
+import { PlaceholderOverlay } from "./overlay/PlaceholderOverlay";
+import { WorkOverlay } from "./overlay/WorkOverlay";
 import { WelcomeCard } from "./WelcomeCard";
 
 const ARROW_GLOW_AT_MS = 3000;
@@ -180,7 +182,7 @@ export function Experience() {
       {percent < 100 && <LoadingScreen percent={percent} />}
       <Curtain open={revealed} />
 
-      <TopBar onHome={close} hidden={!revealed} />
+      <TopBar onHome={close} hidden={!revealed} inert={activeRoute !== null} />
 
       <main id="main" ref={mainRef} tabIndex={-1} className="fixed inset-0">
         <h1 className="sr-only">
@@ -227,17 +229,21 @@ export function Experience() {
         />
       )}
 
-      {/* Overlays mount here in phases 3 to 5. */}
-      {activeRoute && (
-        <section
-          className="bg-bg/80 fixed inset-0 z-[400] flex items-center justify-center backdrop-blur-sm"
-          aria-label={ROUTE_BY_ID[activeRoute].label}
-        >
-          <p className="font-mono text-text-muted text-sm">
-            {ROUTE_BY_ID[activeRoute].label} overlay lands in a later phase
-          </p>
-        </section>
-      )}
+      <AnimatePresence>
+        {activeRoute === "work" && (
+          <WorkOverlay
+            key="work"
+            onClose={close}
+            onOpenProject={(id) => setAnnouncement(`${id} case study, coming next phase.`)}
+          />
+        )}
+        {activeRoute === "about" && (
+          <PlaceholderOverlay key="about" label="About" onClose={close} />
+        )}
+        {activeRoute === "research" && (
+          <PlaceholderOverlay key="research" label="Research" onClose={close} />
+        )}
+      </AnimatePresence>
 
       <div aria-live="polite" className="sr-only">
         {announcement}

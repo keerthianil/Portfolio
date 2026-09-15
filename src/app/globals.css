@@ -103,6 +103,11 @@ main:focus-visible {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    /* Delays matter as much as durations here. A `both`-filled animation with a
+       0.4s delay holds its element at opacity 0 for 0.4s even when the duration
+       is zeroed, which is a blank screen for anyone who asked for less motion. */
+    animation-delay: 0s !important;
+    transition-delay: 0s !important;
     scroll-behavior: auto !important;
   }
 }
@@ -145,4 +150,33 @@ main:focus-visible {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   font-size: 0.9375rem;
+}
+
+/* Loading screen. CSS rather than JS, because this paints before hydration has
+   settled and must never depend on an animation frame to be readable. */
+@keyframes loading-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+.loading-pulse {
+  animation: loading-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes loading-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.loading-rise {
+  animation: loading-rise 0.8s ease-out 0.4s both;
 }

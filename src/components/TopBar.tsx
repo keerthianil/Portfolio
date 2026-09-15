@@ -8,15 +8,21 @@ import { HelpMenu } from "./HelpMenu";
 export function TopBar({
   onHome,
   hidden = false,
+  inert = false,
 }: {
   onHome: () => void;
   hidden?: boolean;
+  /** Set while an overlay is open. `aria-modal` already hides this from a
+      screen reader, so leaving it tabbable would let sighted keyboard users
+      reach a control their screen reader cannot. */
+  inert?: boolean;
 }) {
   const [helpOpen, setHelpOpen] = useState(false);
 
   return (
     <>
       <header
+        inert={inert}
         className={[
           "fixed top-0 left-0 z-[600] flex h-16 w-full items-center",
           "justify-between px-4 transition-opacity duration-300",

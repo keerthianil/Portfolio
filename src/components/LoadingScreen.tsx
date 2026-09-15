@@ -1,12 +1,17 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
 import { Mark } from "./Mark";
 
 /**
- * Five stages keyed off the load percentage. The copy is the work the site is
- * about, which is the joke: it narrates an accessibility build rather than a
- * generic spinner.
+ * Five stages keyed off the load percentage. The copy narrates an accessibility
+ * build rather than a generic spinner.
+ *
+ * Deliberately free of any JS animation. This renders during the busiest moment
+ * of the page's life, before hydration has settled and while the 3D canvas is
+ * initialising. An earlier version faded the text in with Motion and it stayed
+ * stuck at opacity 0, because the animation never got a frame: the loading
+ * screen was invisible except for its ring. CSS keyframes run without waiting
+ * for JS, and the global reduced-motion rule already neutralises them.
  */
 const STAGES = [
   { upTo: 25, emoji: "✏️", text: "Sketching in Figma..." },
@@ -17,14 +22,15 @@ const STAGES = [
 ];
 
 function stageFor(percent: number) {
-  return STAGES.find((stage) => percent <= stage.upTo) ?? STAGES[STAGES.length - 1];
+  return (
+    STAGES.find((stage) => percent <= stage.upTo) ?? STAGES[STAGES.length - 1]
+  );
 }
 
 const RADIUS = 45;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export function LoadingScreen({ percent }: { percent: number }) {
-  const shouldReduce = useReducedMotion();
   const stage = stageFor(percent);
   const clamped = Math.min(100, Math.max(0, percent));
 
@@ -63,41 +69,22 @@ export function LoadingScreen({ percent }: { percent: number }) {
           />
         </svg>
 
-        <motion.div
-          className="text-highlight absolute inset-0 flex items-center justify-center"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{
-            scale: 1,
-            opacity: 1,
-            // The mark pulses rather than spins. A spinning mark under a
-            // progress ring is two spinners; a pulse reads as a heartbeat.
-            ...(shouldReduce || clamped >= 100 ? {} : { opacity: [1, 0.45, 1] }),
-          }}
-          transition={{
-            duration: 0.8,
-            delay: 0.3,
-            opacity:
-              shouldReduce || clamped >= 100
-                ? { duration: 0.3, ease: "easeOut" }
-                : { duration: 1.6, repeat: Infinity, ease: "easeInOut" },
-          }}
-        >
-          <Mark className="h-12 w-12" />
-        </motion.div>
+        <div className="text-highlight absolute inset-0 flex items-center justify-center">
+          {/* The mark pulses rather than spins. A spinner inside a progress ring
+              is two spinners; a pulse reads as a heartbeat. */}
+          <Mark
+            className={`h-12 w-12 ${clamped >= 100 ? "" : "loading-pulse"}`}
+          />
+        </div>
       </div>
 
-      <motion.div
-        className="mt-4 text-center"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.6 }}
-      >
+      <div className="loading-rise mt-4 text-center">
         <p className="text-base font-medium tracking-[0.3em]">LOADING</p>
         <p className="text-text/80 mt-2 text-sm">
           <span aria-hidden="true">{stage.emoji}&nbsp;&nbsp;</span>
           {stage.text}
         </p>
-      </motion.div>
+      </div>
     </div>
   );
 }
