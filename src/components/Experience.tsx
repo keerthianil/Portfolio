@@ -46,6 +46,8 @@ export function Experience() {
 
   const yaw = useRef(0);
   const mainRef = useRef<HTMLElement>(null);
+
+  const markSceneReady = useCallback(() => setSceneReady(true), []);
   const overlayTimer = useRef<number | undefined>(undefined);
 
   // Fake determinate progress. It rises on its own and is held under 100 until
@@ -180,12 +182,18 @@ export function Experience() {
 
       <TopBar onHome={close} hidden={!revealed} />
 
-      <main id="main" ref={mainRef} tabIndex={-1} className="fixed inset-0 outline-none">
+      <main id="main" ref={mainRef} tabIndex={-1} className="fixed inset-0">
         <h1 className="sr-only">
           Keerthi Anil, designer, developer and researcher. I design, build, and
           research interfaces for the people default products miss.
         </h1>
-        <SceneStage camera={camera} yawRef={yaw} onNavigate={navigate} onProp={playProp} />
+        <SceneStage
+          camera={camera}
+          yawRef={yaw}
+          onNavigate={navigate}
+          onProp={playProp}
+          onReady={markSceneReady}
+        />
       </main>
 
       <SceneObjectButtons
@@ -235,8 +243,6 @@ export function Experience() {
         {announcement}
       </div>
 
-      <SceneReadySignal onReady={() => setSceneReady(true)} />
-
       {/* Routes are listed for crawlers and for anyone who lands with no JS. */}
       <noscript>
         <ul>
@@ -251,14 +257,3 @@ export function Experience() {
   );
 }
 
-/**
- * Phase 1 has no scene to wait for, so readiness is a frame after mount. Phase
- * 2 replaces this with the R3F canvas reporting its own load.
- */
-function SceneReadySignal({ onReady }: { onReady: () => void }) {
-  useEffect(() => {
-    const id = window.setTimeout(onReady, 600);
-    return () => window.clearTimeout(id);
-  }, [onReady]);
-  return null;
-}

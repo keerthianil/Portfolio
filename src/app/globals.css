@@ -61,6 +61,15 @@ body {
   border-radius: 4px;
 }
 
+/* The skip link's target. It takes focus programmatically, from the skip link
+   and after the welcome card is dismissed, so it needs feedback the user can
+   see. A ring around the whole viewport would be absurd, so it gets an inset
+   one that reads as "you are here" without boxing the page. */
+main:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--color-highlight);
+}
+
 /* Skip link: visible only when focused. */
 .skip-link {
   position: fixed;

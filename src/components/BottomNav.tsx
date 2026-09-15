@@ -69,7 +69,10 @@ export function BottomNav({
   const arrowClasses = [
     "flex h-14 w-14 cursor-pointer items-center justify-center rounded-full",
     "bg-bg/25 hover:bg-bg/50 transition-all duration-200",
-    "hover:scale-110 select-none touch-manipulation group",
+    // Press is its own state. Without it a held arrow gives no feedback that
+    // the hold registered, which is exactly when the user is holding it.
+    "hover:scale-110 active:scale-95 active:bg-bg/60",
+    "select-none touch-manipulation group",
     showArrowGlow
       ? "ring-2 ring-highlight/50 shadow-[0_0_20px_var(--accent-soft)] motion-safe:animate-pulse"
       : "",
@@ -92,12 +95,15 @@ export function BottomNav({
       aria-label="Site"
     >
       <div
-        className="absolute bottom-0 h-[100px] w-full"
+        className="absolute bottom-0 h-[130px] w-full"
         style={{ background: "var(--scrim)" }}
         aria-hidden="true"
       />
 
-      <div className="pointer-events-auto absolute bottom-0 left-1/2 flex w-full -translate-x-1/2 items-end justify-center px-4 pb-8">
+      <div
+        className="pointer-events-auto absolute bottom-0 left-1/2 flex w-full -translate-x-1/2 items-end justify-center px-4"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 2rem)" }}
+      >
         <motion.div
           className="relative flex items-center justify-center"
           initial={{ opacity: 0, y: 20 }}
@@ -174,6 +180,7 @@ export function BottomNav({
                       "relative z-10 flex h-12 w-[70px] cursor-pointer items-center justify-center",
                       "rounded-full text-[16px] font-normal select-none",
                       "touch-manipulation transition-colors duration-200",
+                      "active:text-highlight",
                       isActive
                         ? "text-highlight"
                         : "text-text/70 hover:text-text",
@@ -217,7 +224,7 @@ export function BottomNav({
             {overlayOpen && (
               <motion.button
                 type="button"
-                className="bg-surface/80 hover:bg-surface absolute flex h-16 w-16 cursor-pointer items-center justify-center rounded-full backdrop-blur-md transition-transform duration-200 ease-in-out select-none hover:scale-110"
+                className="bg-surface/80 hover:bg-surface absolute flex h-16 w-16 cursor-pointer items-center justify-center rounded-full backdrop-blur-md transition-transform duration-200 ease-in-out select-none hover:scale-110 active:scale-95"
                 onClick={(event) => {
                   onClose();
                   event.currentTarget.blur();

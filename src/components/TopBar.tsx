@@ -37,7 +37,7 @@ export function TopBar({
           onClick={() => setHelpOpen((open) => !open)}
           aria-label={helpOpen ? "Close help" : "How to move around"}
           aria-expanded={helpOpen}
-          className="hover:bg-surface/60 group flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-all duration-200 select-none hover:scale-110"
+          className="hover:bg-surface/60 group flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-all duration-200 select-none hover:scale-110 active:scale-95"
         >
           {helpOpen ? (
             <X

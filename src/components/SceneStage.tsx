@@ -1,51 +1,68 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
+import { memo, useCallback } from "react";
+import { useReducedMotion } from "motion/react";
 import type { CameraState, RouteId } from "@/data/routes";
+import type { Hotspot } from "@/scene/Room";
 
 /**
- * Placeholder for the 3D room. Phase 2 replaces the body of this file with the
- * R3F canvas; the props are already the ones the canvas needs, so nothing above
- * it has to change.
- *
- * Yaw arrives as a ref and is applied inside an animation frame, so holding a
- * rotate arrow never triggers a React render.
+ * The canvas is client-only: the monitor and e-reader textures are drawn into a
+ * `<canvas>` at module scope of the render, which has no meaning on the server.
  */
-export function SceneStage({
+const RoomCanvas = dynamic(
+  () => import("@/scene/RoomCanvas").then((module) => module.RoomCanvas),
+  { ssr: false },
+);
+
+/** Which route or prop each object in the room maps to. */
+const HOTSPOT_ROUTES: Partial<Record<Hotspot, RouteId>> = {
+  monitor: "work",
+  laptop: "about",
+  reader: "research",
+};
+
+/**
+ * The room. It is decoration in the accessibility sense: every object in it is
+ * also a real button in SceneObjectButtons, so nothing here is the only way to
+ * reach anything.
+ *
+ * Memoised because Experience re-renders on every announcement and route
+ * change, and a re-render that reached the Canvas would remount the whole
+ * scene.
+ */
+export const SceneStage = memo(function SceneStage({
   camera,
   yawRef,
+  onNavigate,
+  onProp,
+  onReady,
 }: {
   camera: CameraState;
   yawRef: React.RefObject<number>;
   onNavigate: (id: RouteId) => void;
   onProp: (object: string) => void;
+  onReady: () => void;
 }) {
-  const boxRef = useRef<HTMLDivElement>(null);
+  const shouldReduce = useReducedMotion();
 
-  useEffect(() => {
-    let frame = 0;
-    const tick = () => {
-      const box = boxRef.current;
-      if (box) {
-        box.style.transform = `rotate(${(yawRef.current * 180) / Math.PI / 6}deg)`;
-      }
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [yawRef]);
+  const handleSelect = useCallback(
+    (hotspot: Hotspot) => {
+      const route = HOTSPOT_ROUTES[hotspot];
+      if (route) onNavigate(route);
+      else onProp(hotspot);
+    },
+    [onNavigate, onProp],
+  );
 
   return (
-    <div
-      className="absolute inset-0 grid place-items-center overflow-hidden"
-      aria-hidden="true"
-    >
-      <div
-        ref={boxRef}
-        className="border-border text-text-muted grid h-[min(60vh,420px)] w-[min(80vw,720px)] place-items-center rounded-2xl border border-dashed font-mono text-sm"
-      >
-        room, camera: {camera}
-      </div>
-    </div>
+    <RoomCanvas
+      className="absolute inset-0"
+      camera={camera}
+      yawRef={yawRef}
+      onSelect={handleSelect}
+      onReady={onReady}
+      reduceMotion={!!shouldReduce}
+    />
   );
-}
+});

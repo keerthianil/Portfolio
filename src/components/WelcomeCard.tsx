@@ -55,8 +55,12 @@ export function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
           products miss.
         </p>
 
+        {/* Split so a narrow phone breaks between pairs rather than orphaning
+            "AI" on its own line. */}
         <p className="font-mono text-text-muted text-xs tracking-widest uppercase">
-          iOS / SwiftUI / Accessibility / AI
+          <span className="whitespace-nowrap">iOS / SwiftUI</span>{" "}
+          <span aria-hidden="true">/</span>{" "}
+          <span className="whitespace-nowrap">Accessibility / AI</span>
         </p>
 
         <button
@@ -66,7 +70,7 @@ export function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
             setLeaving(true);
             onDismiss();
           }}
-          className="bg-accent text-text hover:bg-highlight hover:text-bg mt-1 cursor-pointer rounded-full px-6 py-3 text-[15px] font-medium transition-colors duration-200"
+          className="bg-accent text-text hover:bg-highlight hover:text-bg active:scale-95 mt-1 cursor-pointer rounded-full px-6 py-3 text-[15px] font-medium transition-all duration-200"
         >
           Start exploring
         </button>
