@@ -17,6 +17,7 @@ import { LoadingScreen } from "./LoadingScreen";
 import { SceneObjectButtons } from "./SceneObjectButtons";
 import { SceneStage } from "./SceneStage";
 import { TopBar } from "./TopBar";
+import { AboutOverlay } from "./overlay/AboutOverlay";
 import { BeforeAfter } from "./overlay/BeforeAfter";
 import { PlaceholderOverlay } from "./overlay/PlaceholderOverlay";
 import { TabOrderGame } from "./overlay/TabOrderGame";
@@ -288,7 +289,11 @@ export function Experience() {
           />
         )}
         {activeRoute === "about" && (
-          <PlaceholderOverlay key="about" label="About" onClose={close} />
+          <AboutOverlay
+            key="about"
+            onClose={close}
+            onOpenTimeline={() => navigate("timeline")}
+          />
         )}
         {activeRoute === "research" && (
           <PlaceholderOverlay key="research" label="Research" onClose={close} />
