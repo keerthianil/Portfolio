@@ -19,6 +19,8 @@ interface BottomNavProps {
   showArrowGlow?: boolean;
   /** Which way the view is fully turned, if either. */
   limit?: "left" | "right" | null;
+  /** False in the flat view, where there is nothing to rotate. */
+  canRotate?: boolean;
 }
 
 export function BottomNav({
@@ -29,6 +31,7 @@ export function BottomNav({
   onRotate,
   showArrowGlow = false,
   limit = null,
+  canRotate = true,
 }: BottomNavProps) {
   const shouldReduce = useReducedMotion();
   const [hovered, setHovered] = useState<RouteId | null>(null);
@@ -134,6 +137,7 @@ export function BottomNav({
             // `aria-hidden` alone would not do.
             inert={overlayOpen}
           >
+            {canRotate && (
             <button
               type="button"
               className={arrowClasses(limit === "left")}
@@ -153,6 +157,7 @@ export function BottomNav({
                 className={arrowIconClasses(showArrowGlow)}
               />
             </button>
+            )}
 
             <div
               className="relative mx-2 flex items-center gap-1 sm:gap-2"
@@ -205,6 +210,7 @@ export function BottomNav({
               })}
             </div>
 
+            {canRotate && (
             <button
               type="button"
               className={arrowClasses(limit === "right")}
@@ -224,6 +230,7 @@ export function BottomNav({
                 className={arrowIconClasses(showArrowGlow)}
               />
             </button>
+            )}
           </motion.div>
 
           <AnimatePresence>
