@@ -282,11 +282,7 @@ export function Experience() {
 
       <AnimatePresence>
         {activeRoute === "work" && (
-          <WorkOverlay
-            key="work"
-            onClose={close}
-            onOpenProject={(id) => setAnnouncement(`${id} case study, coming next phase.`)}
-          />
+          <WorkOverlay key="work" onClose={close} />
         )}
         {activeRoute === "about" && (
           <AboutOverlay

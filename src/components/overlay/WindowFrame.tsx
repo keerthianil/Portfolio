@@ -21,13 +21,16 @@ export function WindowFrame({
   title,
   onClose,
   children,
+  escapeEnabled = true,
 }: {
   title: string;
   onClose: () => void;
   children: React.ReactNode;
+  /** False while a nested dialog owns Escape. */
+  escapeEnabled?: boolean;
 }) {
   const shouldReduce = useReducedMotion();
-  const containerRef = useModalFocus(true, onClose);
+  const containerRef = useModalFocus(true, onClose, { escape: escapeEnabled });
   const [minimised, setMinimised] = useState(false);
   const [maximised, setMaximised] = useState(false);
 
