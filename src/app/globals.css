@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Design tokens.
+
+   Contrast, measured against --bg #0C0A09:
+     --text       #F2EAE1   16.59:1   AAA
+     --highlight  #D4A0A0    8.78:1   AAA
+     --text-muted #7A706A    4.10:1   large text and non-text UI only
+     --accent     #8B2332    2.24:1   fill and glow only, never text on --bg
+     --text on --accent      7.40:1   AAA, so burgundy surfaces are safe
+
+   Two rules follow, mirroring the `…Ink` rule in the Ally iOS tokens:
+     1. --text-muted never carries body copy.
+     2. The burgundy is a surface and a glow. Accent-coloured *text* uses
+        --highlight.
+--------------------------------------------------------------------------- */
+
+@theme {
+  --color-bg: #0c0a09;
+  --color-surface: #17120f;
+  --color-surface-raised: #211a16;
+  --color-border: #2e2521;
+
+  --color-text: #f2eae1;
+  --color-text-muted: #7a706a;
+  --color-highlight: #d4a0a0;
+  --color-accent: #8b2332;
+
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
+  --font-hand: var(--font-patrick-hand), cursive;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  /* The whole site's motion vocabulary: one curve, two springs. */
+  --ease-curtain: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+:root {
+  --accent-soft: rgba(139, 35, 50, 0.32);
+  --scrim: linear-gradient(to top, rgba(12, 10, 9, 0.55), transparent);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Focus ring, used everywhere. Burgundy is too dark to read as a ring against
+   #0C0A09, so the ring itself is the dusty rose and the glow is the burgundy. */
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Skip link: visible only when focused. */
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 9999;
+  transform: translate(-50%, -150%);
+  padding: 0.75rem 1.25rem;
+  border-radius: 0 0 0.75rem 0.75rem;
+  background: var(--color-accent);
+  color: var(--color-text);
+  font-size: 0.9375rem;
+  transition: transform 180ms var(--ease-curtain);
+}
+.skip-link:focus-visible {
+  transform: translate(-50%, 0);
+  outline-offset: -4px;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-text);
+}
+
+/* Reduced motion. Set up before anything animates, so nothing can ship
+   without it. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
