@@ -97,3 +97,43 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Screen-reader-only, and the "until focused" variant used by the buttons that
+   mirror the 3D objects. They are invisible to a mouse user and ordinary
+   buttons to everyone else. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.scene-object-button {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  pointer-events: auto;
+}
+.scene-object-button:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip-path: none;
+  padding: 0.625rem 1.125rem;
+  border-radius: 999px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  font-size: 0.9375rem;
+}

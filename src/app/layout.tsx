@@ -59,10 +59,15 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${fraunces.variable} ${schibsted.variable} ${patrickHand.variable} ${jetbrainsMono.variable}`}
-      >
+    // The font variables go on <html>, not <body>. The @theme tokens that point
+    // at them (--font-display and friends) are emitted at :root, so a variable
+    // defined further down the tree resolves to nothing and every family
+    // silently falls back to the system stack.
+    <html
+      lang="en"
+      className={`${fraunces.variable} ${schibsted.variable} ${patrickHand.variable} ${jetbrainsMono.variable}`}
+    >
+      <body>
         <a href="#main" className="skip-link">
           Skip to main content
         </a>
