@@ -20,6 +20,9 @@ const HOTSPOT_ROUTES: Partial<Record<Hotspot, RouteId>> = {
   monitor: "work",
   laptop: "about",
   reader: "research",
+  calendar: "timeline",
+  posterLeft: "taborder",
+  frameRight: "beforeafter",
 };
 
 /**
@@ -37,12 +40,14 @@ export const SceneStage = memo(function SceneStage({
   onNavigate,
   onProp,
   onReady,
+  sips,
 }: {
   camera: CameraState;
   yawRef: React.RefObject<number>;
   onNavigate: (id: RouteId) => void;
   onProp: (object: string) => void;
   onReady: () => void;
+  sips: number;
 }) {
   const shouldReduce = useReducedMotion();
 
@@ -63,6 +68,7 @@ export const SceneStage = memo(function SceneStage({
       onSelect={handleSelect}
       onReady={onReady}
       reduceMotion={!!shouldReduce}
+      sips={sips}
     />
   );
 });

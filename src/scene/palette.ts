@@ -22,6 +22,8 @@ export const SCENE = {
   cream: new Color("#f2eae1"),
   paper: new Color("#c9bcae"),
   screen: new Color("#1b1614"),
+  frame: new Color("#2f2620"),
+  note: new Color("#d8c9a8"),
 } as const;
 
 /**

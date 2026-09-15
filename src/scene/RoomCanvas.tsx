@@ -15,6 +15,7 @@ export function RoomCanvas({
   onSelect,
   reduceMotion,
   onReady,
+  sips,
   className,
 }: {
   camera: CameraState;
@@ -22,6 +23,7 @@ export function RoomCanvas({
   onSelect: (hotspot: Hotspot) => void;
   reduceMotion: boolean;
   onReady?: () => void;
+  sips: number;
   className?: string;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -119,6 +121,7 @@ export function RoomCanvas({
           onSelect={onSelect}
           hoverLift={ROOM.hoverLift}
           idleMotion={!reduceMotion}
+          sips={sips}
         />
 
         {/* Baked once. The desk never moves, so there is nothing to re-render. */}
