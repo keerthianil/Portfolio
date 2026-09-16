@@ -88,4 +88,4 @@ case study it says so and gives you the code instead, because a narrative
 invented after the fact is the opposite of the point of the rest of it. The
 numbers on the metric tiles are measured numbers or they are not there.
 
-Keerthi Anil, anil.ke@northeastern.edu
+Keerthi Anil

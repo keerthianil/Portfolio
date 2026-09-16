@@ -47,17 +47,38 @@ export const SCENE = {
   highlight: new Color("#d4a0a0"),
   cream: new Color("#f2eae1"),
   paper: new Color("#f0ece0"),
+  /** The paper plane. A shade under the notebook, so it is paper and not a
+      light source. */
+  plane: new Color("#e6e0d2"),
   note: new Color("#e8d77c"),
 
   mug: new Color("#2b2d33"),
   mugInner: new Color("#191b20"),
 
-  /** The door on the left wall. */
-  door: new Color("#6b4e33"),
-  doorFrame: new Color("#4b3623"),
+  /**
+   * The door on the left wall: the frame standing on its face, the panels
+   * behind that frame, and the casing around the opening.
+   *
+   * The panel is a long way darker than the frame in front of it, and further
+   * than it looks like it should be on paper. It is a broad flat face square
+   * on to the overhead, where the stiles and rails are narrow and stand proud
+   * and shade themselves, so matching their paint made the panel the palest
+   * thing on that wall. These are the numbers the render wanted, not the ones
+   * the arithmetic did.
+   */
+  door: new Color("#59402a"),
+  doorPanel: new Color("#2b1f14"),
+  doorFrame: new Color("#3b2a1b"),
 
-  /** The window on the right wall. */
-  windowFrame: new Color("#cfc7b6"),
+  /**
+   * The window on the right wall. The frame was `#cfc7b6`, which against a
+   * maroon wall made it the brightest object in the room and the first thing
+   * the eye went to on a wall that has nothing on it. It is a warm off white
+   * now, the colour painted softwood actually is in a warm room.
+   */
+  windowFrame: new Color("#5d4630"),
+  /** The sides of the hole the window sits in, which are in its own shadow. */
+  windowReveal: new Color("#463322"),
   glass: new Color("#93aabd"),
 
   leaf: new Color("#2f6f41"),
@@ -84,11 +105,20 @@ export const SCENE = {
  * lit part of the desk and the part the monitor lights.
  */
 export const LIGHTS = {
-  /** Overhead, front-left. Does the actual work of making the desk readable. */
+  /**
+   * Overhead, front-left. Does the actual work of making the desk readable.
+   *
+   * It moved in toward the middle of the desk. Out at x -1.15 it was closer
+   * to the door on the left wall than to the thing it is supposed to be
+   * lighting, and with an inverse square falloff that put the door two and a
+   * half times over: tone mapping then compressed it toward white, so
+   * repainting the timber darker changed almost nothing. A light aimed at
+   * the desk is the fix for a wall that is too bright, not a darker wall.
+   */
   key: {
     color: "#fff0dd",
     intensity: 18,
-    position: [-1.15, 2.75, 1.7] as [number, number, number],
+    position: [-0.72, 2.8, 1.55] as [number, number, number],
     angle: 1.05,
     penumbra: 1,
   },
@@ -120,11 +150,21 @@ export const LIGHTS = {
     position: [-1.15, 1.5, -1.5] as [number, number, number],
     distance: 2.8,
   },
-  /** Daylight through the window on the right wall. */
+  /**
+   * Daylight through the window on the right wall.
+   *
+   * It used to sit at x 2.0, thirty centimetres off a window frame at 2.28,
+   * which meant the frame was the closest thing to the brightest light in the
+   * room and was blown to white whatever colour it was painted. It is out in
+   * the room now, where daylight through a window actually falls, and it
+   * lights the desk instead of lighting its own frame. The frame is the same
+   * timber as the door on the opposite wall for the same reason: a room has
+   * one joiner in it.
+   */
   window: {
     color: "#bcd2e4",
     intensity: 7.6,
-    position: [2.0, 1.75, -0.25] as [number, number, number],
+    position: [1.55, 1.62, -0.3] as [number, number, number],
     distance: 5.5,
   },
   /** Warm rim from the front right, so objects separate from the background. */

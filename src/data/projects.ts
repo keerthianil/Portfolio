@@ -221,8 +221,8 @@ export const PROJECTS: Project[] = [
 ];
 
 export const CONTACT = {
-  email: "anil.ke@northeastern.edu",
+  email: "keerthiareddy6@gmail.com",
   github: "https://github.com/keerthianil",
   linkedin: "https://linkedin.com/in/keerthiareddy",
-  resume: "/KeerthiAnil_Resume.pdf",
+  resume: "/KeerthiAnilResume.pdf",
 } as const;
