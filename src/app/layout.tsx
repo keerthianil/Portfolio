@@ -43,7 +43,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://keerthianil.vercel.app"),
+  metadataBase: new URL("https://keerthiaportfolio.vercel.app"),
   title: "Keerthi Anil - Designer, Developer & Researcher",
   description:
     "I design, build, and research interfaces for the people default products miss. iOS, SwiftUI, accessibility, AI.",
