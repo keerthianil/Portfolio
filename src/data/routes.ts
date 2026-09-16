@@ -111,8 +111,8 @@ export const SCENE_PROPS: SceneProp[] = [
     action: "Press",
   },
   {
-    object: "window",
-    label: "the window",
-    action: "Start or stop the rain at",
+    object: "plane",
+    label: "the paper plane on the desk",
+    action: "Throw",
   },
 ];

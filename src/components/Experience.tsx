@@ -486,40 +486,41 @@ export function Experience() {
   /**
    * The window, and the sun going down behind it.
    *
-   * Click the pane and it rains: the sky goes overcast, drops run down the
-   * glass, and the light in the room turns cool and flat with it. Click it
-   * again and the sun comes back out.
+   * Throw it and it takes a lap of the room: out over the desk, around to
+   * the left, back along the far wall and down onto the spot it took off
+   * from. Five seconds, and then it is folded on the desk again.
    *
-   * It replaced a frosted pane that dropped the room's contrast to nothing to
-   * make a point about focus indicators. The point was worth making and the
-   * room being ugly on purpose was the price, so the point moved: the focus
-   * ring in the scene is on all the time now. Nothing is being demonstrated
-   * here. Every other thing you can touch in this room is making an argument,
-   * and one of them is allowed to just be nice.
+   * Nothing is being demonstrated by it. The mug is about undo and the switch
+   * by the door is about colour, and this one is a paper plane. Every room
+   * somebody actually works in has one thing in it that is there for no
+   * reason at all, and a portfolio that cannot afford one of those is making
+   * a different claim about its author than it thinks it is.
+   *
+   * This is the third thing to stand in this slot. A frosted pane dropped the
+   * room's contrast to make a point about focus indicators, which was worth
+   * making and was making it by being ugly on purpose, so the point moved to
+   * the focus ring being on all the time. Then the window rained. The window
+   * is scenery now and the fun is an object on the desk, which is where you
+   * are already looking.
    */
-  const [raining, setRaining] = useState(false);
-  const toggleRain = useCallback(() => {
-    setRaining((value) => {
-      const next = !value;
-      setNote(
-        next
-          ? {
-              title: "Rain",
-              body: "No lesson attached to this one. It rains, the room goes cool, and that is the whole of it.",
-            }
-          : {
-              title: "Clear",
-              body: "Dry again, and the sunset is where it was. That is my photograph, taken out of a window that looked nothing like this one.",
-            },
-      );
-      setAnnouncement(
-        next
-          ? "Raining. The light in the room has gone cool."
-          : "Rain stopped. The window is clear again.",
-      );
-      return next;
+  const [flying, setFlying] = useState(false);
+  const landTimer = useRef<number | undefined>(undefined);
+
+  useEffect(() => () => window.clearTimeout(landTimer.current), []);
+
+  const throwPlane = useCallback(() => {
+    if (flying) return;
+    setFlying(true);
+    setNote({
+      title: "Paper plane",
+      body: "It comes back. Nothing in this room does anything you cannot undo, which is the only reason any of it is allowed to be here.",
     });
-  }, []);
+    setAnnouncement("The paper plane is in the air. It lands in a moment.");
+    landTimer.current = window.setTimeout(() => {
+      setFlying(false);
+      setAnnouncement("The paper plane has landed on the desk.");
+    }, 5200);
+  }, [flying]);
 
   /**
    * Which object's mirror button has focus, so the scene can put a ring on it
@@ -533,9 +534,9 @@ export function Experience() {
     (object: string) => {
       if (object === "mug") knockOver();
       if (object === "lightSwitch") cycleVision();
-      if (object === "window") toggleRain();
+      if (object === "plane") throwPlane();
     },
-    [knockOver, cycleVision, toggleRain],
+    [knockOver, cycleVision, throwPlane],
   );
 
   return (
@@ -573,8 +574,8 @@ export function Experience() {
           onProp={playProp}
           onReady={markSceneReady}
           spilled={spilled}
+          flying={flying}
           vision={vision}
-          raining={raining}
           focused={focused}
           flat={flat}
         />

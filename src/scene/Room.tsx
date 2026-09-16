@@ -11,10 +11,8 @@ import {
   makeCalendarTexture,
   makeCoffeeTexture,
   makeLaptopTexture,
-  makeBeadTexture,
   makeLeafTexture,
   makeMouseTexture,
-  makeRainTexture,
   makeNoteTexture,
   makeReaderTexture,
   makeScreenTexture,
@@ -100,6 +98,46 @@ function makeMouseGeometry(): BufferGeometry {
   return geometry;
 }
 
+/**
+ * A paper dart, folded the way everybody folds one: a long nose, two wings
+ * meeting along a ridge down the top, and a keel underneath that is the bit
+ * you hold.
+ *
+ * Eight triangles and no texture. It is 20cm long, which is the size a sheet
+ * of A4 folds down to, and at that size it reads as a paper plane on a desk
+ * from across the room rather than as a white smudge.
+ */
+function makePlaneGeometry(): BufferGeometry {
+  const nose: [number, number, number] = [0, 0, -0.11];
+  const tail: [number, number, number] = [0, 0.012, 0.09];
+  const left: [number, number, number] = [-0.075, -0.004, 0.085];
+  const right: [number, number, number] = [0.075, -0.004, 0.085];
+  const keel: [number, number, number] = [0, -0.032, 0.075];
+
+  const faces: [number, number, number][][] = [
+    // The two wings, meeting along the ridge from the nose to the tail.
+    [nose, left, tail],
+    [nose, tail, right],
+    // The keel below them, which is what makes it a dart and not a triangle.
+    [nose, keel, left],
+    [nose, right, keel],
+    // The open back edge, closed off so it is a solid from every angle.
+    [tail, left, keel],
+    [tail, keel, right],
+  ];
+
+  const position: number[] = [];
+  for (const face of faces) for (const point of face) position.push(...point);
+
+  const geometry = new BufferGeometry();
+  geometry.setAttribute("position", new Float32BufferAttribute(position, 3));
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+/** How long one circuit takes. The landing announcement is timed off it. */
+const FLIGHT_SECONDS = 5;
+
 export type Hotspot =
   | "monitor"
   | "laptop"
@@ -107,7 +145,7 @@ export type Hotspot =
   | "mug"
   | "calendar"
   | "lightSwitch"
-  | "window";
+  | "plane";
 
 interface RoomProps {
   onSelect: (hotspot: Hotspot) => void;
@@ -117,10 +155,10 @@ interface RoomProps {
   idleMotion: boolean;
   /** True from the moment the mug is knocked until it rights itself. */
   spilled: boolean;
+  /** True from the moment the paper plane is thrown until it lands again. */
+  flying: boolean;
   /** Which colour vision the wall switch by the door is currently simulating. */
   vision: ColourVision;
-  /** True while it is raining outside and the room has gone cool with it. */
-  raining: boolean;
   /** Which object's mirror button currently has focus, if any. */
   focused: Hotspot | null;
 }
@@ -232,8 +270,8 @@ export function Room({
   hoverLift,
   idleMotion,
   spilled,
+  flying,
   vision,
-  raining,
   focused,
 }: RoomProps) {
   /**
@@ -266,7 +304,7 @@ export function Room({
     // lying flat at shoulder height in the middle of the room is a ring on
     // nothing.
     lightSwitch: { at: [-2.262, 1.14, -0.2], r: 0.13, turn: [0, Math.PI / 2, 0] },
-    window: { at: [2.21, 1.62, -0.35], r: 0.6, turn: [0, -Math.PI / 2, 0] },
+    plane: { at: [-0.3, 0.774, 0.2], r: 0.13 },
   };
   const focusRing = focused ? RINGS[focused] : undefined;
 
@@ -284,7 +322,9 @@ export function Room({
   const puddle = useRef<Mesh>(null);
   const stream = useRef<Group>(null);
   const pen = useRef<Group>(null);
-  const rain = useRef<Group>(null);
+  const plane = useRef<Group>(null);
+  /** 0 is folded on the desk, 1 is one lap of the room and back. */
+  const flight = useRef(0);
   /** 0 is upright and full, 1 is over and empty. */
   const progress = useRef(0);
   const screen = useMemo(() => makeScreenTexture(), []);
@@ -300,48 +340,7 @@ export function Room({
   const wood = useMemo(() => makeWoodTexture(), []);
   const mouseMap = useMemo(() => makeMouseTexture(), []);
   const mouseShell = useMemo(() => makeMouseGeometry(), []);
-  const rainMap = useMemo(() => makeRainTexture(), []);
-  const beadMap = useMemo(() => makeBeadTexture(), []);
-
-  // The pane is repainted when the weather turns, and only then. The cloud
-  // and the far rain are in the same canvas as the photograph.
-  useEffect(() => sky.setRain(raining), [sky, raining]);
-
-  /**
-   * The rain on the glass. Where each drop starts, how long its tail is and
-   * how fast it falls, decided once.
-   *
-   * They fall at different speeds on purpose. Give every drop the same speed
-   * and the pane reads as one sheet of texture sliding down, which is what
-   * rain in a video game looked like in about 2004.
-   */
-  const drops = useMemo(() => {
-    const noise = (n: number) => {
-      const x = Math.sin(n * 57.3 + 19.1) * 43758.5453;
-      return x - Math.floor(x);
-    };
-    return Array.from({ length: 20 }, (_, i) => ({
-      x: (noise(i * 5 + 1) - 0.5) * 1.06,
-      y: (noise(i * 5 + 2) - 0.5) * 1.3,
-      z: 0.0575 + noise(i * 5 + 3) * 0.002,
-      length: 0.13 + noise(i * 5 + 4) * 0.15,
-      width: 0.03 + noise(i * 5 + 6) * 0.018,
-      speed: 0.42 + noise(i * 5 + 5) * 0.55,
-    }));
-  }, []);
-
-  /** The ones that have stopped and are sitting on the glass. */
-  const beads = useMemo(() => {
-    const noise = (n: number) => {
-      const x = Math.sin(n * 113.7 + 71.9) * 43758.5453;
-      return x - Math.floor(x);
-    };
-    return Array.from({ length: 22 }, (_, i) => ({
-      x: (noise(i * 4 + 1) - 0.5) * 1.08,
-      y: (noise(i * 4 + 2) - 0.5) * 1.24,
-      r: 0.018 + noise(i * 4 + 3) * 0.03,
-    }));
-  }, []);
+  const planeShell = useMemo(() => makePlaneGeometry(), []);
   useEffect(
     () => () => {
       screen.dispose();
@@ -357,8 +356,7 @@ export function Room({
       wood.dispose();
       mouseMap.dispose();
       mouseShell.dispose();
-      rainMap.dispose();
-      beadMap.dispose();
+      planeShell.dispose();
     },
     [
       screen,
@@ -374,8 +372,7 @@ export function Room({
       wood,
       mouseMap,
       mouseShell,
-      rainMap,
-      beadMap,
+      planeShell,
     ],
   );
 
@@ -428,24 +425,69 @@ export function Room({
   });
 
   /**
-   * The rain runs down the glass.
+   * The paper plane, and its circuit of the desk.
    *
-   * Each drop falls at its own speed and wraps back to the top of the pane
-   * when it leaves the bottom, so twenty quads are a shower that never ends
-   * and never repeats visibly.
+   * One number runs 0 to 1 over five seconds and the whole flight is read off
+   * it: away from the chair first, then right, then back toward you over the
+   * front edge of the desk, then down onto the spot it took off from. It is a
+   * closed loop, so it lands where it started because the path says so and
+   * not because anything is put back afterwards, and when the number resets
+   * to 0 at the end nothing moves, because position(1) is position(0).
    *
-   * Positions come off the ref rather than out of state. Twenty drops at
-   * sixty frames a second is twelve hundred re-renders a second if this is
-   * state, and none of them would be a render anybody needed.
+   * The number advances rather than damping toward a target. A damped value
+   * never quite arrives, and on the way back down it would have flown the
+   * whole circuit again in reverse.
+   *
+   * The nose points along the direction of travel, worked out by
+   * differentiating the path rather than by storing a velocity, and it banks
+   * into the turn and pitches up on the climb. A paper plane that stays level
+   * through a circle reads as a cursor being dragged around one.
+   *
+   * Under reduced motion it does not fly. It lifts off the desk about a
+   * centimetre, tips, and settles: same interaction, same feedback, without
+   * two metres of sweep across somebody's field of view. It is the one thing
+   * in this room where the setting changes what happens rather than how fast
+   * it happens, and a thrown plane crossing the whole frame is exactly the
+   * motion the setting exists to stop.
    */
   useFrame((_, delta) => {
-    const group = rain.current;
-    if (!group) return;
-    for (let i = 0; i < group.children.length; i += 1) {
-      const drop = group.children[i];
-      drop.position.y -= drops[i].speed * delta;
-      if (drop.position.y < -0.72) drop.position.y = 0.72;
+    const model = plane.current;
+    if (!model) return;
+
+    if (!idleMotion) {
+      const target = flying ? 1 : 0;
+      flight.current += (target - flight.current) * Math.min(1, delta * 4);
+      const hop = flight.current;
+      model.position.set(-0.3, 0.774 + hop * 0.016, 0.2);
+      model.rotation.set(-hop * 0.2, 0, hop * 0.12);
+      return;
     }
+
+    flight.current = flying
+      ? Math.min(1, flight.current + delta / FLIGHT_SECONDS)
+      : 0;
+    // Thrown hard and gliding in. Eased at the end, so it settles rather than
+    // arriving at the desk at the speed it left it.
+    const u = 1 - (1 - flight.current) ** 2;
+
+    // A circle over the desk, entered heading away from the chair.
+    const turn = -u * Math.PI * 2 - Math.PI / 2;
+    model.position.set(
+      0.2 + Math.sin(turn) * 0.5,
+      0.774 + Math.sin(u * Math.PI) * 0.5,
+      0.2 + Math.cos(turn) * 0.5,
+    );
+
+    // The tangent to that circle, which is where the nose points. The mesh
+    // is built nose down -z, so the yaw that puts it on a heading is the
+    // arctangent of the negated direction.
+    const dx = Math.cos(turn) * -1;
+    const dz = Math.sin(turn);
+    model.rotation.y = Math.atan2(-dx, -dz);
+    // Climbing for the first half, descending for the second, flat at both
+    // ends, which is where it is sitting on a desk.
+    model.rotation.x = Math.sin(u * Math.PI * 2) * 0.24;
+    model.rotation.z = Math.sin(u * Math.PI) * 0.5;
   });
 
   /**
@@ -672,42 +714,101 @@ export function Room({
         />
       </mesh>
 
-      {/* Left wall: the door, and the light switch beside it. The door is
-          scenery; the switch is the only thing on that wall you can press. */}
+      {/*
+        Left wall: the door, and the light switch beside it. The door is
+        scenery; the switch is the only thing on that wall you can press.
+
+        It was a slab with two dark rectangles stuck on the front and an
+        emissive of its own colour, which under a brighter room came out the
+        colour of cream and read as a cupboard. It is built the way a panel
+        door is built now: a casing of three members around the opening, then
+        two stiles and three rails standing proud of the leaf, and the panels
+        are the leaf showing through between them rather than anything added
+        on top. Nothing here glows. It is a door.
+      */}
       <group position={[-2.28, 0, -0.72]} rotation={[0, Math.PI / 2, 0]}>
-        <mesh position={[0, 1.06, 0]}>
-          <boxGeometry args={[1.02, 2.14, 0.04]} />
-          <meshStandardMaterial
-            color={C.doorFrame}
-            emissive={C.doorFrame}
-            {...lift(0.16, 0)}
-            roughness={0.8}
-          />
-        </mesh>
-        <mesh position={[0, 1.04, 0.025]}>
-          <boxGeometry args={[0.9, 2.04, 0.04]} />
-          <meshStandardMaterial
-            color={C.door}
-            emissive={C.door}
-            {...lift(0.22, 0)}
-            roughness={0.7}
-          />
-        </mesh>
-        {/* Two recessed panels */}
-        {[1.45, 0.62].map((y) => (
-          <mesh key={y} position={[0, y, 0.048]}>
-            <boxGeometry args={[0.64, 0.7, 0.014]} />
-            <meshStandardMaterial color={C.doorFrame} roughness={0.75} />
+        {/* The casing: two jambs and a head, proud of the wall. */}
+        {[
+          { at: [-0.5, 1.03, 0.03], size: [0.08, 2.12, 0.026] },
+          { at: [0.5, 1.03, 0.03], size: [0.08, 2.12, 0.026] },
+          { at: [0, 2.05, 0.03], size: [1.08, 0.08, 0.026] },
+        ].map(({ at, size }) => (
+          <mesh key={`case-${at[0]}-${at[1]}`} position={at as [number, number, number]}>
+            <boxGeometry args={size as [number, number, number]} />
+            <meshStandardMaterial color={C.doorFrame} roughness={0.82} />
           </mesh>
         ))}
-        {/* Handle */}
-        <mesh position={[0.34, 1.02, 0.07]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.022, 0.022, 0.05, 14]} />
+
+        {/* The leaf. Its face is the bottom of the two panels, so it is the
+            darker timber and the frame on top of it is the lighter. */}
+        <mesh position={[0, 1.02, 0.008]}>
+          <boxGeometry args={[0.88, 2.0, 0.042]} />
+          <meshStandardMaterial color={C.doorPanel} roughness={0.78} />
+        </mesh>
+
+        {/* Two stiles and three rails, standing 14mm off the leaf. The gaps
+            between them are the panels. */}
+        {[
+          { at: [-0.3825, 1.02], size: [0.115, 2.0] },
+          { at: [0.3825, 1.02], size: [0.115, 2.0] },
+          { at: [0, 1.95], size: [0.65, 0.14] },
+          { at: [0, 1.02], size: [0.65, 0.2] },
+          { at: [0, 0.16], size: [0.65, 0.28] },
+        ].map(({ at, size }) => (
+          <mesh
+            key={`frame-${at[0]}-${at[1]}`}
+            position={[at[0], at[1], 0.036]}
+          >
+            <boxGeometry args={[size[0], size[1], 0.014]} />
+            <meshStandardMaterial color={C.door} roughness={0.72} />
+          </mesh>
+        ))}
+
+        {/* Two hinges on the side the casing is closest to. */}
+        {[0.42, 1.66].map((y) => (
+          <mesh key={`hinge-${y}`} position={[-0.442, y, 0.012]}>
+            <boxGeometry args={[0.012, 0.12, 0.03]} />
+            <meshStandardMaterial
+              color={C.metal}
+              roughness={0.42}
+              metalness={0.7}
+            />
+          </mesh>
+        ))}
+
+        {/* The handle, on a backplate, at the height a handle is. */}
+        <mesh position={[0.33, 1.02, 0.036]}>
+          <boxGeometry args={[0.055, 0.14, 0.008]} />
+          <meshStandardMaterial
+            color={C.metal}
+            roughness={0.35}
+            metalness={0.75}
+          />
+        </mesh>
+        <mesh position={[0.33, 1.02, 0.056]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.019, 0.019, 0.045, 16]} />
           <meshStandardMaterial
             color={C.metal}
             roughness={0.28}
             metalness={0.8}
           />
+        </mesh>
+        {/* The lever off it, which is what a door in a room built this decade
+            has instead of a knob. */}
+        <mesh position={[0.29, 1.018, 0.078]}>
+          <boxGeometry args={[0.075, 0.018, 0.018]} />
+          <meshStandardMaterial
+            color={C.metal}
+            roughness={0.28}
+            metalness={0.8}
+          />
+        </mesh>
+
+        {/* The gap under it, which is the one part of a door you only notice
+            when it is not there. */}
+        <mesh position={[0, 0.01, 0.01]}>
+          <boxGeometry args={[0.88, 0.02, 0.04]} />
+          <meshStandardMaterial color={"#150f0c"} roughness={1} />
         </mesh>
       </group>
 
@@ -760,117 +861,104 @@ export function Room({
         </group>
       </Hot>
 
-      {/* Right wall: the window. It is where the daylight in the room comes
-          from, so the light rig and the geometry agree about the direction. */}
+      {/*
+        Right wall: the window. It is where the daylight in the room comes
+        from, so the light rig and the geometry agree about the direction.
+
+        It was a white slab with a picture on it, a metre and a half tall,
+        with its head twenty centimetres above the head of the door on the
+        opposite wall. Nothing in a room is built like that. It is now the
+        size a sash actually is, its head lines up with the door's, the frame
+        is four members with glass behind them rather than one box with a
+        picture stuck on the front, and it is painted a warm off white instead
+        of a white that was the brightest thing on the wall.
+      */}
       <group position={[2.28, 0, -0.35]} rotation={[0, -Math.PI / 2, 0]}>
-        <mesh position={[0, 1.62, 0]}>
-          <boxGeometry args={[1.26, 1.42, 0.05]} />
-          <meshStandardMaterial color={C.windowFrame} roughness={0.7} />
-        </mesh>
-        {/*
-          The pane, and the one thing on this wall you can click.
-
-          Click it and it rains: the photograph goes overcast, drops start
-          running down the glass, and the light in the room turns cool with
-          it. Click it again and the sun is back out.
-
-          Nothing is being demonstrated. Every other thing you can touch in
-          this room is making a point, and one of them is allowed not to.
-
-          The pane is the hot object rather than the whole window, because
-          Hot scales what it wraps by three percent and a window frame that
-          grows when you pass the pointer over it is a window frame coming
-          away from the wall.
-        */}
-        <Hot
-          name="window"
-          hoverLift={hoverLift}
-          onSelect={() => onSelect("window")}
-        >
-          <mesh position={[0, 1.62, 0.032]}>
-            <planeGeometry args={[1.14, 1.3]} />
-            <meshStandardMaterial
-              map={sky.texture}
-              emissiveMap={sky.texture}
-              emissive={C.cream}
-              {...lift(raining ? 0.3 : 0.5, 0.35)}
-              roughness={1}
-            />
-          </mesh>
-        </Hot>
-        {/* Glazing bars: two up, one across, the way a sash is divided */}
-        {[-0.38, 0.38].map((x) => (
-          <mesh key={x} position={[x, 1.62, 0.042]}>
-            <boxGeometry args={[0.03, 1.3, 0.022]} />
-            <meshStandardMaterial color={C.windowFrame} roughness={0.7} />
+        {/* The reveal: the thickness of wall the window is set into. Without
+            it the window is a sticker, because a hole in a wall has sides. */}
+        {[
+          { at: [-0.6, 1.52, -0.05], size: [0.03, 1.24, 0.12] },
+          { at: [0.6, 1.52, -0.05], size: [0.03, 1.24, 0.12] },
+          { at: [0, 2.13, -0.05], size: [1.23, 0.03, 0.12] },
+        ].map(({ at, size }) => (
+          <mesh key={`${at[0]}-${at[1]}`} position={at as [number, number, number]}>
+            <boxGeometry args={size as [number, number, number]} />
+            <meshStandardMaterial color={C.windowReveal} roughness={0.92} />
           </mesh>
         ))}
-        <mesh position={[0, 1.62, 0.042]}>
-          <boxGeometry args={[1.14, 0.03, 0.022]} />
-          <meshStandardMaterial color={C.windowFrame} roughness={0.7} />
-        </mesh>
-        {/* Sill */}
-        <mesh position={[0, 0.9, 0.05]}>
-          <boxGeometry args={[1.34, 0.05, 0.12]} />
-          <meshStandardMaterial color={C.windowFrame} roughness={0.7} />
+
+        {/* The glass. One photograph, lit from behind by its own emissive so
+            the window is a source of light and not a picture on a wall. */}
+        <mesh position={[0, 1.52, 0.012]}>
+          <planeGeometry args={[1.02, 1.08]} />
+          <meshStandardMaterial
+            map={sky.texture}
+            emissiveMap={sky.texture}
+            emissive={C.cream}
+            {...lift(0.5, 0)}
+            roughness={1}
+          />
         </mesh>
 
-        {/* The glass over the picture. A single sheet with almost nothing in
-            it, so the photograph is what you see and the glass is only the
-            reason it has a sheen. Wet glass carries more of one. */}
-        <mesh position={[0, 1.62, 0.055]}>
-          <planeGeometry args={[1.14, 1.3]} />
+        {/* The sheen on it, so there is glass in front of the picture. */}
+        <mesh position={[0, 1.52, 0.019]}>
+          <planeGeometry args={[1.02, 1.08]} />
           <meshStandardMaterial
             color={C.glass}
             transparent
-            opacity={raining ? 0.14 : 0.08}
+            opacity={0.08}
             roughness={0.12}
             metalness={0.3}
             depthWrite={false}
           />
         </mesh>
 
-        {/*
-          The water on the glass, in two parts.
+        {/* The sash: two stiles and two rails, standing in front of the
+            glass. A frame is members, and members cast an edge. */}
+        {[
+          { at: [-0.5375, 1.52, 0.038], size: [0.055, 1.19, 0.05] },
+          { at: [0.5375, 1.52, 0.038], size: [0.055, 1.19, 0.05] },
+          { at: [0, 2.0875, 0.038], size: [1.13, 0.055, 0.05] },
+          { at: [0, 0.9525, 0.038], size: [1.13, 0.055, 0.05] },
+        ].map(({ at, size }) => (
+          <mesh key={`sash-${at[0]}-${at[1]}`} position={at as [number, number, number]}>
+            <boxGeometry args={size as [number, number, number]} />
+            <meshStandardMaterial color={C.windowFrame} roughness={0.78} />
+          </mesh>
+        ))}
 
-          The beads have stopped and are sitting there. The drops are still
-          running, and they are the only thing in this room that moves on its
-          own without being asked, so they are also the only thing here that
-          reduced motion has to take away. It takes the running drops and
-          leaves the beads: a wet window with nothing moving on it is still a
-          wet window, and it is still raining in the picture behind it.
-        */}
-        <group position={[0, 1.62, 0]} visible={raining}>
-          {beads.map((bead, i) => (
-            <mesh key={i} position={[bead.x, bead.y, 0.057]}>
-              <planeGeometry args={[bead.r, bead.r]} />
-              <meshBasicMaterial
-                map={beadMap}
-                transparent
-                opacity={0.85}
-                depthWrite={false}
-              />
-            </mesh>
-          ))}
-        </group>
+        {/* Glazing bars: one up and one across, which is four panes. Six was
+            too many for an opening this size and read as a grid. */}
+        <mesh position={[0, 1.52, 0.03]}>
+          <boxGeometry args={[0.032, 1.08, 0.036]} />
+          <meshStandardMaterial color={C.windowFrame} roughness={0.78} />
+        </mesh>
+        <mesh position={[0, 1.52, 0.03]}>
+          <boxGeometry args={[1.02, 0.032, 0.036]} />
+          <meshStandardMaterial color={C.windowFrame} roughness={0.78} />
+        </mesh>
 
-        <group
-          ref={rain}
-          position={[0, 1.62, 0]}
-          visible={raining && idleMotion}
-        >
-          {drops.map((drop, i) => (
-            <mesh key={i} position={[drop.x, drop.y, drop.z]}>
-              <planeGeometry args={[drop.width, drop.length]} />
-              <meshBasicMaterial
-                map={rainMap}
-                transparent
-                opacity={0.9}
-                depthWrite={false}
-              />
-            </mesh>
-          ))}
-        </group>
+        {/* The casing around the outside, standing proud of the wall. */}
+        {[
+          { at: [-0.6, 1.52, 0.055], size: [0.07, 1.33, 0.022] },
+          { at: [0.6, 1.52, 0.055], size: [0.07, 1.33, 0.022] },
+          { at: [0, 2.15, 0.055], size: [1.27, 0.07, 0.022] },
+        ].map(({ at, size }) => (
+          <mesh key={`case-${at[0]}-${at[1]}`} position={at as [number, number, number]}>
+            <boxGeometry args={size as [number, number, number]} />
+            <meshStandardMaterial color={C.windowFrame} roughness={0.8} />
+          </mesh>
+        ))}
+
+        {/* Sill, and the apron under it. */}
+        <mesh position={[0, 0.9, 0.06]}>
+          <boxGeometry args={[1.33, 0.05, 0.15]} />
+          <meshStandardMaterial color={C.windowFrame} roughness={0.72} />
+        </mesh>
+        <mesh position={[0, 0.845, 0.04]}>
+          <boxGeometry args={[1.18, 0.07, 0.02]} />
+          <meshStandardMaterial color={C.windowFrame} roughness={0.85} />
+        </mesh>
       </group>
 
       {/*
@@ -1392,6 +1480,37 @@ export function Room({
           <meshStandardMaterial color={"#15171c"} roughness={0.88} />
         </mesh>
       </group>
+
+      {/*
+        The paper plane.
+
+        It sits folded on the desk in front of the laptop until you throw it,
+        then it takes a lap of the room and lands back on the same spot.
+
+        Nothing is being demonstrated by it. The mug is about undo and the
+        switch by the door is about colour, and this one is a paper plane.
+        Every room somebody actually works in has one thing in it that is
+        there for no reason at all.
+
+        The group is the thing that flies and the mesh inside it carries the
+        resting tilt, so the flight code only ever sets one rotation and does
+        not have to remember which parts of it were the fold and which were
+        the heading.
+      */}
+      <Hot name="plane" hoverLift={hoverLift} onSelect={() => onSelect("plane")}>
+        <group ref={plane} position={[-0.3, 0.774, 0.2]}>
+          <mesh geometry={planeShell} rotation={[0.03, 0.14, 0.05]}>
+            <meshStandardMaterial
+              color={C.plane}
+              emissive={C.cream}
+              {...lift(0.06, 0.75)}
+              roughness={0.94}
+              side={2}
+              flatShading
+            />
+          </mesh>
+        </group>
+      </Hot>
 
       {/*
         Mug. A straight-sided cup that narrows toward the base, a squared off
