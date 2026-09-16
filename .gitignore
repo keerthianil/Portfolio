@@ -42,3 +42,11 @@ next-env.d.ts
 
 # project
 .DS_Store
+
+# Working images kept beside the design notes. Not part of the site.
+docs/*.jpeg
+docs/*.jpg
+docs/*.png
+
+# Personal document. Hosted outside this repo, linked from CONTACT.resume.
+public/KeerthiAnilResume.pdf
