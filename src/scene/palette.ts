@@ -75,12 +75,19 @@ export const SCENE = {
  * the screen plane, which blew the screen to pure white and left everything
  * else in a red cave. The screen is a source rather than a subject: it emits,
  * and the bar light clipped to the top of it carries that spill onto the desk.
+ *
+ * The rig runs about a fifth brighter than it used to. There is a sunset out
+ * of the window, and a room with that much light coming into it does not sit
+ * at the level of a room at dusk. The two screens did not move with it: they
+ * emit their own light and were already reading correctly, and raising them
+ * with everything else would only have flattened the difference between the
+ * lit part of the desk and the part the monitor lights.
  */
 export const LIGHTS = {
   /** Overhead, front-left. Does the actual work of making the desk readable. */
   key: {
     color: "#fff0dd",
-    intensity: 15,
+    intensity: 18,
     position: [-1.15, 2.75, 1.7] as [number, number, number],
     angle: 1.05,
     penumbra: 1,
@@ -109,31 +116,31 @@ export const LIGHTS = {
   /** Maroon off the back wall. This is what keeps the shadows warm, not grey. */
   bounce: {
     color: "#8b2332",
-    intensity: 2.2,
+    intensity: 2.5,
     position: [-1.15, 1.5, -1.5] as [number, number, number],
     distance: 2.8,
   },
   /** Daylight through the window on the right wall. */
   window: {
     color: "#bcd2e4",
-    intensity: 6.0,
+    intensity: 7.6,
     position: [2.0, 1.75, -0.25] as [number, number, number],
     distance: 5.5,
   },
   /** Warm rim from the front right, so objects separate from the background. */
   rim: {
     color: "#f0d9c0",
-    intensity: 0.5,
+    intensity: 0.64,
     position: [2.4, 1.7, 2] as [number, number, number],
   },
   /** A dim wash high on the back wall, so its top half is a wall and not a void. */
   wallWash: {
     color: "#a8404f",
-    intensity: 1.1,
+    intensity: 1.35,
     position: [0, 2.4, -1.0] as [number, number, number],
     distance: 3.4,
   },
-  ambient: { color: "#6a5449", intensity: 0.95 },
+  ambient: { color: "#6a5449", intensity: 1.18 },
 } as const;
 
 

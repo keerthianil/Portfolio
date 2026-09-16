@@ -6,7 +6,21 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { NAV_ROUTES, type RouteId } from "@/data/routes";
 import { pick, springIndicator, springPop } from "@/lib/motion";
 
-const LABEL_WIDTH = 70;
+/**
+ * How wide a nav label is, and the gap between two of them, at each size.
+ *
+ * The pill used to be 378px wide at every width, which is wider than a 360px
+ * Android phone and wider than an iPhone SE. Both rounded ends ran off the
+ * screen. The label width is read in JavaScript rather than set in a class
+ * because the sliding indicator behind the hovered label is positioned by
+ * multiplying it, so a class that changed the width at a breakpoint and a
+ * constant that did not would put the indicator under the wrong word.
+ */
+const SIZES = {
+  wide: { label: 70, gap: 8 },
+  phone: { label: 66, gap: 4 },
+  small: { label: 56, gap: 4 },
+};
 
 interface BottomNavProps {
   activeRoute: RouteId | null;
@@ -41,19 +55,35 @@ export function BottomNav({
 }: BottomNavProps) {
   const shouldReduce = useReducedMotion();
   const [hovered, setHovered] = useState<RouteId | null>(null);
-  const [gap, setGap] = useState(8);
+  const [size, setSize] = useState(SIZES.wide);
 
   const held = useRef(false);
   const direction = useRef<1 | -1>(1);
   const holdTimer = useRef<number | undefined>(undefined);
   const lastPointerStep = useRef(0);
 
+  /**
+   * Which of the three sizes applies, watched through the media queries
+   * themselves rather than through `resize`.
+   *
+   * On iOS the address bar collapses and expands as you scroll, and each one
+   * of those is a resize event. A resize listener that re-renders the nav
+   * would be firing all the way down a case study to answer a question whose
+   * answer had not changed. A media query only says something when the answer
+   * does change, which on a phone is when it is turned on its side.
+   */
   useEffect(() => {
+    const wide = window.matchMedia("(min-width: 640px)");
+    const phone = window.matchMedia("(min-width: 390px)");
     const read = () =>
-      setGap(window.matchMedia("(min-width: 640px)").matches ? 8 : 4);
+      setSize(wide.matches ? SIZES.wide : phone.matches ? SIZES.phone : SIZES.small);
     read();
-    window.addEventListener("resize", read, { passive: true });
-    return () => window.removeEventListener("resize", read);
+    wide.addEventListener("change", read);
+    phone.addEventListener("change", read);
+    return () => {
+      wide.removeEventListener("change", read);
+      phone.removeEventListener("change", read);
+    };
   }, []);
 
   /**
@@ -98,7 +128,8 @@ export function BottomNav({
     : 0;
 
   const arrowClasses = (disabled: boolean) => [
-    "flex h-14 w-14 cursor-pointer items-center justify-center rounded-full",
+    // 48 on a phone and 56 from 640 up. Both clear the 44px a thumb needs.
+    "flex h-12 w-12 sm:h-14 sm:w-14 cursor-pointer items-center justify-center rounded-full",
     "bg-bg/25 hover:bg-bg/50 transition-all duration-200",
     // Press is its own state. Without it a held arrow gives no feedback that
     // the hold registered, which is exactly when the user is holding it.
@@ -162,7 +193,7 @@ export function BottomNav({
           transition={pick(!!shouldReduce, { duration: 0.5, ease: "easeOut" })}
         >
           <motion.div
-            className="flex h-[84px] items-center rounded-full px-4 shadow-lg backdrop-blur-sm"
+            className="flex h-[76px] items-center rounded-full px-2 shadow-lg backdrop-blur-sm sm:h-[84px] sm:px-4"
             style={{
               background:
                 "linear-gradient(90deg, rgba(46, 37, 33, 0.72) 0%, rgba(12, 10, 9, 0.18) 100%)",
@@ -204,19 +235,19 @@ export function BottomNav({
             )}
 
             <div
-              className="relative mx-2 flex items-center gap-1 sm:gap-2"
+              className="relative mx-1.5 flex items-center gap-1 sm:mx-2 sm:gap-2"
               onMouseLeave={() => setHovered(null)}
             >
               <motion.div
                 className="absolute rounded-full backdrop-blur-sm"
                 style={{
-                  width: LABEL_WIDTH,
+                  width: size.label,
                   height: 48,
                   backgroundColor: "rgba(12, 10, 9, 0.28)",
                   transformOrigin: "center center",
                 }}
                 animate={{
-                  x: hovered ? indicatorIndex * (LABEL_WIDTH + gap) : 0,
+                  x: hovered ? indicatorIndex * (size.label + size.gap) : 0,
                   opacity: hovered ? 1 : 0,
                   scale: hovered ? 1 : 0,
                 }}
@@ -230,9 +261,10 @@ export function BottomNav({
                   <button
                     key={route.id}
                     type="button"
+                    style={{ width: size.label }}
                     className={[
-                      "relative z-10 flex h-12 w-[70px] cursor-pointer items-center justify-center",
-                      "rounded-full text-[16px] font-normal select-none",
+                      "relative z-10 flex h-12 cursor-pointer items-center justify-center",
+                      "rounded-full text-[15px] font-normal select-none sm:text-[16px]",
                       "touch-manipulation transition-colors duration-200",
                       "active:text-highlight",
                       isActive

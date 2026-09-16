@@ -113,9 +113,9 @@ export function CaseStudy({
             type="button"
             onClick={onClose}
             aria-label={`Close the ${study.title} case study`}
-            className="text-text-muted hover:text-text hover:bg-bg/60 flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-colors duration-200"
+            className="text-text-muted hover:text-text hover:bg-bg/60 -mr-1.5 flex h-10 w-10 cursor-pointer items-center justify-center rounded-md transition-colors duration-200"
           >
-            <X size={16} aria-hidden="true" />
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 
@@ -166,7 +166,7 @@ export function CaseStudy({
                 {study.repo && (
                   <a
                     href={study.repo}
-                    className="text-highlight hover:text-text inline-flex items-center gap-2 text-sm transition-colors duration-200"
+                    className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-sm transition-colors duration-200"
                   >
                     <ExternalLink size={14} aria-hidden="true" />
                     Source

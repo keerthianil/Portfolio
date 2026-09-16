@@ -674,20 +674,20 @@ export function makeCalendarTexture(): CanvasTexture {
 /** The window, which has two states rather than a slide index. */
 export interface SkyTexture {
   texture: CanvasTexture;
-  /** Evening on, evening off. Repaints the pane. */
-  setNight: (on: boolean) => void;
+  /** Weather on, weather off. Repaints the pane. */
+  setRain: (on: boolean) => void;
   dispose: () => void;
 }
 
 /**
- * What is outside the window: her photograph of a sunset, and nothing else.
+ * What is outside the window: my photograph of a sunset, and nothing else.
  * There were painted rooftops along the bottom, which fought the picture.
  *
- * Click it and the sun finishes going down. The same photograph takes a deep
- * blue veil, the stars come out over it and the moon comes up, and the room
- * behind it drops to the lights that are actually on in it. Nothing is
- * painted twice: the evening is this canvas plus a different set of light
- * intensities, so there is no second photograph to load.
+ * Click it and it rains. The same photograph takes a cool grey veil, the
+ * colour goes out of the sky, and the light in the room turns with it. There
+ * is no second photograph to load: the weather is this canvas plus a
+ * different set of light intensities, and the drops on the glass are
+ * geometry, in Room.tsx, because they have to move.
  */
 export function makeSkyTexture(): SkyTexture {
   const width = 512;
@@ -699,22 +699,44 @@ export function makeSkyTexture(): SkyTexture {
   const texture = finish(canvas);
 
   let photograph: HTMLImageElement | null = null;
-  let night = false;
+  let raining = false;
 
-  /** Stars, placed once so they do not move when the pane is repainted. */
+  /**
+   * The cloud, placed once so it does not rearrange itself when the pane is
+   * repainted. A pure function of the index rather than a running seed: the
+   * compiler rejects reassigning a captured variable, and a closure over a
+   * counter is exactly that.
+   */
   const noise = (n: number) => {
     const x = Math.sin(n * 91.7 + 47.3) * 43758.5453;
     return x - Math.floor(x);
   };
-  const stars = Array.from({ length: 90 }, (_, i) => ({
-    x: noise(i * 3 + 1) * width,
-    y: noise(i * 3 + 2) * height * 0.72,
-    r: 0.6 + noise(i * 3 + 3) * 1.5,
+  const clouds = Array.from({ length: 16 }, (_, i) => ({
+    x: noise(i * 4 + 1) * width * 1.3 - width * 0.15,
+    y: noise(i * 4 + 2) * height * 0.62,
+    rx: 90 + noise(i * 4 + 3) * 150,
+    ry: 34 + noise(i * 4 + 4) * 46,
   }));
 
   const draw = () => {
-    if (photograph) cover(ctx, photograph, 0, 0, width, height);
-    else {
+    if (photograph) {
+      /**
+       * The photograph, with its colour pushed rather than pulled.
+       *
+       * The pane carries an emissive map, which is what makes a window read
+       * as a source of light rather than as a picture hung on a wall, and an
+       * emissive map washes a photograph out: the brighter it is asked to
+       * glow, the further every pixel travels toward white and the less of
+       * the sunset is left. The emissive came down and the saturation went
+       * up, so what is in the window is the colour that was in the sky.
+       *
+       * `ctx.filter` is a no-op string assignment where it is not supported,
+       * and the picture is still the picture, so there is nothing to guard.
+       */
+      ctx.filter = "saturate(1.42) contrast(1.06)";
+      cover(ctx, photograph, 0, 0, width, height);
+      ctx.filter = "none";
+    } else {
       const sky = ctx.createLinearGradient(0, 0, 0, height);
       sky.addColorStop(0, "#8f8fb8");
       sky.addColorStop(0.55, "#e29070");
@@ -723,33 +745,63 @@ export function makeSkyTexture(): SkyTexture {
       ctx.fillRect(0, 0, width, height);
     }
 
-    if (night) {
-      // Deep blue over the whole picture rather than black. A photograph
-      // taken after sunset is not colourless, it is blue, and black would
-      // have read as the window being switched off.
+    if (raining) {
+      // Grey, and cool, and not dark. Overcast is a loss of colour and of
+      // contrast, not a loss of light: a dark veil here read as dusk, which
+      // is a different afternoon entirely.
       const veil = ctx.createLinearGradient(0, 0, 0, height);
-      veil.addColorStop(0, "rgba(6, 9, 30, 0.88)");
-      veil.addColorStop(1, "rgba(14, 16, 44, 0.72)");
+      veil.addColorStop(0, "rgba(58, 68, 82, 0.94)");
+      veil.addColorStop(0.58, "rgba(84, 94, 108, 0.93)");
+      veil.addColorStop(1, "rgba(104, 112, 122, 0.92)");
       ctx.fillStyle = veil;
       ctx.fillRect(0, 0, width, height);
 
-      for (const star of stars) {
-        ctx.fillStyle = `rgba(245, 246, 255, ${0.25 + star.r * 0.32})`;
+      // Cloud, as overlapping soft ellipses. A flat grey rectangle is a
+      // switched off window, and the sky has to have something in it.
+      for (const cloud of clouds) {
+        const soft = ctx.createRadialGradient(
+          cloud.x,
+          cloud.y,
+          cloud.ry * 0.2,
+          cloud.x,
+          cloud.y,
+          cloud.rx,
+        );
+        soft.addColorStop(0, "rgba(146, 156, 170, 0.55)");
+        soft.addColorStop(1, "rgba(146, 156, 170, 0)");
+        ctx.fillStyle = soft;
         ctx.beginPath();
-        ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+        ctx.ellipse(cloud.x, cloud.y, cloud.rx, cloud.ry, 0, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // The moon, with the halo it has through glass.
-      const halo = ctx.createRadialGradient(360, 150, 6, 360, 150, 110);
-      halo.addColorStop(0, "rgba(240, 240, 226, 0.5)");
-      halo.addColorStop(1, "rgba(240, 240, 226, 0)");
-      ctx.fillStyle = halo;
-      ctx.fillRect(250, 40, 220, 220);
-      ctx.fillStyle = "rgba(246, 243, 230, 0.94)";
-      ctx.beginPath();
-      ctx.arc(360, 150, 26, 0, Math.PI * 2);
-      ctx.fill();
+      // The far rain, as haze rather than as drops. Anything near enough to
+      // read as a drop is on the glass, and the glass is geometry.
+      ctx.strokeStyle = "rgba(202, 214, 228, 0.22)";
+      ctx.lineWidth = 1.6;
+      for (let i = 0; i < 190; i += 1) {
+        const x = noise(i * 2 + 7) * width;
+        const y = noise(i * 2 + 8) * height;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - 6, y + 30);
+        ctx.stroke();
+      }
+
+      // Darker into the corners, so the pane is a view out and not a lit
+      // panel set into the wall.
+      const corners = ctx.createRadialGradient(
+        width / 2,
+        height * 0.44,
+        60,
+        width / 2,
+        height * 0.44,
+        height * 0.62,
+      );
+      corners.addColorStop(0, "rgba(28, 34, 44, 0)");
+      corners.addColorStop(1, "rgba(28, 34, 44, 0.42)");
+      ctx.fillStyle = corners;
+      ctx.fillRect(0, 0, width, height);
     }
 
     texture.needsUpdate = true;
@@ -763,13 +815,98 @@ export function makeSkyTexture(): SkyTexture {
 
   return {
     texture,
-    setNight: (on: boolean) => {
-      if (on === night) return;
-      night = on;
+    setRain: (on: boolean) => {
+      if (on === raining) return;
+      raining = on;
       draw();
     },
     dispose: () => texture.dispose(),
   };
+}
+
+/* --------------------------------------------------------------------- rain */
+
+/**
+ * One drop running down the glass: a bright head with the tail it drags
+ * behind it. Drawn once and shared by every drop on the pane, because they
+ * differ in where they are and how fast they fall and in nothing else.
+ *
+ * A drop cannot be a plain quad. A hard edged rectangle at this size reads as
+ * a scratch on the glass, and the thing that makes it read as water is that
+ * the tail fades out and the head does not.
+ */
+export function makeRainTexture(): CanvasTexture {
+  const w = 32;
+  const h = 256;
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d")!;
+
+  ctx.save();
+  roundRect(ctx, 11, 0, 10, h, 5);
+  ctx.clip();
+  const trail = ctx.createLinearGradient(0, 0, 0, h);
+  trail.addColorStop(0, "rgba(206, 226, 246, 0)");
+  trail.addColorStop(0.5, "rgba(206, 226, 246, 0.2)");
+  trail.addColorStop(0.84, "rgba(230, 242, 255, 0.62)");
+  trail.addColorStop(1, "rgba(230, 242, 255, 0)");
+  ctx.fillStyle = trail;
+  ctx.fillRect(0, 0, w, h);
+  ctx.restore();
+
+  const head = ctx.createRadialGradient(16, 214, 1, 16, 214, 16);
+  head.addColorStop(0, "rgba(240, 248, 255, 0.92)");
+  head.addColorStop(0.55, "rgba(216, 234, 250, 0.5)");
+  head.addColorStop(1, "rgba(216, 234, 250, 0)");
+  ctx.fillStyle = head;
+  ctx.beginPath();
+  ctx.ellipse(16, 214, 9, 18, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  return finish(canvas);
+}
+
+/**
+ * A drop that has stopped, clinging to the glass. Almost entirely a rim and a
+ * highlight: water on glass is not a blob of colour, it is an edge that bends
+ * what is behind it and one bright point where the light is.
+ */
+export function makeBeadTexture(): CanvasTexture {
+  const size = 64;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d")!;
+  const c = size / 2;
+
+  const body = ctx.createRadialGradient(c, c, 2, c, c, 26);
+  body.addColorStop(0, "rgba(198, 218, 238, 0.1)");
+  body.addColorStop(0.72, "rgba(198, 218, 238, 0.2)");
+  body.addColorStop(1, "rgba(198, 218, 238, 0)");
+  ctx.fillStyle = body;
+  ctx.beginPath();
+  ctx.arc(c, c, 26, 0, Math.PI * 2);
+  ctx.fill();
+
+  // The rim, brighter along the bottom where a bead pools.
+  ctx.lineWidth = 2.6;
+  ctx.strokeStyle = "rgba(226, 240, 254, 0.5)";
+  ctx.beginPath();
+  ctx.arc(c, c, 23, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.strokeStyle = "rgba(240, 250, 255, 0.72)";
+  ctx.beginPath();
+  ctx.arc(c, c + 1, 23, 0.35, Math.PI - 0.35);
+  ctx.stroke();
+
+  // The one bright point.
+  ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+  ctx.beginPath();
+  ctx.ellipse(c - 8, c - 9, 4.5, 3.4, -0.6, 0, Math.PI * 2);
+  ctx.fill();
+
+  return finish(canvas);
 }
 
 /**

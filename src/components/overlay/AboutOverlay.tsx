@@ -241,7 +241,7 @@ export function AboutOverlay({ onClose }: { onClose: () => void }) {
         {/* Terminal */}
         <div
           ref={bodyRef}
-          className="font-mono flex-1 px-5 py-7 text-[13px] leading-relaxed sm:px-9"
+          className="font-mono flex-1 px-3.5 py-6 text-[13px] leading-relaxed sm:px-9 sm:py-7"
         >
           <div className="mx-auto flex max-w-[70ch] flex-col gap-5">
             <div className="flex flex-col gap-1.5">
@@ -330,7 +330,7 @@ export function AboutOverlay({ onClose }: { onClose: () => void }) {
               <a
                 href={CONTACT.resume}
                 download
-                className="text-highlight hover:text-text inline-flex items-center gap-2 transition-colors duration-200"
+                className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 transition-colors duration-200"
               >
                 <Download size={14} aria-hidden="true" />
                 View resume
@@ -344,14 +344,14 @@ export function AboutOverlay({ onClose }: { onClose: () => void }) {
               <button
                 type="button"
                 onClick={openTimeline}
-                className="text-highlight hover:text-text inline-flex cursor-pointer items-center gap-2 transition-colors duration-200"
+                className="text-highlight hover:text-text inline-flex min-h-6 cursor-pointer items-center gap-2 py-1 transition-colors duration-200"
               >
                 <CalendarDays size={14} aria-hidden="true" />
                 Timeline
               </button>
               <a
                 href={`mailto:${CONTACT.email}`}
-                className="text-highlight hover:text-text inline-flex items-center gap-2 transition-colors duration-200"
+                className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 transition-colors duration-200"
               >
                 <Mail size={14} aria-hidden="true" />
                 Contact me

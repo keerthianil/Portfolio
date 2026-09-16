@@ -42,7 +42,3 @@ next-env.d.ts
 
 # project
 .DS_Store
-
-# local tooling
-.claude/
-AGENTS.md

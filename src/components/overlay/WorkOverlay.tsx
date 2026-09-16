@@ -70,7 +70,7 @@ export function WorkOverlay({ onClose }: { onClose: () => void }) {
             <li>
               <a
                 href={`mailto:${CONTACT.email}`}
-                className="text-highlight hover:text-text inline-flex items-center gap-2 text-[15px] transition-colors duration-200"
+                className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-[15px] transition-colors duration-200"
               >
                 <Mail size={16} aria-hidden="true" />
                 {CONTACT.email}
@@ -79,7 +79,7 @@ export function WorkOverlay({ onClose }: { onClose: () => void }) {
             <li>
               <a
                 href={CONTACT.github}
-                className="text-highlight hover:text-text inline-flex items-center gap-2 text-[15px] transition-colors duration-200"
+                className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-[15px] transition-colors duration-200"
               >
                 <Code size={16} aria-hidden="true" />
                 github.com/keerthianil
@@ -88,7 +88,7 @@ export function WorkOverlay({ onClose }: { onClose: () => void }) {
             <li>
               <a
                 href={CONTACT.linkedin}
-                className="text-highlight hover:text-text inline-flex items-center gap-2 text-[15px] transition-colors duration-200"
+                className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-[15px] transition-colors duration-200"
               >
                 <ExternalLink size={16} aria-hidden="true" />
                 linkedin.com/in/keerthiareddy
