@@ -1,6 +1,5 @@
 /** The fake boot sequence. Each line fills its bar, then the next starts. */
 export const BOOT_LINES = [
-  "Resolving package dependencies",
   "Compiling Swift",
   "Running accessibility audit",
   "Attaching VoiceOver",
@@ -8,7 +7,7 @@ export const BOOT_LINES = [
 ];
 
 /** Per line tick interval in ms. Faster lines read as cached, slower as work. */
-export const BOOT_INTERVALS = [34, 18, 3, 6, 11];
+export const BOOT_INTERVALS = [18, 3, 6, 11];
 
 /**
  * ASCII art, interleaved with the prose the way a terminal would print it.
@@ -113,8 +112,12 @@ export interface DesktopIcon {
   y: number;
 }
 
+/**
+ * Three things on the desktop. Two are real and one is a joke, and the joke is
+ * the one that makes the other two read as a desktop rather than as a nav.
+ */
 export const DESKTOP_ICONS: DesktopIcon[] = [
-  { id: "resume", label: "Resume.pdf", x: 50, y: 12 },
-  { id: "timeline", label: "Timeline", x: 50, y: 40 },
-  { id: "contact", label: "Contact", x: 50, y: 68 },
+  { id: "timeline", label: "Timeline", x: 50, y: 12 },
+  { id: "taxes", label: "Tax documents", x: 50, y: 40 },
+  { id: "resume", label: "Resume.pdf", x: 50, y: 68 },
 ];

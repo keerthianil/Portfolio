@@ -18,16 +18,16 @@ import {
 } from "@/data/routes";
 import { CAMERA_LEAD_MS } from "@/lib/motion";
 import { flatStore } from "@/lib/webgl";
+import type { Hotspot } from "@/scene/Room";
+import { COLOUR_VISION, type ColourVision } from "@/scene/palette";
 import { BottomNav } from "./BottomNav";
 import { Curtain } from "./Curtain";
-import { LoadingScreen } from "./LoadingScreen";
+import { RoomNote, type RoomNoteContent } from "./RoomNote";
 import { SceneObjectButtons } from "./SceneObjectButtons";
 import { SceneStage } from "./SceneStage";
 import { TopBar } from "./TopBar";
 import { AboutOverlay } from "./overlay/AboutOverlay";
-import { BeforeAfter } from "./overlay/BeforeAfter";
 import { ResearchOverlay } from "./overlay/ResearchOverlay";
-import { TabOrderGame } from "./overlay/TabOrderGame";
 import { Timeline } from "./overlay/Timeline";
 import { WorkOverlay } from "./overlay/WorkOverlay";
 import { WelcomeCard } from "./WelcomeCard";
@@ -40,8 +40,21 @@ const ARROW_GLOW_AT_MS = 3000;
  */
 const YAW_LIMIT = 0.62;
 
+/**
+ * One press of an arrow. Half the limit, so the room is two stops wide each
+ * way: desk, part turn, wall. Press and hold is still continuous, and so is a
+ * horizontal scroll, but a single press lands you somewhere you could have
+ * predicted rather than somewhere between two things.
+ */
+const YAW_STEP = YAW_LIMIT / 2;
+
+/** How far a held arrow turns per animation frame. */
+const YAW_PER_FRAME = 0.012;
+
+/** Radians per pixel of drag. */
+const YAW_PER_DRAG_PX = 0.0028;
+
 export function Experience() {
-  const [percent, setPercent] = useState(0);
   const [sceneReady, setSceneReady] = useState(false);
   const [revealed, setRevealed] = useState(false);
   /**
@@ -80,25 +93,20 @@ export function Experience() {
   );
   const overlayTimer = useRef<number | undefined>(undefined);
 
-  // Fake determinate progress. It rises on its own and is held under 100 until
-  // the scene actually reports ready, so the bar never lies about being done.
+  /**
+   * The curtain opens as soon as there is a room behind it.
+   *
+   * There used to be a progress ring in front of this, counting to a hundred.
+   * It was counting to nothing: the scene chunk is lazy and the textures paint
+   * on their own, so the number was invented and the wait was the number's,
+   * not the page's. The room now shows the moment it can, and the flat view
+   * shows immediately because it has nothing to wait for.
+   */
   useEffect(() => {
-    const id = window.setInterval(() => {
-      setPercent((value) => {
-        // In the flat view nothing will ever report ready, because there is no
-        // canvas to report it.
-        if (sceneReady || flat) return Math.min(100, value + 6);
-        return Math.min(92, value + 3);
-      });
-    }, 45);
-    return () => window.clearInterval(id);
-  }, [sceneReady, flat]);
-
-  useEffect(() => {
-    if (percent < 100) return;
-    const id = window.setTimeout(() => setRevealed(true), 250);
+    if (!sceneReady && !flat) return;
+    const id = window.setTimeout(() => setRevealed(true), 60);
     return () => window.clearTimeout(id);
-  }, [percent]);
+  }, [sceneReady, flat]);
 
   useEffect(() => {
     if (!revealed || welcomeOpen) return;
@@ -110,21 +118,48 @@ export function Experience() {
    * The camera leads the overlay by 700ms. You arrive at the object before its
    * content covers it, which is what makes the scene feel like a place rather
    * than a menu.
+   *
+   * Routes only. A case study opening inside Projects, or the timeline opening
+   * inside About, changes the hash to a second level of the same route, and
+   * this used to run again on every one of those: it re-announced the route as
+   * loading and then as opened while the panel had never moved. The guard also
+   * takes out an announcement of "Back in the room" fired at every page load,
+   * before anybody had been anywhere to come back from.
+   *
+   * It takes two refs, not one. `asked` is the route the hash last asked for,
+   * `shown` is the one the overlay actually got, set 700ms later when the
+   * timer fires. A guard on `asked` alone breaks the first paint in
+   * development, where effects mount twice: the first mount schedules the
+   * overlay, its cleanup cancels the timer, and the second mount is turned
+   * away for asking for a route that is already pending and now never
+   * arrives.
    */
+  const asked = useRef<RouteId | null>(null);
+  const shown = useRef<RouteId | null>(null);
   const applyRoute = useCallback((route: RouteId | null) => {
+    if (asked.current === route && shown.current === route) return;
+    asked.current = route;
     window.clearTimeout(overlayTimer.current);
     setCamera(route ?? "room");
     setShowArrowGlow(false);
 
     if (!route) {
+      shown.current = null;
       setActiveRoute(null);
       setAnnouncement("Back in the room.");
       return;
     }
 
+    // Whatever opened this route, the welcome card is done. The card is
+    // suppressed on a deep link by reading the hash at mount, but a hash that
+    // arrives after mount, which is what a link from another tab does, used to
+    // leave the card sitting on top of the panel it had just opened.
+    setWelcomeOpen(false);
+
     const definition = ROUTE_BY_ID[route];
     setAnnouncement(definition.loadingMessage);
     overlayTimer.current = window.setTimeout(() => {
+      shown.current = route;
       setActiveRoute(route);
       setAnnouncement(`${definition.label} opened.`);
     }, CAMERA_LEAD_MS);
@@ -172,11 +207,10 @@ export function Experience() {
    * sixty a second.
    */
   const [limit, setLimit] = useState<"left" | "right" | null>(null);
-  const rotate = useCallback((direction: 1 | -1) => {
-    const next = Math.max(
-      -YAW_LIMIT,
-      Math.min(YAW_LIMIT, yaw.current + 0.05 * direction),
-    );
+
+  /** Adds to the yaw and clamps it. Everything that turns the room goes here. */
+  const turn = useCallback((delta: number) => {
+    const next = Math.max(-YAW_LIMIT, Math.min(YAW_LIMIT, yaw.current + delta));
     yaw.current = next;
     const reached =
       next >= YAW_LIMIT - 1e-4
@@ -187,73 +221,325 @@ export function Experience() {
     setLimit((current) => (current === reached ? current : reached));
   }, []);
 
-  // Arrow keys drive the same rotation, and stop while an overlay is open so
-  // they stay available for scrolling the overlay's own content.
+  /** One frame of a held arrow. */
+  const rotate = useCallback(
+    (direction: 1 | -1) => turn(YAW_PER_FRAME * direction),
+    [turn],
+  );
+
+  /** One press of an arrow: a whole stop, not a nudge. */
+  const rotateStep = useCallback(
+    (direction: 1 | -1) => turn(YAW_STEP * direction),
+    [turn],
+  );
+
+  /**
+   * Arrow keys drive the same two stops: tap for a stop, hold past a beat for
+   * a continuous turn. They stop while an overlay is open so they stay
+   * available for scrolling the overlay's own content.
+   */
   useEffect(() => {
-    if (activeRoute) return;
+    if (activeRoute || welcomeOpen) return;
+    const HOLD_AFTER_MS = 260;
     const pressed = { left: false, right: false };
+    const holding = { left: false, right: false };
+    const timers: Record<"left" | "right", number | undefined> = {
+      left: undefined,
+      right: undefined,
+    };
+
+    const press = (side: "left" | "right") => {
+      if (pressed[side]) return;
+      pressed[side] = true;
+      rotateStep(side === "left" ? 1 : -1);
+      timers[side] = window.setTimeout(() => {
+        holding[side] = true;
+      }, HOLD_AFTER_MS);
+    };
+    const release = (side: "left" | "right") => {
+      pressed[side] = false;
+      holding[side] = false;
+      window.clearTimeout(timers[side]);
+    };
+
     const onDown = (event: KeyboardEvent) => {
-      if (event.key === "ArrowLeft") pressed.left = true;
-      if (event.key === "ArrowRight") pressed.right = true;
+      if (event.key === "ArrowLeft") press("left");
+      if (event.key === "ArrowRight") press("right");
     };
     const onUp = (event: KeyboardEvent) => {
-      if (event.key === "ArrowLeft") pressed.left = false;
-      if (event.key === "ArrowRight") pressed.right = false;
+      if (event.key === "ArrowLeft") release("left");
+      if (event.key === "ArrowRight") release("right");
     };
+    // A key held down while the tab loses focus never fires keyup, which would
+    // leave the room spinning when you came back.
+    const onBlur = () => {
+      release("left");
+      release("right");
+    };
+
     let frame = 0;
     const tick = () => {
-      if (pressed.left) rotate(1);
-      if (pressed.right) rotate(-1);
+      if (holding.left) rotate(1);
+      if (holding.right) rotate(-1);
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     window.addEventListener("keydown", onDown);
     window.addEventListener("keyup", onUp);
+    window.addEventListener("blur", onBlur);
     return () => {
       cancelAnimationFrame(frame);
+      window.clearTimeout(timers.left);
+      window.clearTimeout(timers.right);
       window.removeEventListener("keydown", onDown);
       window.removeEventListener("keyup", onUp);
+      window.removeEventListener("blur", onBlur);
     };
-  }, [activeRoute, rotate]);
+  }, [activeRoute, welcomeOpen, rotate, rotateStep]);
 
   /**
-   * The mug. Three sips empty it, and a fourth click fills it again. The sound
-   * is optional: if the file is missing, or the browser refuses to play without
-   * a gesture it recognises, the level still drops and the announcement still
-   * fires, because the sound was never the only feedback.
+   * Drag to look, instead of scrolling to look.
+   *
+   * A horizontal wheel or trackpad swipe used to turn the room. On macOS a
+   * horizontal scroll with nothing to scroll is also the browser's back
+   * gesture, and the browser wins that race often enough that looking at the
+   * left wall would sometimes leave the site. There is no flag that reliably
+   * turns that off from inside the page, so the gesture is gone and a drag
+   * does the job: press anywhere in the room and pull.
+   *
+   * It is pointer events rather than mouse events so a touch drag works too,
+   * and it ignores drags that start on a control, so the nav arrows still
+   * behave like buttons.
    */
-  const [sips, setSips] = useState(0);
-  const drink = useCallback(() => {
-    setSips((count) => {
-      const next = count >= 3 ? 0 : count + 1;
+  useEffect(() => {
+    if (activeRoute || welcomeOpen || flat !== false) return;
+    let last: number | null = null;
+    let id: number | null = null;
+
+    const down = (event: PointerEvent) => {
+      if (event.button !== 0) return;
+      if ((event.target as HTMLElement | null)?.closest("button, a, input")) return;
+      last = event.clientX;
+      id = event.pointerId;
+    };
+    const move = (event: PointerEvent) => {
+      if (last === null || event.pointerId !== id) return;
+      const delta = event.clientX - last;
+      last = event.clientX;
+      // Dragging right pulls the room right, which means the view goes left.
+      turn(delta * YAW_PER_DRAG_PX);
+      if (Math.abs(delta) > 0) document.body.style.cursor = "grabbing";
+    };
+    const up = () => {
+      last = null;
+      id = null;
+      document.body.style.cursor = "";
+    };
+
+    window.addEventListener("pointerdown", down);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+    return () => {
+      window.removeEventListener("pointerdown", down);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+      document.body.style.cursor = "";
+    };
+  }, [activeRoute, welcomeOpen, flat, turn]);
+
+  /**
+   * The mug. Knock it and the camera leans in, the cup goes over, the coffee
+   * spreads across the desk, and three and a half seconds later everything is
+   * upright and full again and you are back where you were looking.
+   *
+   * Nothing about it is undoable, which is the only reason a portfolio is
+   * allowed to have a joke in it. The sound is optional: if the file is
+   * missing, or the browser refuses to play without a gesture it recognises,
+   * the cup still goes over and the announcement still fires, because the
+   * sound was never the only feedback.
+   */
+  const [spilled, setSpilled] = useState(false);
+  const spillTimer = useRef<number | undefined>(undefined);
+  const spillReturn = useRef<number | undefined>(undefined);
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(spillTimer.current);
+      window.clearTimeout(spillReturn.current);
+    },
+    [],
+  );
+
+  /**
+   * Any click or key while the coffee is on the desk puts it back. Watching a
+   * spill you did not ask to keep watching is a modal with no close button.
+   */
+  useEffect(() => {
+    if (!spilled) return;
+    const rightIt = () => {
+      window.clearTimeout(spillTimer.current);
+      window.clearTimeout(spillReturn.current);
+      setSpilled(false);
+      setCamera("room");
+      setAnnouncement("Mug upright and refilled.");
+    };
+    // Deferred to the next frame, or the click that knocked it over would be
+    // the same click that rights it.
+    const id = window.setTimeout(() => {
+      window.addEventListener("pointerdown", rightIt);
+      window.addEventListener("keydown", rightIt);
+    }, 0);
+    return () => {
+      window.clearTimeout(id);
+      window.removeEventListener("pointerdown", rightIt);
+      window.removeEventListener("keydown", rightIt);
+    };
+  }, [spilled]);
+
+  const knockOver = useCallback(() => {
+    if (spilled) return;
+    window.clearTimeout(spillTimer.current);
+    window.clearTimeout(spillReturn.current);
+
+    setSpilled(true);
+    setCamera("mug");
+    setAnnouncement("The coffee is on the desk. It will be fine in a moment.");
+
+    const prop = SCENE_PROPS.find((item) => item.object === "mug");
+    if (prop?.sound) new Audio(prop.sound).play().catch(() => {});
+
+    spillTimer.current = window.setTimeout(() => {
+      setSpilled(false);
+      setAnnouncement("Mug upright and refilled.");
+      // The camera holds a beat after the cup rights itself, so the last thing
+      // you see close up is the mug full again rather than the tidy-up.
+      spillReturn.current = window.setTimeout(() => setCamera("room"), 900);
+    }, 3400);
+  }, [spilled]);
+
+  /**
+   * The card the wall interactions put up. Two lines, gone in six seconds,
+   * never focusable: it is a caption on something you are already looking at.
+   */
+  const [note, setNote] = useState<RoomNoteContent | null>(null);
+  useEffect(() => {
+    if (!note) return;
+    const id = window.setTimeout(() => setNote(null), 6000);
+    return () => window.clearTimeout(id);
+  }, [note]);
+
+  /**
+   * The switch by the door. Four presses walk the room through normal,
+   * deuteranopia, protanopia and tritanopia and back to normal. It recolours
+   * the scene's own materials rather than putting a filter over the canvas,
+   * because a filter would recolour the interface on top of it too, and the
+   * interface is not what is being demonstrated.
+   */
+  const [vision, setVision] = useState<ColourVision>("normal");
+  const cycleVision = useCallback(() => {
+    setVision((current) => {
+      const next =
+        COLOUR_VISION[(COLOUR_VISION.indexOf(current) + 1) % COLOUR_VISION.length];
+      setNote(
+        next === "normal"
+          ? {
+              title: "Normal colour vision",
+              body: "About one man in twelve does not see the room the way it just went back to.",
+            }
+          : {
+              title: next,
+              body: "Look at the wall and the plant. If colour is the only thing separating two things, for these viewers there is nothing separating them.",
+            },
+      );
       setAnnouncement(
-        next === 0
-          ? "Mug refilled."
-          : next === 3
-            ? "Empty."
-            : `Sip ${next} of 3.`,
+        next === "normal"
+          ? "Colour vision back to normal."
+          : `Simulating ${next}.`,
       );
       return next;
     });
-    const prop = SCENE_PROPS.find((item) => item.object === "mug");
-    if (prop?.sound) new Audio(prop.sound).play().catch(() => {});
   }, []);
+
+  /**
+   * The window, and the sun going down behind it.
+   *
+   * Click the pane and the photograph goes to evening, the stars come out in
+   * it, the daylight leaves the room and the desk lamp and the monitor are
+   * what is left lighting it. Click it again and it is the afternoon.
+   *
+   * It replaced a frosted pane that dropped the room's contrast to nothing to
+   * make a point about focus indicators. The point was worth making and the
+   * room being ugly for six seconds was the price, so the point moved: the
+   * focus ring in the scene is on all the time now, and the window is allowed
+   * to just be a nice thing to click.
+   */
+  const [night, setNight] = useState(false);
+  const toggleNight = useCallback(() => {
+    setNight((value) => {
+      const next = !value;
+      setNote(
+        next
+          ? {
+              title: "Evening",
+              body: "Same room, different light. Everything you make gets looked at in both, and only one of them is the one you made it in.",
+            }
+          : {
+              title: "Afternoon",
+              body: "Daylight back. This is the easy light to design in, which is exactly why it is not the only one worth checking.",
+            },
+      );
+      setAnnouncement(
+        next
+          ? "Evening. The room is down to the desk lamp and the monitor."
+          : "Afternoon. Daylight back through the window.",
+      );
+      return next;
+    });
+  }, []);
+
+  /**
+   * Which object's mirror button has focus, so the scene can put a ring on it
+   * in the room. The mirror buttons are pills at the top of the screen and the
+   * objects they open are across the room, so the browser's ring on the button
+   * says which control has focus and this says what it is attached to.
+   */
+  const [focused, setFocused] = useState<Hotspot | null>(null);
 
   const playProp = useCallback(
     (object: string) => {
-      if (object === "mug") drink();
+      if (object === "mug") knockOver();
+      if (object === "lightSwitch") cycleVision();
+      if (object === "window") toggleNight();
     },
-    [drink],
+    [knockOver, cycleVision, toggleNight],
   );
 
   return (
     <>
-      {percent < 100 && <LoadingScreen percent={percent} />}
       <Curtain open={revealed} />
 
-      <TopBar onHome={close} hidden={!revealed} inert={activeRoute !== null} />
+      <TopBar hidden={!revealed} overlayOpen={activeRoute !== null} />
 
-      <main id="main" ref={mainRef} tabIndex={-1} className="fixed inset-0">
+      {revealed && activeRoute === null && <RoomNote note={note} />}
+
+      {/*
+        The welcome card is the only live thing on screen until it is
+        dismissed. The room, the nav and the object buttons all go inert
+        behind it, so a click on the desk cannot open a panel underneath a
+        card that is still asking you to start.
+      */}
+      <main
+        id="main"
+        ref={mainRef}
+        tabIndex={-1}
+        className={[
+          "fixed inset-0",
+          welcomeOpen && revealed ? "pointer-events-none" : "",
+        ].join(" ")}
+        inert={welcomeOpen && revealed}
+      >
         <h1 className="sr-only">
           Keerthi Anil, designer, developer and researcher. I design, build, and
           research interfaces for the people default products miss.
@@ -264,7 +550,10 @@ export function Experience() {
           onNavigate={navigate}
           onProp={playProp}
           onReady={markSceneReady}
-          sips={sips}
+          spilled={spilled}
+          vision={vision}
+          night={night}
+          focused={focused}
           flat={flat}
         />
       </main>
@@ -272,6 +561,7 @@ export function Experience() {
       <SceneObjectButtons
         onNavigate={navigate}
         onProp={playProp}
+        onFocusObject={setFocused}
         inert={activeRoute !== null || welcomeOpen || !revealed || !!flat}
       />
 
@@ -292,11 +582,13 @@ export function Experience() {
 
       {revealed && (
         <BottomNav
+          inert={welcomeOpen}
           activeRoute={activeRoute}
           overlayOpen={activeRoute !== null}
           onNavigate={navigate}
           onClose={close}
           onRotate={rotate}
+          onRotateStep={rotateStep}
           showArrowGlow={showArrowGlow && !welcomeOpen && !flat}
           limit={limit}
           canRotate={flat === false}
@@ -307,23 +599,11 @@ export function Experience() {
         {activeRoute === "work" && (
           <WorkOverlay key="work" onClose={close} />
         )}
-        {activeRoute === "about" && (
-          <AboutOverlay
-            key="about"
-            onClose={close}
-            onOpenTimeline={() => navigate("timeline")}
-          />
-        )}
+        {activeRoute === "about" && <AboutOverlay key="about" onClose={close} />}
         {activeRoute === "research" && (
           <ResearchOverlay key="research" onClose={close} />
         )}
         {activeRoute === "timeline" && <Timeline key="timeline" onClose={close} />}
-        {activeRoute === "taborder" && (
-          <TabOrderGame key="taborder" onClose={close} />
-        )}
-        {activeRoute === "beforeafter" && (
-          <BeforeAfter key="beforeafter" onClose={close} />
-        )}
       </AnimatePresence>
 
       <div aria-live="polite" className="sr-only">

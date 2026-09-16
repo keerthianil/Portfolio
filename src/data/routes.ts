@@ -3,15 +3,15 @@
  * and moves the camera to `work`. Adding a section means adding a row here.
  */
 
-export type RouteId =
-  | "work"
-  | "about"
-  | "research"
-  | "timeline"
-  | "taborder"
-  | "beforeafter";
+export type RouteId = "work" | "about" | "research" | "timeline";
 
-export type CameraState = RouteId | "room";
+/**
+ * Camera states that are not routes. `mug` is where the camera goes to watch
+ * the coffee go over, and it comes straight back.
+ */
+export type SceneCamera = "room" | "mug";
+
+export type CameraState = RouteId | SceneCamera;
 
 export interface RouteDefinition {
   id: RouteId;
@@ -59,7 +59,7 @@ export const ROUTES: RouteDefinition[] = [
     title: "Research",
     loadingMessage: "Loading research...",
     sceneObject: "reader",
-    sceneObjectLabel: "the e-reader",
+    sceneObjectLabel: "the notebook",
     inNav: true,
   },
   {
@@ -70,26 +70,6 @@ export const ROUTES: RouteDefinition[] = [
     loadingMessage: "Loading timeline...",
     sceneObject: "calendar",
     sceneObjectLabel: "the desk calendar",
-    inNav: false,
-  },
-  {
-    id: "taborder",
-    path: "taborder",
-    label: "tab order",
-    title: "Tab order",
-    loadingMessage: "Loading...",
-    sceneObject: "posterLeft",
-    sceneObjectLabel: "the poster on the left wall",
-    inNav: false,
-  },
-  {
-    id: "beforeafter",
-    path: "beforeafter",
-    label: "before and after",
-    title: "Before and after",
-    loadingMessage: "Loading...",
-    sceneObject: "frameRight",
-    sceneObjectLabel: "the framed screen on the right wall",
     inNav: false,
   },
 ];
@@ -113,6 +93,8 @@ export function routeFromHash(hash: string): RouteDefinition | null {
 export interface SceneProp {
   object: string;
   label: string;
+  /** The verb on its mirror button, so "Squash the bug" reads as a sentence. */
+  action: string;
   sound?: string;
 }
 
@@ -120,6 +102,17 @@ export const SCENE_PROPS: SceneProp[] = [
   {
     object: "mug",
     label: "the coffee mug",
-    sound: "/audio/coffee-sip.mp3",
+    action: "Knock over",
+    sound: "/audio/coffee-spill.mp3",
+  },
+  {
+    object: "lightSwitch",
+    label: "the colour vision switch by the door",
+    action: "Press",
+  },
+  {
+    object: "window",
+    label: "the window",
+    action: "Change the light through",
   },
 ];

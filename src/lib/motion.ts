@@ -9,8 +9,13 @@ import type { Transition } from "motion/react";
 /** easeOutQuad. Reserved for full-screen curtains. Nothing else uses it. */
 export const CURTAIN_EASE = [0.25, 0.46, 0.45, 0.94] as const;
 
+/**
+ * 700ms, not 1200. The curtain is the last thing between the visitor and the
+ * room, and every millisecond of it is spent looking at black. A slow theatre
+ * wipe is a nice idea on the second visit and a wait on the first.
+ */
 export const curtain: Transition = {
-  duration: 1.2,
+  duration: 0.7,
   ease: CURTAIN_EASE,
 };
 

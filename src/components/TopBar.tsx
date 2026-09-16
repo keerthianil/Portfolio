@@ -2,41 +2,37 @@
 
 import { useState } from "react";
 import { CircleQuestionMark, X } from "lucide-react";
-import { Mark } from "./Mark";
 import { HelpMenu } from "./HelpMenu";
 
 export function TopBar({
-  onHome,
   hidden = false,
-  inert = false,
+  overlayOpen = false,
 }: {
-  onHome: () => void;
   hidden?: boolean;
-  /** Set while an overlay is open. `aria-modal` already hides this from a
-      screen reader, so leaving it tabbable would let sighted keyboard users
-      reach a control their screen reader cannot. */
-  inert?: boolean;
+  /**
+   * Set while an overlay is open. The bar leaves entirely rather than sitting
+   * there greyed out: `aria-modal` already hides it from a screen reader, and
+   * help about moving around the room is not help while you are reading a case
+   * study. It comes back when you close the panel.
+   */
+  overlayOpen?: boolean;
 }) {
   const [helpOpen, setHelpOpen] = useState(false);
 
   return (
     <>
       <header
-        inert={inert}
+        inert={hidden || overlayOpen}
         className={[
           "fixed top-0 left-0 z-[600] flex h-16 w-full items-center",
           "justify-between px-4 transition-opacity duration-300",
-          hidden ? "pointer-events-none opacity-0" : "opacity-100",
+          hidden || overlayOpen ? "pointer-events-none opacity-0" : "opacity-100",
         ].join(" ")}
       >
-        <button
-          type="button"
-          onClick={onHome}
-          className="text-text hover:text-highlight flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-colors duration-200"
-          aria-label="Keerthi Anil, back to the room"
-        >
-          <Mark className="h-7 w-7" />
-        </button>
+        {/* Nothing in this corner. The name is in the page heading and the
+            face is in About, and a third copy of the same identity up here is
+            a badge. The room is reachable from the nav and from Escape. */}
+        <span aria-hidden="true" />
 
         <button
           type="button"

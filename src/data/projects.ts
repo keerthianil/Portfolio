@@ -1,9 +1,14 @@
 /**
- * The four projects, in the order they should be read.
+ * The projects, strongest first.
+ *
+ * One list rather than two sections. The order is the argument: the first four
+ * went in front of people who were not me, and by the time you are at the
+ * bottom of the grid you are in coursework. Nobody reads a nine card grid
+ * bottom up, so the ranking does the work that a heading was doing.
  *
  * `tint` is each app's own accent, taken from its shipping colour tokens rather
- * than picked to match this site. The cards are previews of the work, and four
- * burgundy cards would say nothing about four different products.
+ * than picked to match this site. Nine burgundy cards would say nothing about
+ * nine different products.
  */
 
 export interface ProjectShot {
@@ -22,6 +27,12 @@ export interface Project {
   /** The app's own accent, used for the card field only. */
   tint: string;
   repo?: string;
+  /**
+   * False when only `.webp` exists for this project, which is everything
+   * captured from the simulator rather than run through the original
+   * optimisation pass.
+   */
+  avif?: boolean;
   /** Up to two screens, shown angled on the card. */
   cover: ProjectShot[];
 }
@@ -29,6 +40,7 @@ export interface Project {
 export const PROJECTS: Project[] = [
   {
     id: "stemally",
+    avif: true,
     title: "StemAlly",
     summary:
       "A STEM reader for blind students. Equations you move around inside, and figures you explore by touch.",
@@ -49,6 +61,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "tactilenav",
+    avif: true,
     title: "TactileNav",
     summary:
       "Tactile street maps you read with one finger. Every line is a physical millimetre, so the scale never lies.",
@@ -68,7 +81,28 @@ export const PROJECTS: Project[] = [
     ],
   },
   {
+    id: "aria",
+    title: "ARIA",
+    summary:
+      "An accessibility audit tool for designers reviewing a built product. It runs the checks that are maths on device, and refuses to guess at the rest.",
+    role: "Product design and SwiftUI build, end to end",
+    timeframe: "2026",
+    tint: "#3b62d0",
+    repo: "https://github.com/keerthianil/ARIA",
+    cover: [
+      {
+        file: "audit",
+        alt: "An ARIA audit summary: thirteen findings across five screens of Spotify iOS, split by severity.",
+      },
+      {
+        file: "finding",
+        alt: "An ARIA finding detail, showing WCAG 1.4.3, a critical severity, the failing contrast ratio and the fix.",
+      },
+    ],
+  },
+  {
     id: "ally",
+    avif: true,
     title: "Ally",
     summary:
       "An accessibility app that failed its own rules twice, and the tests that came out of catching it.",
@@ -89,6 +123,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "threadline",
+    avif: true,
     title: "Threadline",
     summary:
       "A wardrobe tracker that prices a purchase against what you already own. Financial framing, never guilt.",
@@ -104,6 +139,82 @@ export const PROJECTS: Project[] = [
       {
         file: "check-result",
         alt: "Threadline's purchase check verdict screen, weighing a new item against the existing wardrobe.",
+      },
+    ],
+  },
+  {
+    id: "indoorexplorer",
+    title: "IndoorExplorer",
+    summary:
+      "An indoor floor plan you read by dragging a finger across it. Rooms, corridors, stairs and lifts each get their own tone and haptic.",
+    role: "Coursework, SwiftUI",
+    timeframe: "2025",
+    tint: "#2b7a6f",
+    cover: [
+      {
+        file: "map",
+        alt: "IndoorExplorer's floor plan, with rooms and corridors drawn as flat blocks.",
+      },
+      {
+        file: "corridor",
+        alt: "A corridor selected in IndoorExplorer, with its name and feedback pattern announced.",
+      },
+    ],
+  },
+  {
+    id: "shapetracer",
+    title: "ShapeTracer",
+    summary:
+      "Trace a shape with one finger and feel where the edge is. Haptics and a generated tone carry the whole interface.",
+    role: "Coursework, SwiftUI",
+    timeframe: "2025",
+    tint: "#6b4ea8",
+    cover: [
+      {
+        file: "shapes",
+        alt: "ShapeTracer's shape picker, offering a circle and a square.",
+      },
+      {
+        file: "trace-circle",
+        alt: "A circle being traced in ShapeTracer, with a live accuracy percentage under it.",
+      },
+    ],
+  },
+  {
+    id: "swaptitude",
+    title: "Swaptitude",
+    summary:
+      "A skill swap marketplace: teach one thing, learn another. Firebase auth, a live post feed and matching, built by four of us.",
+    role: "Coursework, SwiftUI and Firebase, team of four",
+    timeframe: "2025",
+    tint: "#c9971a",
+    cover: [
+      {
+        file: "feed",
+        alt: "Swaptitude's home feed, showing skill swap posts: english for piano, guitar for something else.",
+      },
+      {
+        file: "explore",
+        alt: "Swaptitude's explore tab, browsing skills by category: music, languages, technology, cooking.",
+      },
+    ],
+  },
+  {
+    id: "travelplanner",
+    title: "TravelPlanner",
+    summary:
+      "Destinations, trips and dates, backed by Core Data. The one in this set that is about persistence rather than about touch.",
+    role: "Coursework, SwiftUI and Core Data",
+    timeframe: "2025",
+    tint: "#2d6aa8",
+    cover: [
+      {
+        file: "destinations",
+        alt: "TravelPlanner's destination list, with photographs of Paris, Tokyo and New York.",
+      },
+      {
+        file: "destination",
+        alt: "A TravelPlanner destination page for Paris, with two saved trips under it.",
       },
     ],
   },
