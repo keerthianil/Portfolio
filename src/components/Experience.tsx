@@ -516,35 +516,36 @@ export function Experience() {
   }, [prodded]);
 
   /**
-   * The desk lamp, and which end of the desk it is pointed at.
+   * The blind over the window.
    *
-   * There was no lamp in this room and there was still a light on the desk,
-   * which came from a bar clipped to the top of the monitor. That is a real
-   * object and it is also not a lamp, so the brightest thing on the desk came
-   * from something nobody could see. Clicking this one swings the arm across
-   * across the desk, and the light is a child of the lamp's head, so there is
-   * nothing here that moves the light. The arm turns and the light is bolted
-   * to it.
+   * Pull the cord and it comes down and the daylight in the room goes with
+   * it. This is the one thing on that wall that is about something. Glare and
+   * light sensitivity are access needs rather than preferences, they are the
+   * reason a lot of people read everything you make with the lights off, and
+   * the fix for them is the oldest piece of hardware in the room.
+   *
+   * It is a number rather than a boolean because the slats take a moment to
+   * come down and the light has to come down with them at the same rate.
    */
-  const [lampAim, setLampAim] = useState(0);
-  const swingLamp = useCallback(() => {
-    setLampAim((value) => {
+  const [blindsDown, setBlindsDown] = useState(0);
+  const pullBlind = useCallback(() => {
+    setBlindsDown((value) => {
       const next = value === 0 ? 1 : 0;
       setNote(
         next === 1
           ? {
-              title: "Lamp swung out",
-              body: "Over the middle of the desk. It is the only light in this room attached to a thing you can move, and the pool moves with it.",
+              title: "Blind down",
+              body: "Glare is an access need, not a preference. Plenty of people read everything you make with the lights off, and this is the control they have.",
             }
           : {
-              title: "Lamp over the laptop",
-              body: "Back where it was, which is where a lamp on a desk spends most of its life.",
+              title: "Blind up",
+              body: "Daylight back. This is the room I designed the site in, which is the reason it is not the only one I checked it in.",
             },
       );
       setAnnouncement(
         next === 1
-          ? "The lamp is swung out over the desk."
-          : "The lamp is back over the laptop.",
+          ? "The blind is down. The daylight in the room has dropped."
+          : "The blind is up. Daylight back through the window.",
       );
       return next;
     });
@@ -563,9 +564,9 @@ export function Experience() {
       if (object === "mug") knockOver();
       if (object === "lightSwitch") cycleVision();
       if (object === "duck") prodDuck();
-      if (object === "lamp") swingLamp();
+      if (object === "blinds") pullBlind();
     },
-    [knockOver, cycleVision, prodDuck, swingLamp],
+    [knockOver, cycleVision, prodDuck, pullBlind],
   );
 
   return (
@@ -604,7 +605,7 @@ export function Experience() {
           onReady={markSceneReady}
           spilled={spilled}
           prodded={prodded}
-          lampAim={lampAim}
+          blindsDown={blindsDown}
           vision={vision}
           focused={focused}
           flat={flat}

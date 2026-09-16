@@ -19,7 +19,7 @@ export function RoomCanvas({
   spilled,
   vision,
   prodded,
-  lampAim,
+  blindsDown,
   focused,
   className,
 }: {
@@ -31,7 +31,7 @@ export function RoomCanvas({
   spilled: boolean;
   vision: ColourVision;
   prodded: boolean;
-  lampAim: number;
+  blindsDown: number;
   focused: Hotspot | null;
   className?: string;
 }) {
@@ -43,6 +43,16 @@ export function RoomCanvas({
    * the world origin, which is the floor in front of the desk. The bar light
    * has to point at the keyboard, so it gets a real target to aim at.
    */
+  /**
+   * The blind over the window, in the light rig.
+   *
+   * It takes most of the daylight out and leaves a little, because a closed
+   * venetian blind is not a wall: the slats are tilted and some of the light
+   * gets past them. The ambient comes down with it, so the room reads as
+   * shaded rather than as the same room with one lamp switched off.
+   */
+  const shade = 1 - blindsDown * 0.84;
+
   const barTarget = useMemo(() => {
     const object = new Object3D();
     object.position.set(...LIGHTS.bar.target);
@@ -79,7 +89,7 @@ export function RoomCanvas({
 
         <ambientLight
           color={LIGHTS.ambient.color}
-          intensity={LIGHTS.ambient.intensity}
+          intensity={LIGHTS.ambient.intensity * (1 - blindsDown * 0.2)}
         />
 
         {/* Key: overhead front-left, the light that makes the desk readable. */}
@@ -111,7 +121,7 @@ export function RoomCanvas({
         {/* Daylight through the window on the right wall. */}
         <pointLight
           color={LIGHTS.window.color}
-          intensity={LIGHTS.window.intensity}
+          intensity={LIGHTS.window.intensity * shade}
           position={LIGHTS.window.position}
           distance={LIGHTS.window.distance}
           decay={2}
@@ -148,7 +158,7 @@ export function RoomCanvas({
         {/* Warm rim from the front right. */}
         <directionalLight
           color={LIGHTS.rim.color}
-          intensity={LIGHTS.rim.intensity * ROOM.rim}
+          intensity={LIGHTS.rim.intensity * ROOM.rim * (1 - blindsDown * 0.45)}
           position={LIGHTS.rim.position}
         />
 
@@ -159,7 +169,7 @@ export function RoomCanvas({
           spilled={spilled}
           vision={vision}
           prodded={prodded}
-          lampAim={lampAim}
+          blindsDown={blindsDown}
           focused={focused}
         />
 

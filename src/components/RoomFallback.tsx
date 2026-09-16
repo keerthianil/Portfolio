@@ -8,7 +8,7 @@ import {
   CalendarDays,
   DoorOpen,
   Bird,
-  Lamp,
+  Blinds,
 } from "lucide-react";
 import { ROUTES, SCENE_PROPS, type RouteId } from "@/data/routes";
 
@@ -20,7 +20,7 @@ const GLYPH: Record<string, typeof Monitor> = {
   mug: Coffee,
   lightSwitch: DoorOpen,
   duck: Bird,
-  lamp: Lamp,
+  blinds: Blinds,
 };
 
 /** What each of the three things on the walls is called in this view. */
@@ -28,7 +28,7 @@ const PROP_TITLE: Record<string, string> = {
   mug: "Coffee",
   lightSwitch: "Colour vision",
   duck: "Rubber duck",
-  lamp: "Desk lamp",
+  blinds: "The blind",
 };
 
 const BLURB: Record<RouteId, string> = {

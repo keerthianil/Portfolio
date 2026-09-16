@@ -3,6 +3,7 @@
 import { createPortal } from "react-dom";
 import { CONTACT } from "@/data/projects";
 import { TIMELINE } from "@/data/timeline";
+import { ResumeLink } from "../ResumeLink";
 import { WindowFrame } from "./WindowFrame";
 
 /**
@@ -114,16 +115,14 @@ export function Timeline({
           })}
         </ol>
 
+        {CONTACT.resume && (
         <p className="border-border border-t pt-6 text-[15px]">
-          <a
-            href={CONTACT.resume}
-            download
-            className="text-highlight hover:text-text transition-colors duration-200"
-          >
-            Download the resume
-          </a>
+          <ResumeLink className="text-highlight hover:text-text transition-colors duration-200">
+            Read the resume
+          </ResumeLink>
           <span className="text-text-muted"> for the full version.</span>
         </p>
+        )}
       </div>
     </WindowFrame>
   );

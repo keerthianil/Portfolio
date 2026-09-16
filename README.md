@@ -32,8 +32,8 @@ npx tsc --noEmit && npx eslint src --max-warnings 0 && npm run build
 Next.js App Router, TypeScript, Tailwind. The room is `three` through
 `@react-three/fiber`, built by hand rather than exported from a modelling tool,
 and every texture in it is drawn into a 2D canvas at runtime: the wood grain,
-the crema on the coffee, the screensaver on the monitor, the frost of rain on
-the window.
+the crema on the coffee, the screensaver on the monitor, the pages of the
+calendar.
 
 ```
 src/app/         the single page, the fonts, the palette tokens
@@ -73,12 +73,14 @@ The subject of the site, so it is tested rather than claimed.
 `docs/DESIGN.md` has the palette ratios and the reasoning. `docs/MOTION-SPEC.md`
 has the timings.
 
-## Three things in the room that are not sections
+## Four things in the room that are not sections
 
 The mug goes over when you knock it, and rights itself. The switch by the door
 runs the whole room through the three dichromacies, which is the argument
 against letting colour carry meaning on its own and it lands faster than a
-paragraph about it would. The window rains, which is not an argument about
+paragraph about it would. The blind over the window comes down on a cord and
+takes the daylight with it, because glare is an access need and not a
+preference. And there is a rubber duck, which is not an argument about
 anything.
 
 ## Contents

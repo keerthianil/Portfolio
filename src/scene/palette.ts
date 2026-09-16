@@ -58,11 +58,6 @@ export const SCENE = {
   duck: new Color("#e9bc42"),
   duckBeak: new Color("#d9762c"),
 
-  /** The desk lamp: a dark painted shell, warm inside, steel at the joints. */
-  lampMetal: new Color("#2e2b2a"),
-  lampJoint: new Color("#6e6a66"),
-  lampShade: new Color("#3f3936"),
-  lampGlow: new Color("#ffe3b4"),
   note: new Color("#e8d77c"),
 
   mug: new Color("#2b2d33"),
@@ -84,15 +79,16 @@ export const SCENE = {
   doorFrame: new Color("#3b2a1b"),
 
   /**
-   * The window on the right wall. The frame was `#cfc7b6`, which against a
-   * maroon wall made it the brightest object in the room and the first thing
-   * the eye went to on a wall that has nothing on it. It is a warm off white
-   * now, the colour painted softwood actually is in a warm room.
+   * The window on the right wall has no colours of its own. It is the door's
+   * timber, `door` for the members and `doorFrame` for the reveal, because
+   * there is one joiner in this room, and a window painted its own colour was
+   * the brightest object on a wall that has nothing else on it.
    */
-  windowFrame: new Color("#5d4630"),
-  /** The sides of the hole the window sits in, which are in its own shadow. */
-  windowReveal: new Color("#463322"),
   glass: new Color("#93aabd"),
+
+  /** The blind over that window, and the cord that works it. */
+  blind: new Color("#cfc3ad"),
+  blindCord: new Color("#8b8272"),
 
   leaf: new Color("#2f6f41"),
   leafDark: new Color("#1f4c2d"),
@@ -195,18 +191,6 @@ export const LIGHTS = {
   ambient: { color: "#6a5449", intensity: 1.34 },
 } as const;
 
-/**
- * The desk lamp, which is the one light in the room attached to a thing you
- * can see and move. It lives with the geometry rather than in the rig above,
- * because it is parented to the lamp's own head and swings with it.
- */
-export const LAMP = {
-  color: "#ffddab",
-  intensity: 3.6,
-  angle: 0.62,
-  penumbra: 0.75,
-  distance: 2.2,
-} as const;
 
 
 /**
