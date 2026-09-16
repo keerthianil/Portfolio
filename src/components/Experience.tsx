@@ -507,10 +507,11 @@ export function Experience() {
     if (prodded) return;
     setProdded(true);
     squeak();
-    setNote({
-      title: "Rubber duck",
-      body: "The one on a developer's desk is there to have the bug explained to it out loud, which works, and that is the part nobody can account for.",
-    });
+    // No card. The other things in this room put two lines up because they
+    // are making a point and the point needs saying. This one squeaks, and a
+    // caption explaining the joke is the surest way to kill it. The live
+    // region still gets a line, because the squeak is the whole feedback and
+    // somebody may not be able to hear it.
     setAnnouncement("The duck squeaks and rocks.");
     settleTimer.current = window.setTimeout(() => setProdded(false), 1500);
   }, [prodded]);
@@ -531,17 +532,11 @@ export function Experience() {
   const pullBlind = useCallback(() => {
     setBlindsDown((value) => {
       const next = value === 0 ? 1 : 0;
-      setNote(
-        next === 1
-          ? {
-              title: "Blind down",
-              body: "Glare is an access need, not a preference. Plenty of people read everything you make with the lights off, and this is the control they have.",
-            }
-          : {
-              title: "Blind up",
-              body: "Daylight back. This is the room I designed the site in, which is the reason it is not the only one I checked it in.",
-            },
-      );
+      // No card. A blind coming down and a room going dark with it is the
+      // whole of the point, and a caption underneath explaining that glare is
+      // an access need is the site telling you what you just watched it do.
+      // The live region still gets a line, because somebody who cannot see
+      // the room go dark is owed the same information.
       setAnnouncement(
         next === 1
           ? "The blind is down. The daylight in the room has dropped."

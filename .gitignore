@@ -48,5 +48,3 @@ docs/*.jpeg
 docs/*.jpg
 docs/*.png
 
-# Personal document. Hosted outside this repo, linked from CONTACT.resume.
-public/KeerthiAnilResume.pdf
