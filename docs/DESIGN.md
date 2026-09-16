@@ -49,34 +49,43 @@ in the room. The door is a leaf with two stiles and three rails standing proud
 of it, and the panels are the leaf showing through between them.
 
 Four things you can touch. The mug goes over and rights itself. The switch by
-the door runs the simulation. The lamp swings its arm across the desk and the
-light goes with it. The rubber duck between the laptop and the calendar tips
-over, rocks, and squeaks.
+the door runs the colour vision simulation. The rubber duck between the laptop
+and the calendar tips over, rocks, and squeaks. And the blind over the window
+comes down on a cord and takes the daylight with it.
 
-The duck is not making a point. Everything else you can touch here is an
-argument and one of them is allowed to just be nice, and a portfolio that
-cannot afford one of those is making a claim about its author that it does not
-intend to make. It is also the one saturated thing in this room that is not
-maroon, which is a rule broken on purpose: a duck that is not yellow is not a
-duck. The yellow is pulled toward the sticky note rather than toward a bath
-toy, so it sits in the room's own family of warm yellows.
+The duck is not making a point, and it is the only one of them that does not.
+Everything else you can touch here is an argument and one of them is allowed to
+just be nice, and a portfolio that cannot afford one of those is making a claim
+about its author that it does not intend to make. It is also the only saturated
+thing in this room that is not maroon, which is a rule broken on purpose,
+because a duck that is not yellow is not a duck. The yellow is pulled toward
+the sticky note rather than toward a bath toy so it sits in the room's own
+family of warm yellows.
 
 Its squeak is synthesised in the browser with two oscillators rather than
 loaded as a file. A rubber duck makes two noises and not one, the squeeze
 rising and the release falling, and a fifth of a second of that is an envelope
-and two pitch bends. It does not need to be an asset.
+and two pitch bends. It does not need to be an asset. The duck is also the one
+of the four that puts no card up: the other three are saying something and this
+one squeaks and falls over, which says itself.
 
-There was no lamp for a long time and there was still a light on the desk: it
-came from a bar clipped to the top of the monitor, which is a real object and
-is also not a lamp, so the brightest thing on the desk came from something
-nobody could see. The lamp's arm is laid out by where its joints are rather
-than as a chain of nested rotations, because nested rotations compound and the
-first version summed to about ninety degrees and shone at the viewer. Its
-spot light is a child of the head, so nothing in the code moves the light: the
-arm turns and the light is bolted to it.
+The blind is the one thing on that wall that is about something. Glare and
+light sensitivity are access needs rather than preferences, they are the
+reason a lot of people read everything you make with the lights off, and the
+fix for them is the oldest piece of hardware in the room. Pulling the cord
+lowers eighteen slats and drops the daylight, the ambient and the rim with
+them, and the slats stack under the headrail rather than sliding away, because
+that is what a venetian blind does.
 
-Each of the four puts a two line card up for six seconds. None of them is
-undoable, which is the only reason a portfolio is allowed to have any of them.
+A desk lamp stood on this desk for one revision and came off it again. It was
+there because the light on the desk used to come from a bar clipped to the top
+of the monitor, which is a real object and is also not a lamp, so the brightest
+thing on the desk came from something nobody could see. It turned out to be one
+object too many on a desk that already has a monitor, a laptop, a notebook, a
+calendar, a mug and a duck on it.
+
+None of the four is undoable, which is the only reason a portfolio is allowed
+to have any of them.
 
 The photograph in the window has its saturation pushed and its emissive pulled
 down. An emissive map is what makes a window read as a source of light instead

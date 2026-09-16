@@ -13,6 +13,7 @@ import {
 } from "@/data/about";
 import { CONTACT } from "@/data/projects";
 import { useSubRoute } from "@/lib/useSubRoute";
+import { ResumeLink } from "../ResumeLink";
 import { Timeline } from "./Timeline";
 import { WindowFrame } from "./WindowFrame";
 
@@ -174,11 +175,13 @@ export function AboutOverlay({ onClose }: { onClose: () => void }) {
         );
 
         if (icon.id === "resume") {
+          // Renders nothing while there is no resume to link to, which takes
+          // the icon off the desktop rather than leaving one that 404s.
           return (
-            <a key={icon.id} href={CONTACT.resume} download className={shared}>
+            <ResumeLink key={icon.id} className={shared}>
               {glyph}
               {label}
-            </a>
+            </ResumeLink>
           );
         }
         if (icon.id === "taxes") {
@@ -327,14 +330,10 @@ export function AboutOverlay({ onClose }: { onClose: () => void }) {
             </div>
 
             <div className="border-border flex flex-wrap gap-x-5 gap-y-2 border-t pt-5">
-              <a
-                href={CONTACT.resume}
-                download
-                className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 transition-colors duration-200"
-              >
+              <ResumeLink className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 transition-colors duration-200">
                 <Download size={14} aria-hidden="true" />
-                View resume
-              </a>
+                Read resume
+              </ResumeLink>
               {/*
                 The same timeline the folder on the desktop opens. The folder
                 is in a column that is hidden below 1024px, which left the

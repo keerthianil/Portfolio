@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { RoundedBox } from "@react-three/drei";
-import { Box3, BufferGeometry, Float32BufferAttribute, Object3D, Vector3 } from "three";
+import { Box3, BufferGeometry, Float32BufferAttribute, Vector3 } from "three";
 import type { Group, Mesh, MeshStandardMaterial } from "three";
-import { LAMP, SCENE, simulate, type ColourVision } from "./palette";
+import { SCENE, simulate, type ColourVision } from "./palette";
 import {
   SLIDES,
   makeCalendarTexture,
@@ -106,7 +106,7 @@ export type Hotspot =
   | "calendar"
   | "lightSwitch"
   | "duck"
-  | "lamp";
+  | "blinds";
 
 interface RoomProps {
   onSelect: (hotspot: Hotspot) => void;
@@ -118,8 +118,8 @@ interface RoomProps {
   spilled: boolean;
   /** True from the moment the duck is prodded until it stops rocking. */
   prodded: boolean;
-  /** Which way the desk lamp is pointed: 0 at the keyboard, 1 at the notebook. */
-  lampAim: number;
+  /** How far the blind is down over the window: 0 is up, 1 is closed. */
+  blindsDown: number;
   /** Which colour vision the wall switch by the door is currently simulating. */
   vision: ColourVision;
   /** Which object's mirror button currently has focus, if any. */
@@ -234,7 +234,7 @@ export function Room({
   idleMotion,
   spilled,
   prodded,
-  lampAim,
+  blindsDown,
   vision,
   focused,
 }: RoomProps) {
@@ -269,7 +269,7 @@ export function Room({
     // nothing.
     lightSwitch: { at: [-2.262, 1.14, -0.2], r: 0.13, turn: [0, Math.PI / 2, 0] },
     duck: { at: [-0.66, 0.774, -0.52], r: 0.1 },
-    lamp: { at: [-1.06, 0.79, -0.8], r: 0.16 },
+    blinds: { at: [2.2, 1.52, -0.35], r: 0.62, turn: [0, -Math.PI / 2, 0] },
   };
   const focusRing = focused ? RINGS[focused] : undefined;
 
@@ -288,16 +288,10 @@ export function Room({
   const stream = useRef<Group>(null);
   const pen = useRef<Group>(null);
   const duck = useRef<Group>(null);
-  const lampArm = useRef<Group>(null);
-  /**
-   * What the lamp's spot light aims at. A plain object a metre down the beam,
-   * parented to the head, so three has something in the scene graph to point
-   * the cone at and it follows the arm for free.
-   */
-  const lampTarget = useMemo(() => new Object3D(), []);
-  /** How far through the duck's rock we are, and where the lamp is pointed. */
+  const blind = useRef<Group>(null);
+  /** How far through the duck's rock we are, and how far the blind is down. */
   const rock = useRef(0);
-  const aim = useRef(0);
+  const drop = useRef(0);
   /** 0 is upright and full, 1 is over and empty. */
   const progress = useRef(0);
   const screen = useMemo(() => makeScreenTexture(), []);
@@ -395,6 +389,32 @@ export function Room({
   });
 
   /**
+   * The slats of the blind, spaced once.
+   *
+   * There are eighteen of them, hung from the headrail. Lowering the blind is
+   * the group's Y scale going to 1 and raising it is that scale going to
+   * almost nothing, with the group's origin at the headrail, so the slats
+   * compress into a stack under it. That is what a venetian blind does: it
+   * does not slide away anywhere, it piles up at the top.
+   */
+  const slats = useMemo(
+    () => Array.from({ length: 18 }, (_, i) => -0.028 - i * 0.0585),
+    [],
+  );
+
+  /**
+   * The blind coming down, and going back up.
+   */
+  useFrame((_, delta) => {
+    const group = blind.current;
+    if (!group) return;
+    drop.current += (blindsDown - drop.current) * Math.min(1, delta * (idleMotion ? 4.2 : 14));
+    // Never exactly zero: a group scaled to nothing has no normals worth
+    // computing and the slats flicker on the way back up.
+    group.scale.y = 0.035 + drop.current * 0.965;
+  });
+
+  /**
    * The duck, rocking.
    *
    * It is a rubber duck on a hard desk, so it does not swing like a pendulum
@@ -427,24 +447,6 @@ export function Room({
     model.rotation.z = swing * 0.12;
     model.rotation.y = -0.42;
     model.position.y = 0.771 + Math.abs(swing) * 0.006;
-  });
-
-  /**
-   * The lamp's arm, swinging between the keyboard and the notebook.
-   *
-   * The light is a child of the head, so there is nothing here that moves the
-   * light: the arm turns and the light is attached to it. A separate light
-   * position lerped alongside the geometry is two things that have to agree
-   * about where the lamp is pointing, and sooner or later they do not.
-   */
-  useFrame((_, delta) => {
-    const arm = lampArm.current;
-    if (!arm) return;
-    aim.current += (lampAim - aim.current) * Math.min(1, delta * (idleMotion ? 3.4 : 12));
-    // 0.65 puts the head over the desk beside the keyboard, 1.55 swings it
-    // across to the notebook. Both keep the arm inside the frame the room
-    // opens on, which is the whole reason the lamp is on this corner.
-    arm.rotation.y = 0.65 + aim.current * 0.9;
   });
 
   /**
@@ -840,7 +842,7 @@ export function Room({
         ].map(({ at, size }) => (
           <mesh key={`${at[0]}-${at[1]}`} position={at as [number, number, number]}>
             <boxGeometry args={size as [number, number, number]} />
-            <meshStandardMaterial color={C.windowReveal} roughness={0.92} />
+            <meshStandardMaterial color={C.doorFrame} roughness={0.92} />
           </mesh>
         ))}
 
@@ -880,7 +882,7 @@ export function Room({
         ].map(({ at, size }) => (
           <mesh key={`sash-${at[0]}-${at[1]}`} position={at as [number, number, number]}>
             <boxGeometry args={size as [number, number, number]} />
-            <meshStandardMaterial color={C.windowFrame} roughness={0.78} />
+            <meshStandardMaterial color={C.door} roughness={0.78} />
           </mesh>
         ))}
 
@@ -888,11 +890,11 @@ export function Room({
             too many for an opening this size and read as a grid. */}
         <mesh position={[0, 1.52, 0.03]}>
           <boxGeometry args={[0.032, 1.08, 0.036]} />
-          <meshStandardMaterial color={C.windowFrame} roughness={0.78} />
+          <meshStandardMaterial color={C.door} roughness={0.78} />
         </mesh>
         <mesh position={[0, 1.52, 0.03]}>
           <boxGeometry args={[1.02, 0.032, 0.036]} />
-          <meshStandardMaterial color={C.windowFrame} roughness={0.78} />
+          <meshStandardMaterial color={C.door} roughness={0.78} />
         </mesh>
 
         {/* The casing around the outside, standing proud of the wall. */}
@@ -903,19 +905,73 @@ export function Room({
         ].map(({ at, size }) => (
           <mesh key={`case-${at[0]}-${at[1]}`} position={at as [number, number, number]}>
             <boxGeometry args={size as [number, number, number]} />
-            <meshStandardMaterial color={C.windowFrame} roughness={0.8} />
+            <meshStandardMaterial color={C.door} roughness={0.8} />
           </mesh>
         ))}
 
         {/* Sill, and the apron under it. */}
         <mesh position={[0, 0.9, 0.06]}>
           <boxGeometry args={[1.33, 0.05, 0.15]} />
-          <meshStandardMaterial color={C.windowFrame} roughness={0.72} />
+          <meshStandardMaterial color={C.door} roughness={0.72} />
         </mesh>
         <mesh position={[0, 0.845, 0.04]}>
           <boxGeometry args={[1.18, 0.07, 0.02]} />
-          <meshStandardMaterial color={C.windowFrame} roughness={0.85} />
+          <meshStandardMaterial color={C.door} roughness={0.85} />
         </mesh>
+
+        {/*
+          The blind, and the cord that works it.
+
+          Pull the cord and it comes down over the glass and the daylight in
+          the room goes with it. This is the one thing on this wall that is
+          about something: glare and light sensitivity are access needs, and
+          the fix for them is the oldest piece of hardware in the room.
+
+          The headrail and the cord are outside the part that scales, because
+          a headrail that squashes is not a headrail.
+        */}
+        <Hot
+          name="blinds"
+          hoverLift={hoverLift}
+          onSelect={() => onSelect("blinds")}
+        >
+          {/* Headrail, across the top of the opening. */}
+          <mesh position={[0, 2.07, 0.072]}>
+            <boxGeometry args={[1.1, 0.055, 0.05]} />
+            <meshStandardMaterial color={C.blind} roughness={0.72} />
+          </mesh>
+
+          {/* The slats, hanging off it. */}
+          <group ref={blind} position={[0, 2.045, 0.072]}>
+            {slats.map((y) => (
+              <mesh key={y} position={[0, y, 0]} rotation={[0.28, 0, 0]}>
+                <boxGeometry args={[1.06, 0.052, 0.006]} />
+                <meshStandardMaterial
+                  color={C.blind}
+                  emissive={C.blind}
+                  {...lift(0.04, 0.5)}
+                  roughness={0.78}
+                  side={2}
+                />
+              </mesh>
+            ))}
+          </group>
+
+          {/* The cord down the right hand side, with a pull on the end. */}
+          <mesh position={[0.5, 1.83, 0.078]}>
+            <cylinderGeometry args={[0.0035, 0.0035, 0.42, 6]} />
+            <meshStandardMaterial color={C.blindCord} roughness={0.9} />
+          </mesh>
+          <mesh position={[0.5, 1.6, 0.078]}>
+            <cylinderGeometry args={[0.014, 0.011, 0.05, 10]} />
+            <meshStandardMaterial
+              color={C.blindCord}
+              emissive={C.blindCord}
+              {...lift(0.05, 0.9)}
+              roughness={0.7}
+            />
+          </mesh>
+        </Hot>
       </group>
 
       {/*
@@ -1497,134 +1553,6 @@ export function Room({
               <meshStandardMaterial color={"#17120c"} roughness={0.3} />
             </mesh>
           ))}
-        </group>
-      </Hot>
-
-      {/*
-        The desk lamp.
-
-        There was no lamp. There was a bar light clipped to the top of the
-        monitor, which is a real thing and is also not a lamp, so the light
-        on the desk came from an object nobody could see. This one is where
-        you would put it: back left corner of the desk, arm out over it. It
-        started further left than that and was outside the frame the room
-        opens on, which is a strange place to put the object somebody just
-        said they could not see.
-
-        Click it and the arm swings from the keyboard across to the notebook.
-        The light is a child of the head, so nothing here moves the light. The
-        arm turns and the light is bolted to it.
-      */}
-      <Hot name="lamp" hoverLift={hoverLift} onSelect={() => onSelect("lamp")}>
-        <group position={[-1.06, 0.771, -0.8]}>
-          {/* A weighted base, because the arm is out over the desk. */}
-          <mesh position={[0, 0.012, 0]}>
-            <cylinderGeometry args={[0.082, 0.092, 0.024, 28]} />
-            <meshStandardMaterial
-              color={C.lampMetal}
-              roughness={0.42}
-              metalness={0.6}
-            />
-          </mesh>
-          <mesh position={[0, 0.03, 0]}>
-            <cylinderGeometry args={[0.03, 0.034, 0.014, 20]} />
-            <meshStandardMaterial
-              color={C.lampMetal}
-              roughness={0.4}
-              metalness={0.6}
-            />
-          </mesh>
-
-          {/*
-            Everything above the base turns together.
-
-            The arm is laid out by where its joints are rather than as a chain
-            of nested rotations. Nested rotations compound: the first version
-            had the lower arm, the upper arm and the head each tilted relative
-            to its parent, the three of them summed to about ninety degrees,
-            and the lamp ended up shining at the viewer. Stating the elbow and
-            the head as positions and deriving the angle to reach them means
-            the beam points where the numbers say and nothing accumulates.
-          */}
-          <group ref={lampArm} position={[0, 0.037, 0]} rotation={[0, 0.65, 0]}>
-            {/* Lower arm: base to the elbow at (0, 0.413, 0.08). */}
-            <mesh position={[0, 0.207, 0.04]} rotation={[-0.19, 0, 0]}>
-              <cylinderGeometry args={[0.011, 0.014, 0.414, 14]} />
-              <meshStandardMaterial
-                color={C.lampMetal}
-                roughness={0.38}
-                metalness={0.65}
-              />
-            </mesh>
-
-            {/* The elbow. */}
-            <mesh position={[0, 0.413, 0.08]}>
-              <sphereGeometry args={[0.021, 14, 12]} />
-              <meshStandardMaterial
-                color={C.lampJoint}
-                roughness={0.34}
-                metalness={0.72}
-              />
-            </mesh>
-
-            {/* Upper arm: elbow to the head at (0, 0.5, 0.4), out over the
-                desk. */}
-            <mesh position={[0, 0.457, 0.24]} rotation={[-1.305, 0, 0]}>
-              <cylinderGeometry args={[0.0095, 0.011, 0.332, 14]} />
-              <meshStandardMaterial
-                color={C.lampMetal}
-                roughness={0.38}
-                metalness={0.65}
-              />
-            </mesh>
-
-            {/* The head. Its own pitch, not the sum of the arm's. */}
-            <group position={[0, 0.5, 0.4]} rotation={[-0.35, 0, 0]}>
-              <mesh>
-                <sphereGeometry args={[0.019, 12, 10]} />
-                <meshStandardMaterial
-                  color={C.lampJoint}
-                  roughness={0.34}
-                  metalness={0.72}
-                />
-              </mesh>
-              {/* The shade: narrow where it meets the arm, wide at the mouth.
-                  It was the other way up, which is a plant pot. */}
-              <mesh position={[0, -0.052, 0]}>
-                <cylinderGeometry args={[0.034, 0.08, 0.09, 24, 1, true]} />
-                <meshStandardMaterial
-                  color={C.lampShade}
-                  roughness={0.5}
-                  metalness={0.25}
-                  side={2}
-                />
-              </mesh>
-              {/* The bulb, which is the part that reads as switched on. */}
-              <mesh position={[0, -0.094, 0]} rotation={[Math.PI / 2, 0, 0]}>
-                <circleGeometry args={[0.074, 24]} />
-                <meshStandardMaterial
-                  color={C.lampGlow}
-                  emissive={C.lampGlow}
-                  {...lift(1.6, 0.5)}
-                  roughness={1}
-                />
-              </mesh>
-              {/* The light, and the point it aims at, both children of the
-                  head so they swing with it and there is nothing to keep in
-                  step. */}
-              <primitive object={lampTarget} position={[0, -1, 0]} />
-              <spotLight
-                position={[0, -0.09, 0]}
-                target={lampTarget}
-                color={LAMP.color}
-                intensity={LAMP.intensity}
-                angle={LAMP.angle}
-                penumbra={LAMP.penumbra}
-                distance={LAMP.distance}
-                decay={2}
-              />
-            </group>
-          </group>
         </group>
       </Hot>
 

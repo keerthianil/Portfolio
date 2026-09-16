@@ -220,9 +220,28 @@ export const PROJECTS: Project[] = [
   },
 ];
 
-export const CONTACT = {
+/**
+ * `resume` is deliberately empty, and it is deliberately a `string` rather
+ * than a literal.
+ *
+ * The resume is not in this repository. It is a personal document, the
+ * repository is public, and anything committed to a public repository is
+ * public for as long as the repository exists whether or not it is still in
+ * the latest commit. So it lives somewhere else and this holds the link.
+ *
+ * Paste a share link here and the three places that link to it come back: the
+ * About footer, the Resume icon on the laptop's desktop, and the line under
+ * the timeline. Leave it empty and all three stay away rather than pointing
+ * at a file that is not there. See `src/components/ResumeLink.tsx`.
+ */
+export const CONTACT: {
+  email: string;
+  github: string;
+  linkedin: string;
+  resume: string;
+} = {
   email: "keerthiareddy6@gmail.com",
   github: "https://github.com/keerthianil",
   linkedin: "https://linkedin.com/in/keerthiareddy",
-  resume: "/KeerthiAnilResume.pdf",
-} as const;
+  resume: "",
+};

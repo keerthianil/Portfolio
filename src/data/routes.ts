@@ -116,8 +116,8 @@ export const SCENE_PROPS: SceneProp[] = [
     action: "Prod",
   },
   {
-    object: "lamp",
-    label: "the desk lamp",
-    action: "Swing",
+    object: "blinds",
+    label: "the cord on the window blind",
+    action: "Pull",
   },
 ];
