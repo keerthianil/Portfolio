@@ -27,8 +27,8 @@
   --color-highlight: #d4a0a0;
   --color-accent: #8b2332;
 
-  --font-display: var(--font-fraunces), Georgia, serif;
-  --font-sans: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-newsreader), Georgia, serif;
+  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
   --font-hand: var(--font-patrick-hand), cursive;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 

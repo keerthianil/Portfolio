@@ -22,17 +22,53 @@ Two rules fall out of those numbers:
 
 The Research overlay inverts to e-ink: `#F2EAE1` paper, `#0C0A09` ink.
 
+If those ratios are ever recomputed, linearise all three channels first. A
+version of the contrast maths shipped with the blue channel left in gamma space
+and every ratio came out inflated: 24.29 where the real number is 16.59.
+
+## The room
+
+Warm oak, a panel of maroon battens standing proud of more oak, and one
+saturated hue. Maroon is on the battens, the felt behind them, the home row of
+the keyboard and the band on the pen, and nowhere else. Everything not maroon is
+wood, paper, or a grey that leans warm.
+
+A door on the left wall and a window on the right, because a room with three
+blank walls is a set. Both do something. Beside the door is a switch that runs
+the room through the three dichromacies, which is the argument against letting
+colour carry meaning on its own and it lands faster than a paragraph about it
+would. The window is where the daylight comes from, and clicking it takes the
+daylight away: the sun finishes going down, the stars come out in the
+photograph, and the room drops to the desk lamp and the monitor. Nothing you
+made gets looked at in one light.
+
+Three things on the walls, and the third is the mug. Each is one click and puts
+a two line card up for six seconds. None of them is undoable, which is the only
+reason a portfolio is allowed to have any of them.
+
+The monitor is a screensaver: one project, held 3.4s, then changed over 0.7s.
+The canvas behind it is only repainted while that change is in flight and only
+at 24fps, because each repaint is a texture upload and nothing on a held slide
+is moving. The two slides do not cross dissolve. Both titles sit at the same
+point on the panel, so a cross dissolve printed two project names over each
+other for a third of a second and neither was readable. The outgoing slide
+leaves before the incoming one arrives.
+
 ## Type
 
 | Role | Family | Why |
 |---|---|---|
-| Display | Fraunces | Warm high contrast serif. Already ships in Threadline |
-| Body and UI | Schibsted Grotesk | Also ships in Threadline |
+| Display | Newsreader | Drawn for reading at length on a screen |
+| Body and UI | Public Sans | The US design system's face, drawn for services people have no choice about using |
 | Handwriting | Patrick Hand | Sticky notes and labels |
 | Mono | JetBrains Mono | Terminal, hex values, WCAG IDs |
 
-Using the same families the apps use means the site's type system is the one the
-work uses, rather than a separate set chosen to look nice.
+Public Sans is an argument rather than a decoration on a site about
+accessibility: it was drawn to be legible to everyone required to read it.
+
+The font variables go on `<html>`, not `<body>`. The `@theme` tokens that point
+at them are emitted at `:root`, so a variable defined further down the tree
+resolves to nothing and every family silently falls back to the system stack.
 
 ## Motion
 
@@ -46,6 +82,13 @@ This is the subject of the site, so it is tested rather than claimed.
 
 - Every object in the 3D room is also a real focusable button. The canvas is an
   enhancement and never the only route to anything.
+- Focus lands on an object, so the scene draws a ring on it. The mirror buttons
+  are pills at the top of the screen and the things they open are across the
+  room, so without the ring nothing connects the two. It is on whenever the room
+  is, which is the only setting a focus indicator has ever been allowed to have.
+- A panel that opens inside a panel is a second level of the hash, and opening
+  one pushes a history entry rather than replacing it. Back closes it. On a
+  phone that gesture is how most people close most things.
 - `prefers-reduced-motion` degrades every animated surface, and zeroes delays as
   well as durations. A `both` filled animation with a 0.4s delay holds its
   element invisible even when the duration is zeroed.

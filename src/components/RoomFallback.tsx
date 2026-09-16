@@ -1,6 +1,14 @@
 "use client";
 
-import { Coffee, Laptop, Monitor, BookOpen, CalendarDays, PanelsTopLeft } from "lucide-react";
+import {
+  Coffee,
+  Laptop,
+  Monitor,
+  BookOpen,
+  CalendarDays,
+  DoorOpen,
+  SunMedium,
+} from "lucide-react";
 import { ROUTES, SCENE_PROPS, type RouteId } from "@/data/routes";
 
 const GLYPH: Record<string, typeof Monitor> = {
@@ -8,17 +16,23 @@ const GLYPH: Record<string, typeof Monitor> = {
   laptop: Laptop,
   reader: BookOpen,
   calendar: CalendarDays,
-  posterLeft: PanelsTopLeft,
-  frameRight: PanelsTopLeft,
+  mug: Coffee,
+  lightSwitch: DoorOpen,
+  window: SunMedium,
+};
+
+/** What each of the three things on the walls is called in this view. */
+const PROP_TITLE: Record<string, string> = {
+  mug: "Coffee",
+  lightSwitch: "Colour vision",
+  window: "Evening",
 };
 
 const BLURB: Record<RouteId, string> = {
-  work: "Four projects, with the case studies",
+  work: "Nine projects, five of them with a case study",
   about: "Who I am and what I have shipped",
   research: "Studies, reviews and instruments",
   timeline: "Where I have worked and studied",
-  taborder: "A small thing about focus order",
-  beforeafter: "One screen, failing and fixed",
 };
 
 /**
@@ -92,7 +106,9 @@ export function RoomFallback({
             );
           })}
 
-          {SCENE_PROPS.map((prop) => (
+          {SCENE_PROPS.map((prop) => {
+            const Glyph = GLYPH[prop.object] ?? Coffee;
+            return (
             <li key={prop.object} className="flex">
               <button
                 type="button"
@@ -103,17 +119,20 @@ export function RoomFallback({
                   className="text-highlight mt-0.5 shrink-0"
                   aria-hidden="true"
                 >
-                  <Coffee size={20} />
+                  <Glyph size={20} />
                 </span>
                 <span className="flex flex-col gap-1">
-                  <span className="font-display text-lg">Coffee</span>
+                  <span className="font-display text-lg capitalize">
+                    {PROP_TITLE[prop.object] ?? prop.label}
+                  </span>
                   <span className="text-text-muted text-[13px] leading-snug">
-                    Take a sip
+                    {prop.action} {prop.label}
                   </span>
                 </span>
               </button>
             </li>
-          ))}
+            );
+          })}
         </ul>
 
         <p className="text-text-muted max-w-prose text-[13px] leading-relaxed">

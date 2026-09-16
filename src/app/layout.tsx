@@ -1,21 +1,30 @@
 import type { Metadata, Viewport } from "next";
 import {
-  Fraunces,
-  Schibsted_Grotesk,
+  Newsreader,
+  Public_Sans,
   Patrick_Hand,
   JetBrains_Mono,
 } from "next/font/google";
 import "./globals.css";
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+/**
+ * Newsreader for display and Public Sans for everything else.
+ *
+ * Public Sans is the typeface the US government's design system ships, drawn
+ * for services that have to be legible to everyone who is required to use
+ * them. On a site about accessibility that is an argument rather than a
+ * decoration. Newsreader was drawn for reading at length on a screen, which is
+ * what the case studies ask of it.
+ */
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
   subsets: ["latin"],
-  axes: ["SOFT", "WONK", "opsz"],
+  axes: ["opsz"],
   display: "swap",
 });
 
-const schibsted = Schibsted_Grotesk({
-  variable: "--font-schibsted",
+const publicSans = Public_Sans({
+  variable: "--font-public-sans",
   subsets: ["latin"],
   display: "swap",
 });
@@ -65,9 +74,16 @@ export default function RootLayout({
     // silently falls back to the system stack.
     <html
       lang="en"
-      className={`${fraunces.variable} ${schibsted.variable} ${patrickHand.variable} ${jetbrainsMono.variable}`}
+      className={`${newsreader.variable} ${publicSans.variable} ${patrickHand.variable} ${jetbrainsMono.variable}`}
+      // Browser extensions write their own attributes onto <html> and <body>
+      // before React hydrates: a grammar checker adds `data-qb-installed`, a
+      // password manager adds its own, and each one is a hydration mismatch
+      // that React reports as an error the visitor did not cause and cannot
+      // fix. This suppresses the attribute comparison on these two elements
+      // only. Everything inside them is still checked.
+      suppressHydrationWarning
     >
-      <body>
+      <body suppressHydrationWarning>
         <a href="#main" className="skip-link">
           Skip to main content
         </a>

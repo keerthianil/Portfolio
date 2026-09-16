@@ -6,10 +6,11 @@ import type { ReactNode } from "react";
 import { useReducedMotion } from "motion/react";
 import type { CameraState, RouteId } from "@/data/routes";
 import type { Hotspot } from "@/scene/Room";
+import type { ColourVision } from "@/scene/palette";
 import { RoomFallback } from "./RoomFallback";
 
 /**
- * The canvas is client-only: the monitor, laptop and e-reader textures are
+ * The canvas is client-only: the monitor, laptop and notebook textures are
  * drawn into a 2D canvas during render, which has no meaning on the server.
  */
 const RoomCanvas = dynamic(
@@ -23,8 +24,6 @@ const HOTSPOT_ROUTES: Partial<Record<Hotspot, RouteId>> = {
   laptop: "about",
   reader: "research",
   calendar: "timeline",
-  posterLeft: "taborder",
-  frameRight: "beforeafter",
 };
 
 /**
@@ -59,7 +58,10 @@ export const SceneStage = memo(function SceneStage({
   onNavigate,
   onProp,
   onReady,
-  sips,
+  spilled,
+  vision,
+  night,
+  focused,
   flat,
 }: {
   camera: CameraState;
@@ -67,7 +69,10 @@ export const SceneStage = memo(function SceneStage({
   onNavigate: (id: RouteId) => void;
   onProp: (object: string) => void;
   onReady: () => void;
-  sips: number;
+  spilled: boolean;
+  vision: ColourVision;
+  night: boolean;
+  focused: Hotspot | null;
   /** Null while the WebGL probe is still pending. */
   flat: boolean | null;
 }) {
@@ -96,7 +101,10 @@ export const SceneStage = memo(function SceneStage({
         onSelect={handleSelect}
         onReady={onReady}
         reduceMotion={!!shouldReduce}
-        sips={sips}
+        spilled={spilled}
+        vision={vision}
+        night={night}
+        focused={focused}
       />
     </SceneBoundary>
   );

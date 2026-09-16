@@ -1,65 +1,63 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, ExternalLink, Wifi, Bluetooth, BatteryMedium } from "lucide-react";
+import { Download, ExternalLink } from "lucide-react";
 import { RESEARCH, type ResearchItem } from "@/data/research";
 import { WindowFrame } from "./WindowFrame";
 
 /**
- * Research, framed as an e-ink reader.
+ * Research, as the notebook it opens from.
  *
  * Paper rather than the site's dark palette, because this is the one place on
  * the site meant for reading at length and the rest of it is not. Contrast
  * holds either way: near black ink on warm cream is the same 16.59:1 as the
  * dark mode pair, inverted.
+ *
+ * It is a sheet, not an application window: torn top edge, a ruled margin down
+ * the left, no title bar and no traffic lights. A notebook that opens a Mac
+ * window is two objects pretending to be one.
  */
 export function ResearchOverlay({ onClose }: { onClose: () => void }) {
   const [open, setOpen] = useState<ResearchItem | null>(null);
 
   return (
-    <WindowFrame title="Research" onClose={onClose} escapeEnabled={!open}>
-      <div className="min-h-full bg-[#f2eae1] text-[#0c0a09]">
-        <DeviceBar />
+    <WindowFrame title="Research" onClose={onClose} escapeEnabled={!open} paper>
+      <div className="relative min-h-full bg-[#f2eae1] text-[#0c0a09]">
+        {/* The ruling, under everything. Faint enough to read across. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(to bottom, transparent 0 31px, rgba(12,10,9,0.06) 31px 32px)",
+          }}
+        />
+        {/* The margin rule a notebook page has, and the punch holes. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-[42px] hidden w-px bg-[#8b2332]/30 sm:block"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-0 bottom-0 left-[14px] hidden w-4 flex-col justify-around py-24 sm:flex"
+        >
+          {[0, 1, 2, 3].map((i) => (
+            <span
+              key={i}
+              className="block h-4 w-4 rounded-full border border-[#0c0a09]/12 bg-[#e5dccf]"
+            />
+          ))}
+        </div>
 
-        {open ? (
-          <Reader item={open} onBack={() => setOpen(null)} />
-        ) : (
-          <Shelf onOpen={setOpen} />
-        )}
+        <div className="relative sm:pl-10">
+          {open ? (
+            <Reader item={open} onBack={() => setOpen(null)} />
+          ) : (
+            <Shelf onOpen={setOpen} />
+          )}
+        </div>
       </div>
     </WindowFrame>
-  );
-}
-
-/** The fake device status row. Decorative, and marked as such. */
-function DeviceBar() {
-  const [time, setTime] = useState("");
-  useEffect(() => {
-    const read = () =>
-      setTime(
-        new Intl.DateTimeFormat("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-        }).format(new Date()),
-      );
-    read();
-    const id = window.setInterval(read, 30000);
-    return () => window.clearInterval(id);
-  }, []);
-
-  return (
-    <div
-      className="flex items-center justify-between border-b border-[#0c0a09]/10 px-5 py-2 font-mono text-[11px] text-[#0c0a09]/55"
-      aria-hidden="true"
-    >
-      <span>{time}</span>
-      <span className="flex items-center gap-2">
-        <Wifi size={12} />
-        <Bluetooth size={12} />
-        <BatteryMedium size={14} />
-        43%
-      </span>
-    </div>
   );
 }
 

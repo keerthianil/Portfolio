@@ -13,14 +13,18 @@ interface BottomNavProps {
   overlayOpen: boolean;
   onNavigate: (id: RouteId) => void;
   onClose: () => void;
-  /** Called every animation frame while an arrow is held. */
+  /** Called every animation frame while an arrow is held down. */
   onRotate: (direction: 1 | -1) => void;
+  /** Called once per press. One press is one stop of the two each way. */
+  onRotateStep: (direction: 1 | -1) => void;
   /** Pulses the arrows once, to teach that the scene rotates. */
   showArrowGlow?: boolean;
   /** Which way the view is fully turned, if either. */
   limit?: "left" | "right" | null;
   /** False in the flat view, where there is nothing to rotate. */
   canRotate?: boolean;
+  /** Set while the welcome card owns the screen. */
+  inert?: boolean;
 }
 
 export function BottomNav({
@@ -29,9 +33,11 @@ export function BottomNav({
   onNavigate,
   onClose,
   onRotate,
+  onRotateStep,
   showArrowGlow = false,
   limit = null,
   canRotate = true,
+  inert = false,
 }: BottomNavProps) {
   const shouldReduce = useReducedMotion();
   const [hovered, setHovered] = useState<RouteId | null>(null);
@@ -39,6 +45,8 @@ export function BottomNav({
 
   const held = useRef(false);
   const direction = useRef<1 | -1>(1);
+  const holdTimer = useRef<number | undefined>(undefined);
+  const lastPointerStep = useRef(0);
 
   useEffect(() => {
     const read = () =>
@@ -48,8 +56,14 @@ export function BottomNav({
     return () => window.removeEventListener("resize", read);
   }, []);
 
-  // Hold to rotate. The button fires once on click for keyboard and tap; this
-  // loop is what makes press-and-drag feel continuous.
+  /**
+   * A press is one stop. Holding past a beat turns the room continuously
+   * instead.
+   *
+   * The continuous turn does not start on pointer down, it starts 260ms later,
+   * because a click is a pointer down and a pointer up and the two would
+   * otherwise both fire: a stop plus however many frames the click took.
+   */
   useEffect(() => {
     let frame = 0;
     const tick = () => {
@@ -60,12 +74,23 @@ export function BottomNav({
     return () => cancelAnimationFrame(frame);
   }, [onRotate]);
 
-  const startHold = useCallback((value: 1 | -1) => {
-    held.current = true;
-    direction.current = value;
-  }, []);
+  useEffect(() => () => window.clearTimeout(holdTimer.current), []);
+
+  const startHold = useCallback(
+    (value: 1 | -1) => {
+      direction.current = value;
+      onRotateStep(value);
+      lastPointerStep.current = Date.now();
+      window.clearTimeout(holdTimer.current);
+      holdTimer.current = window.setTimeout(() => {
+        held.current = true;
+      }, 260);
+    },
+    [onRotateStep],
+  );
   const endHold = useCallback(() => {
     held.current = false;
+    window.clearTimeout(holdTimer.current);
   }, []);
 
   const indicatorIndex = hovered
@@ -91,15 +116,34 @@ export function BottomNav({
       glow ? "text-highlight" : "text-text/70 group-hover:text-highlight",
     ].join(" ");
 
-  function rotateOnce(value: 1 | -1, event: { currentTarget: HTMLElement }) {
-    onRotate(value);
-    event.currentTarget.blur();
+  /**
+   * Enter or Space on a focused arrow fires a click with no pointer down
+   * before it, so this is the keyboard path. A mouse or a tap has already
+   * turned the room on pointer down, and the click that follows would
+   * otherwise turn it a second time.
+   *
+   * The blur afterwards is for the mouse only. A click from a pointer carries
+   * a detail count and a click from a key does not, and blurring on the key
+   * path threw focus to the body: you pressed Enter on "Look left", the room
+   * turned one stop, and the next Tab started again from the top of the page
+   * instead of from the arrow you were still trying to hold.
+   */
+  function rotateOnce(
+    value: 1 | -1,
+    event: { currentTarget: HTMLElement; detail: number },
+  ) {
+    if (Date.now() - lastPointerStep.current > 700) onRotateStep(value);
+    if (event.detail > 0) event.currentTarget.blur();
   }
 
   return (
     <nav
-      className="pointer-events-none fixed bottom-0 left-0 z-[500] h-[100px] w-full"
+      className={[
+        "pointer-events-none fixed bottom-0 left-0 z-[500] h-[100px] w-full",
+        inert ? "opacity-0" : "opacity-100 transition-opacity duration-300",
+      ].join(" ")}
       aria-label="Site"
+      inert={inert}
     >
       <div
         className="absolute bottom-0 h-[130px] w-full"

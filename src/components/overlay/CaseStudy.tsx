@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { motion, useReducedMotion } from "motion/react";
 import { ExternalLink, X } from "lucide-react";
 import { CASE_STUDIES, type Section } from "@/data/caseStudies";
+import { PROJECTS } from "@/data/projects";
 import { OVERLAY_MS, pick, springModal } from "@/lib/motion";
 import { useModalFocus } from "@/lib/useModalFocus";
 
@@ -65,7 +66,15 @@ export function CaseStudy({
     });
   }, []);
 
-  if (!study) return null;
+  // Five of the nine projects have a written case study. The other four are
+  // coursework, and a made up case study is worse than an honest short one, so
+  // they get a brief from the card's own data and a link to the code.
+  if (!study) {
+    return createPortal(
+      <ShortBrief id={id} onClose={onClose} containerRef={containerRef} />,
+      document.body,
+    );
+  }
 
   /**
    * Portalled to the body on purpose. The parent window animates on `y`, and a
@@ -293,5 +302,108 @@ export function CaseStudy({
       </motion.div>
     </div>,
     document.body,
+  );
+}
+
+/**
+ * What opens for a project with no written case study: the same facts the card
+ * carries, at reading size, and a link to the code. Shorter than a case study
+ * and honest about being shorter.
+ */
+function ShortBrief({
+  id,
+  onClose,
+  containerRef,
+}: {
+  id: string;
+  onClose: () => void;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  const project = PROJECTS.find((item) => item.id === id);
+  if (!project) return null;
+
+  return (
+    <div className="fixed inset-0 z-[800] flex items-center justify-center px-3 py-6 sm:px-6">
+      <div
+        className="bg-bg/75 absolute inset-0 backdrop-blur-sm"
+        aria-hidden="true"
+        onClick={onClose}
+      />
+      <section
+        ref={containerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={project.title}
+        className="bg-surface border-border relative flex max-h-full w-full max-w-[720px] flex-col overflow-hidden rounded-2xl border shadow-2xl"
+      >
+        <div className="border-border bg-surface-raised flex shrink-0 items-center gap-4 border-b px-5 py-3">
+          <h2 className="font-display flex-1 truncate text-lg">
+            {project.title}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-text-muted hover:text-text cursor-pointer font-mono text-xs"
+          >
+            esc
+            <span className="sr-only">Close {project.title}</span>
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-6 overflow-y-auto px-6 py-7">
+          <p className="text-text/85 text-[17px] leading-relaxed">
+            {project.summary}
+          </p>
+          <dl className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <dt className="text-text-muted font-mono text-[11px] tracking-wide uppercase">
+                Role
+              </dt>
+              <dd className="text-text/85 mt-1 text-[15px]">{project.role}</dd>
+            </div>
+            <div>
+              <dt className="text-text-muted font-mono text-[11px] tracking-wide uppercase">
+                When
+              </dt>
+              <dd className="text-text/85 mt-1 text-[15px]">
+                {project.timeframe}
+              </dd>
+            </div>
+          </dl>
+
+          <div className="flex gap-3">
+            {project.cover.map((shot) => (
+              // Already sized and converted once. Running these through
+              // next/image would re-encode an optimised file.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={shot.file}
+                src={`/images/projects/${project.id}/${shot.file}.webp`}
+                alt={shot.alt}
+                loading="lazy"
+                decoding="async"
+                className="border-border w-1/2 rounded-lg border object-cover"
+              />
+            ))}
+          </div>
+
+          <p className="text-text-muted border-border border-t pt-5 text-sm leading-relaxed">
+            This one has no written case study. It was coursework, the decisions
+            are in its readme, and inventing a narrative for it after the fact
+            would be the opposite of the point of the rest of this site.
+            {project.repo ? " The code is below." : ""}
+          </p>
+
+          {project.repo && (
+            <a
+              href={project.repo}
+              className="text-highlight hover:text-text self-start text-[15px] transition-colors duration-200"
+            >
+              Read the code
+            </a>
+          )}
+        </div>
+      </section>
+    </div>
   );
 }

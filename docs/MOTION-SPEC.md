@@ -9,7 +9,7 @@ One custom curve, three springs, two durations.
 
 | Name | Value | Used for |
 |---|---|---|
-| `curtain` | `cubic-bezier(0.25, 0.46, 0.45, 0.94)`, 1200ms | Full screen curtain reveal and exit. Reserved. |
+| `curtain` | `cubic-bezier(0.25, 0.46, 0.45, 0.94)`, 700ms | Full screen curtain reveal. Reserved. |
 | `springModal` | `{ stiffness: 300, damping: 30 }` | Case study modal enter and exit |
 | `springIndicator` | `{ stiffness: 200, damping: 20 }` | Nav hover pill slide |
 | `springPop` | `{ stiffness: 400, damping: 25 }` | Nav close button pop |
@@ -21,27 +21,41 @@ reads as finished.
 
 ## Loading
 
-Stage thresholds by percent: `<=25 sketching`, `<=50 voiceover`, `<=85 contrast`,
-`<100 haptics`, `100 ready`.
+There is no loading screen, on purpose. There was one, and it counted a
+percentage to a hundred against a number nobody was waiting for: the scene
+chunk is lazy and the textures paint on their own, so the number was invented
+and the wait belonged to the number rather than to the page.
 
-Ring: `viewBox 0 0 100 100`, `r=45`, `strokeWidth=2`, rotated `-90deg`,
-`strokeDasharray = 2*PI*45`, `strokeDashoffset = 2*PI*45*(1-pct/100)`, 300ms ease out.
+The curtain opens 60ms after the scene reports ready, and the flat view shows
+immediately because it has nothing to wait for.
 
-The loading screen uses CSS keyframes, never JS animation. It paints during the
-busiest moment of the page's life, before hydration has settled and while the 3D
-canvas initialises. A JS animation there does not get a frame, and the screen
-ends up invisible.
+Curtain: two panels, `origin-top` and `origin-bottom`, `scaleY 1 to 0`, 700ms,
+curtain ease. 700 and not 1200, because every millisecond of a curtain is spent
+looking at black, and a slow theatre wipe is a nice idea on the second visit and
+a wait on the first.
 
-Curtain: two panels, `origin-top` and `origin-bottom`, `scaleY 1 to 0`, 1200ms,
-curtain ease. Exit runs the reverse plus a black fade at `delay 1`.
+The panels are always mounted and driven by `open`. They were wrapped in an
+`AnimatePresence` keyed on `!open` once, so they opened the moment they mounted
+and then ran their exit, which closed them again, when `open` finally flipped.
+The curtain went up twice. They do not go back inside an `AnimatePresence`.
 
 ## Scene navigation
 
-- Orbit step per frame: `rotation.y += 0.05 * direction`, about 2.86 degrees,
-  driven by requestAnimationFrame while an arrow is held.
-- Yaw is normalised to `[-PI, PI]` every frame or it winds up.
+The room is two stops wide each way: desk, part turn, wall. It is not a 360,
+because a full turn puts you behind the desk looking at the back of a monitor.
+
+- Yaw is clamped to +/- 0.62 rad, about 35 degrees, and never wrapped.
+- One press of an arrow turns half the limit, so two presses reach the wall.
+  Press and hold switches to a continuous turn after 260ms, at 0.012 rad per
+  frame. The delay is what keeps a single click from doing both.
+- A horizontal scroll turns the room at 0.0016 rad per pixel. That listener is
+  not passive, because a horizontal scroll with nothing to scroll triggers the
+  browser back swipe on macOS, and it is only attached in the room.
+- Positive yaw swings the view toward the left wall, so the "Look left" button
+  passes `+1`. This reads backwards and is correct.
 - Yaw lives in a ref, not state. It changes every frame while an arrow is held
-  and only the scene reads it.
+  and only the scene reads it. The two limit flags are state, and only change
+  when a limit is crossed.
 - **The camera leads the overlay by 700ms.** A route change moves the camera
   first and mounts the overlay 700ms later, so you arrive at the object before
   its content covers it. This is the difference between a room and a menu.
@@ -59,6 +73,7 @@ scrim     bottom gradient, 130px
 pill      backdrop-blur-sm rounded-full h-[84px] px-4
 entry     {opacity:0, y:20} to {opacity:1, y:0}, 500ms ease out
 arrows    56px round, hover scale 1.10, active scale 0.95, 200ms
+          press = one stop, hold past 260ms = continuous
 labels    70x48, 16px
 indicator 70x48, animates x by index*(70 + gap), gap 8 at >=640px else 4
 close     64px round, scale 0 to 1, springPop
@@ -79,6 +94,23 @@ state, and `touch-manipulation`. Bottom padding uses
   nav is one they cannot find.
 - The room and the nav pill go `inert` while an overlay is open, so Tab cannot
   wander behind it.
+- Two overlays open on the device you clicked rather than over the room: the
+  monitor and the laptop each draw their own bezel, and the window sits on that
+  screen with the wallpaper behind it. In that form the whole screen is the
+  dialog, not the window, because the files on the desktop are content and
+  anything outside a dialog is invisible to a screen reader.
+- The window's red dot closes and its green dot goes full bleed. The yellow one
+  is drawn and does nothing, so it is a `span` and not a disabled button: a
+  control with no behaviour behind it does not belong in the tab order.
+
+## The mug
+
+Knocking it over runs one number from 0 to 1 and back, damped at 7 going over
+and 3.2 coming back, because gravity and a tidy-up are not the same speed. That
+number drives the tip, the puddle and the level together. The camera leans in
+for it and holds 900ms after the cup rights itself, so the last thing you see
+close up is the mug full again. The whole cycle is 4.3s and nothing about it is
+undoable.
 
 ## Grid
 

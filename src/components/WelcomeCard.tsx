@@ -61,7 +61,11 @@ export function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
         </span>
 
         <div className="flex flex-col gap-1">
-          <h1 className="font-display text-3xl leading-tight">Keerthi Anil</h1>
+          {/* A paragraph, not a heading. The page already has its one h1 on
+              main, and a second one appearing and then unmounting when the
+              card is dismissed rewrites the document outline under anybody
+              reading it by headings. */}
+          <p className="font-display text-3xl leading-tight">Keerthi Anil</p>
           <p className="text-highlight text-sm tracking-wide">
             Designer, Developer &amp; Researcher
           </p>
@@ -78,6 +82,15 @@ export function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
           <span className="whitespace-nowrap">iOS / SwiftUI</span>{" "}
           <span aria-hidden="true">/</span>{" "}
           <span className="whitespace-nowrap">Accessibility / AI</span>
+        </p>
+
+        {/* The one piece of news on the card. It sits above the button rather
+            than under the strapline because it is the thing a recruiter is
+            looking for, and it has a date on it so it goes stale honestly
+            instead of saying "currently" forever. */}
+        <p className="border-highlight/40 bg-accent/15 text-text/90 rounded-full border px-4 py-2 text-[13px]">
+          <span className="bg-highlight mr-2 inline-block h-2 w-2 rounded-full align-middle" aria-hidden="true" />
+          Open to full-time roles from January 2026
         </p>
 
         <button

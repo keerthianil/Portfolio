@@ -10,6 +10,12 @@ import type { Project } from "@/data/projects";
  * at an angle on a field tinted with that app's own accent rather than cropping
  * a portrait screenshot into a landscape thumbnail.
  *
+ * The two screens are deliberately different sizes and both are cropped by the
+ * bottom edge. Sitting them side by side at the same height filled the card
+ * and left nine cards that were each a wall of white screenshot: the tint is
+ * the only thing telling them apart, so the tint has to survive. The back one
+ * is smaller, pushed up and behind; the front one overlaps it.
+ *
  * Two layers of hover: the card lifts on a short curve and the art scales on a
  * longer one, so the art keeps moving after the card has settled.
  */
@@ -28,18 +34,22 @@ export function ProjectCard({
       aria-label={`Open the ${project.title} case study`}
     >
       <div
-        className="relative aspect-[4/3] w-full overflow-hidden"
+        className="relative aspect-[16/10] w-full overflow-hidden"
         style={{
           background: `radial-gradient(120% 100% at 50% 0%, ${project.tint}55 0%, ${project.tint}18 45%, transparent 100%), #120e0c`,
         }}
       >
-        <div className="absolute inset-0 flex items-end justify-center gap-3 pt-7 transition-transform duration-300 ease-out group-hover:scale-[1.04] sm:gap-4">
+        <div className="absolute inset-0 flex items-end justify-center pb-1 transition-transform duration-300 ease-out group-hover:scale-[1.03]">
           {project.cover.map((shot, index) => (
             <picture key={shot.file}>
-              <source
-                srcSet={`/images/projects/${project.id}/${shot.file}.avif`}
-                type="image/avif"
-              />
+              {/* Only the first four projects have an avif pair. The rest came
+                  off the simulator and were converted once, to webp. */}
+              {project.avif && (
+                <source
+                  srcSet={`/images/projects/${project.id}/${shot.file}.avif`}
+                  type="image/avif"
+                />
+              )}
               <source
                 srcSet={`/images/projects/${project.id}/${shot.file}.webp`}
                 type="image/webp"
@@ -51,13 +61,19 @@ export function ProjectCard({
                 height={2622}
                 loading="lazy"
                 decoding="async"
-                // Sized so the tinted field still reads above and beside the
-                // screens. At 86% they filled the card and the tint, which is
-                // the only thing telling the four cards apart, vanished.
-                className="h-[74%] w-auto self-end rounded-[12px] shadow-2xl ring-1 ring-black/50"
-                style={{
-                  transform: `rotate(${index === 0 ? -5 : 5}deg) translateY(${index === 0 ? 5 : 0}%)`,
-                }}
+                className={[
+                  "absolute bottom-0 w-auto rounded-[10px] shadow-2xl ring-1 ring-black/40",
+                  // The back screen is smaller, higher and behind; the front
+                  // one is larger and overlaps it. Both run off the bottom
+                  // edge, which is what stops the pair reading as two
+                  // thumbnails in a row.
+                  // Small on purpose. These are 1206x2622 phone captures and
+                  // at any real size nine cards become nine walls of white
+                  // screenshot, which is the one thing the grid cannot be.
+                  index === 0
+                    ? "h-[46%] translate-x-[-30%] rotate-[-7deg]"
+                    : "z-10 h-[56%] translate-x-[24%] rotate-[5deg]",
+                ].join(" ")}
               />
             </picture>
           ))}
