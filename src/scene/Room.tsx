@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { RoundedBox } from "@react-three/drei";
-import { Box3, BufferGeometry, Float32BufferAttribute, Vector3 } from "three";
+import { Box3, BufferGeometry, Float32BufferAttribute, Object3D, Vector3 } from "three";
 import type { Group, Mesh, MeshStandardMaterial } from "three";
-import { SCENE, simulate, type ColourVision } from "./palette";
+import { LAMP, SCENE, simulate, type ColourVision } from "./palette";
 import {
   SLIDES,
   makeCalendarTexture,
@@ -98,46 +98,6 @@ function makeMouseGeometry(): BufferGeometry {
   return geometry;
 }
 
-/**
- * A paper dart, folded the way everybody folds one: a long nose, two wings
- * meeting along a ridge down the top, and a keel underneath that is the bit
- * you hold.
- *
- * Eight triangles and no texture. It is 20cm long, which is the size a sheet
- * of A4 folds down to, and at that size it reads as a paper plane on a desk
- * from across the room rather than as a white smudge.
- */
-function makePlaneGeometry(): BufferGeometry {
-  const nose: [number, number, number] = [0, 0, -0.11];
-  const tail: [number, number, number] = [0, 0.012, 0.09];
-  const left: [number, number, number] = [-0.075, -0.004, 0.085];
-  const right: [number, number, number] = [0.075, -0.004, 0.085];
-  const keel: [number, number, number] = [0, -0.032, 0.075];
-
-  const faces: [number, number, number][][] = [
-    // The two wings, meeting along the ridge from the nose to the tail.
-    [nose, left, tail],
-    [nose, tail, right],
-    // The keel below them, which is what makes it a dart and not a triangle.
-    [nose, keel, left],
-    [nose, right, keel],
-    // The open back edge, closed off so it is a solid from every angle.
-    [tail, left, keel],
-    [tail, keel, right],
-  ];
-
-  const position: number[] = [];
-  for (const face of faces) for (const point of face) position.push(...point);
-
-  const geometry = new BufferGeometry();
-  geometry.setAttribute("position", new Float32BufferAttribute(position, 3));
-  geometry.computeVertexNormals();
-  return geometry;
-}
-
-/** How long one circuit takes. The landing announcement is timed off it. */
-const FLIGHT_SECONDS = 5;
-
 export type Hotspot =
   | "monitor"
   | "laptop"
@@ -145,7 +105,8 @@ export type Hotspot =
   | "mug"
   | "calendar"
   | "lightSwitch"
-  | "plane";
+  | "duck"
+  | "lamp";
 
 interface RoomProps {
   onSelect: (hotspot: Hotspot) => void;
@@ -155,8 +116,10 @@ interface RoomProps {
   idleMotion: boolean;
   /** True from the moment the mug is knocked until it rights itself. */
   spilled: boolean;
-  /** True from the moment the paper plane is thrown until it lands again. */
-  flying: boolean;
+  /** True from the moment the duck is prodded until it stops rocking. */
+  prodded: boolean;
+  /** Which way the desk lamp is pointed: 0 at the keyboard, 1 at the notebook. */
+  lampAim: number;
   /** Which colour vision the wall switch by the door is currently simulating. */
   vision: ColourVision;
   /** Which object's mirror button currently has focus, if any. */
@@ -270,7 +233,8 @@ export function Room({
   hoverLift,
   idleMotion,
   spilled,
-  flying,
+  prodded,
+  lampAim,
   vision,
   focused,
 }: RoomProps) {
@@ -304,7 +268,8 @@ export function Room({
     // lying flat at shoulder height in the middle of the room is a ring on
     // nothing.
     lightSwitch: { at: [-2.262, 1.14, -0.2], r: 0.13, turn: [0, Math.PI / 2, 0] },
-    plane: { at: [-0.3, 0.774, 0.2], r: 0.13 },
+    duck: { at: [-0.66, 0.774, -0.52], r: 0.1 },
+    lamp: { at: [-1.06, 0.79, -0.8], r: 0.16 },
   };
   const focusRing = focused ? RINGS[focused] : undefined;
 
@@ -322,9 +287,17 @@ export function Room({
   const puddle = useRef<Mesh>(null);
   const stream = useRef<Group>(null);
   const pen = useRef<Group>(null);
-  const plane = useRef<Group>(null);
-  /** 0 is folded on the desk, 1 is one lap of the room and back. */
-  const flight = useRef(0);
+  const duck = useRef<Group>(null);
+  const lampArm = useRef<Group>(null);
+  /**
+   * What the lamp's spot light aims at. A plain object a metre down the beam,
+   * parented to the head, so three has something in the scene graph to point
+   * the cone at and it follows the arm for free.
+   */
+  const lampTarget = useMemo(() => new Object3D(), []);
+  /** How far through the duck's rock we are, and where the lamp is pointed. */
+  const rock = useRef(0);
+  const aim = useRef(0);
   /** 0 is upright and full, 1 is over and empty. */
   const progress = useRef(0);
   const screen = useMemo(() => makeScreenTexture(), []);
@@ -340,7 +313,6 @@ export function Room({
   const wood = useMemo(() => makeWoodTexture(), []);
   const mouseMap = useMemo(() => makeMouseTexture(), []);
   const mouseShell = useMemo(() => makeMouseGeometry(), []);
-  const planeShell = useMemo(() => makePlaneGeometry(), []);
   useEffect(
     () => () => {
       screen.dispose();
@@ -356,7 +328,6 @@ export function Room({
       wood.dispose();
       mouseMap.dispose();
       mouseShell.dispose();
-      planeShell.dispose();
     },
     [
       screen,
@@ -372,7 +343,6 @@ export function Room({
       wood,
       mouseMap,
       mouseShell,
-      planeShell,
     ],
   );
 
@@ -425,69 +395,56 @@ export function Room({
   });
 
   /**
-   * The paper plane, and its circuit of the desk.
+   * The duck, rocking.
    *
-   * One number runs 0 to 1 over five seconds and the whole flight is read off
-   * it: away from the chair first, then right, then back toward you over the
-   * front edge of the desk, then down onto the spot it took off from. It is a
-   * closed loop, so it lands where it started because the path says so and
-   * not because anything is put back afterwards, and when the number resets
-   * to 0 at the end nothing moves, because position(1) is position(0).
+   * It is a rubber duck on a hard desk, so it does not swing like a pendulum
+   * on a string: it tips onto its front, comes back past level, and dies out
+   * over about a second and a half. That is a decaying sine, and the decay is
+   * what stops it reading as a metronome.
    *
-   * The number advances rather than damping toward a target. A damped value
-   * never quite arrives, and on the way back down it would have flown the
-   * whole circuit again in reverse.
-   *
-   * The nose points along the direction of travel, worked out by
-   * differentiating the path rather than by storing a velocity, and it banks
-   * into the turn and pitches up on the climb. A paper plane that stays level
-   * through a circle reads as a cursor being dragged around one.
-   *
-   * Under reduced motion it does not fly. It lifts off the desk about a
-   * centimetre, tips, and settles: same interaction, same feedback, without
-   * two metres of sweep across somebody's field of view. It is the one thing
-   * in this room where the setting changes what happens rather than how fast
-   * it happens, and a thrown plane crossing the whole frame is exactly the
-   * motion the setting exists to stop.
+   * It also lifts very slightly while it rocks, because a round bottom
+   * pivoting on a flat surface has to.
    */
   useFrame((_, delta) => {
-    const model = plane.current;
+    const model = duck.current;
     if (!model) return;
 
-    if (!idleMotion) {
-      const target = flying ? 1 : 0;
-      flight.current += (target - flight.current) * Math.min(1, delta * 4);
-      const hop = flight.current;
-      model.position.set(-0.3, 0.774 + hop * 0.016, 0.2);
-      model.rotation.set(-hop * 0.2, 0, hop * 0.12);
+    const target = prodded ? 1 : 0;
+    rock.current += (target - rock.current) * Math.min(1, delta * 7);
+    const amount = rock.current;
+
+    if (amount < 0.002) {
+      model.rotation.set(0, -0.42, 0);
+      model.position.y = 0.771;
       return;
     }
 
-    flight.current = flying
-      ? Math.min(1, flight.current + delta / FLIGHT_SECONDS)
-      : 0;
-    // Thrown hard and gliding in. Eased at the end, so it settles rather than
-    // arriving at the desk at the speed it left it.
-    const u = 1 - (1 - flight.current) ** 2;
+    // Under reduced motion it tips once and holds, rather than oscillating.
+    const swing = idleMotion
+      ? Math.sin(rock.current * Math.PI * 5.5) * amount
+      : amount;
+    model.rotation.x = swing * 0.42;
+    model.rotation.z = swing * 0.12;
+    model.rotation.y = -0.42;
+    model.position.y = 0.771 + Math.abs(swing) * 0.006;
+  });
 
-    // A circle over the desk, entered heading away from the chair.
-    const turn = -u * Math.PI * 2 - Math.PI / 2;
-    model.position.set(
-      0.2 + Math.sin(turn) * 0.5,
-      0.774 + Math.sin(u * Math.PI) * 0.5,
-      0.2 + Math.cos(turn) * 0.5,
-    );
-
-    // The tangent to that circle, which is where the nose points. The mesh
-    // is built nose down -z, so the yaw that puts it on a heading is the
-    // arctangent of the negated direction.
-    const dx = Math.cos(turn) * -1;
-    const dz = Math.sin(turn);
-    model.rotation.y = Math.atan2(-dx, -dz);
-    // Climbing for the first half, descending for the second, flat at both
-    // ends, which is where it is sitting on a desk.
-    model.rotation.x = Math.sin(u * Math.PI * 2) * 0.24;
-    model.rotation.z = Math.sin(u * Math.PI) * 0.5;
+  /**
+   * The lamp's arm, swinging between the keyboard and the notebook.
+   *
+   * The light is a child of the head, so there is nothing here that moves the
+   * light: the arm turns and the light is attached to it. A separate light
+   * position lerped alongside the geometry is two things that have to agree
+   * about where the lamp is pointing, and sooner or later they do not.
+   */
+  useFrame((_, delta) => {
+    const arm = lampArm.current;
+    if (!arm) return;
+    aim.current += (lampAim - aim.current) * Math.min(1, delta * (idleMotion ? 3.4 : 12));
+    // 0.65 puts the head over the desk beside the keyboard, 1.55 swings it
+    // across to the notebook. Both keep the arm inside the frame the room
+    // opens on, which is the whole reason the lamp is on this corner.
+    arm.rotation.y = 0.65 + aim.current * 0.9;
   });
 
   /**
@@ -895,7 +852,7 @@ export function Room({
             map={sky.texture}
             emissiveMap={sky.texture}
             emissive={C.cream}
-            {...lift(0.5, 0)}
+            {...lift(0.32, 0)}
             roughness={1}
           />
         </mesh>
@@ -1482,33 +1439,192 @@ export function Room({
       </group>
 
       {/*
-        The paper plane.
+        The rubber duck, between the laptop and the calendar.
 
-        It sits folded on the desk in front of the laptop until you throw it,
-        then it takes a lap of the room and lands back on the same spot.
+        Prod it and it tips onto its front and rocks until it stops, and it
+        squeaks, which is synthesised in the browser rather than loaded as a
+        file. Nothing is being demonstrated. The mug is about undo and the
+        switch by the door is about colour, and this is a duck. Every desk
+        somebody actually works at has one thing on it that is there for no
+        reason, and the one on this desk is the one developers put there on
+        purpose, to explain the bug to.
 
-        Nothing is being demonstrated by it. The mug is about undo and the
-        switch by the door is about colour, and this one is a paper plane.
-        Every room somebody actually works in has one thing in it that is
-        there for no reason at all.
-
-        The group is the thing that flies and the mesh inside it carries the
-        resting tilt, so the flight code only ever sets one rotation and does
-        not have to remember which parts of it were the fold and which were
-        the heading.
+        It is the one saturated thing in the room that is not maroon. A duck
+        that is not yellow is not a duck, so the yellow is pulled toward the
+        sticky note rather than toward a bath toy, and it is the size of a
+        thing you could actually palm.
       */}
-      <Hot name="plane" hoverLift={hoverLift} onSelect={() => onSelect("plane")}>
-        <group ref={plane} position={[-0.3, 0.774, 0.2]}>
-          <mesh geometry={planeShell} rotation={[0.03, 0.14, 0.05]}>
+      <Hot name="duck" hoverLift={hoverLift} onSelect={() => onSelect("duck")}>
+        <group ref={duck} position={[-0.66, 0.771, -0.52]} rotation={[0, -0.42, 0]}>
+          {/* Body: wider than it is tall, and longer than it is wide. */}
+          <mesh position={[0, 0.036, 0]} scale={[1, 0.82, 1.24]}>
+            <sphereGeometry args={[0.042, 22, 16]} />
             <meshStandardMaterial
-              color={C.plane}
-              emissive={C.cream}
-              {...lift(0.06, 0.75)}
-              roughness={0.94}
-              side={2}
-              flatShading
+              color={C.duck}
+              emissive={C.duck}
+              {...lift(0.05, 0.7)}
+              roughness={0.52}
             />
           </mesh>
+          {/* The tail, tipped up at the back. */}
+          <mesh position={[0, 0.05, -0.045]} rotation={[0.9, 0, 0]}>
+            <coneGeometry args={[0.022, 0.038, 12]} />
+            <meshStandardMaterial color={C.duck} roughness={0.52} />
+          </mesh>
+          {/* Head, forward and up, on no neck to speak of. */}
+          <mesh position={[0, 0.072, 0.024]}>
+            <sphereGeometry args={[0.026, 18, 14]} />
+            <meshStandardMaterial
+              color={C.duck}
+              emissive={C.duck}
+              {...lift(0.05, 0.7)}
+              roughness={0.52}
+            />
+          </mesh>
+          {/* Beak. Flat, wide, and orange, which is the whole silhouette. */}
+          <mesh
+            position={[0, 0.068, 0.049]}
+            rotation={[Math.PI / 2, 0, 0]}
+            scale={[1.5, 1, 0.55]}
+          >
+            <coneGeometry args={[0.014, 0.026, 10]} />
+            <meshStandardMaterial color={C.duckBeak} roughness={0.45} />
+          </mesh>
+          {/* Two eyes, which is the difference between a duck and a lump. */}
+          {[-0.013, 0.013].map((x) => (
+            <mesh key={x} position={[x, 0.081, 0.04]}>
+              <sphereGeometry args={[0.0042, 8, 8]} />
+              <meshStandardMaterial color={"#17120c"} roughness={0.3} />
+            </mesh>
+          ))}
+        </group>
+      </Hot>
+
+      {/*
+        The desk lamp.
+
+        There was no lamp. There was a bar light clipped to the top of the
+        monitor, which is a real thing and is also not a lamp, so the light
+        on the desk came from an object nobody could see. This one is where
+        you would put it: back left corner of the desk, arm out over it. It
+        started further left than that and was outside the frame the room
+        opens on, which is a strange place to put the object somebody just
+        said they could not see.
+
+        Click it and the arm swings from the keyboard across to the notebook.
+        The light is a child of the head, so nothing here moves the light. The
+        arm turns and the light is bolted to it.
+      */}
+      <Hot name="lamp" hoverLift={hoverLift} onSelect={() => onSelect("lamp")}>
+        <group position={[-1.06, 0.771, -0.8]}>
+          {/* A weighted base, because the arm is out over the desk. */}
+          <mesh position={[0, 0.012, 0]}>
+            <cylinderGeometry args={[0.082, 0.092, 0.024, 28]} />
+            <meshStandardMaterial
+              color={C.lampMetal}
+              roughness={0.42}
+              metalness={0.6}
+            />
+          </mesh>
+          <mesh position={[0, 0.03, 0]}>
+            <cylinderGeometry args={[0.03, 0.034, 0.014, 20]} />
+            <meshStandardMaterial
+              color={C.lampMetal}
+              roughness={0.4}
+              metalness={0.6}
+            />
+          </mesh>
+
+          {/*
+            Everything above the base turns together.
+
+            The arm is laid out by where its joints are rather than as a chain
+            of nested rotations. Nested rotations compound: the first version
+            had the lower arm, the upper arm and the head each tilted relative
+            to its parent, the three of them summed to about ninety degrees,
+            and the lamp ended up shining at the viewer. Stating the elbow and
+            the head as positions and deriving the angle to reach them means
+            the beam points where the numbers say and nothing accumulates.
+          */}
+          <group ref={lampArm} position={[0, 0.037, 0]} rotation={[0, 0.65, 0]}>
+            {/* Lower arm: base to the elbow at (0, 0.413, 0.08). */}
+            <mesh position={[0, 0.207, 0.04]} rotation={[-0.19, 0, 0]}>
+              <cylinderGeometry args={[0.011, 0.014, 0.414, 14]} />
+              <meshStandardMaterial
+                color={C.lampMetal}
+                roughness={0.38}
+                metalness={0.65}
+              />
+            </mesh>
+
+            {/* The elbow. */}
+            <mesh position={[0, 0.413, 0.08]}>
+              <sphereGeometry args={[0.021, 14, 12]} />
+              <meshStandardMaterial
+                color={C.lampJoint}
+                roughness={0.34}
+                metalness={0.72}
+              />
+            </mesh>
+
+            {/* Upper arm: elbow to the head at (0, 0.5, 0.4), out over the
+                desk. */}
+            <mesh position={[0, 0.457, 0.24]} rotation={[-1.305, 0, 0]}>
+              <cylinderGeometry args={[0.0095, 0.011, 0.332, 14]} />
+              <meshStandardMaterial
+                color={C.lampMetal}
+                roughness={0.38}
+                metalness={0.65}
+              />
+            </mesh>
+
+            {/* The head. Its own pitch, not the sum of the arm's. */}
+            <group position={[0, 0.5, 0.4]} rotation={[-0.35, 0, 0]}>
+              <mesh>
+                <sphereGeometry args={[0.019, 12, 10]} />
+                <meshStandardMaterial
+                  color={C.lampJoint}
+                  roughness={0.34}
+                  metalness={0.72}
+                />
+              </mesh>
+              {/* The shade: narrow where it meets the arm, wide at the mouth.
+                  It was the other way up, which is a plant pot. */}
+              <mesh position={[0, -0.052, 0]}>
+                <cylinderGeometry args={[0.034, 0.08, 0.09, 24, 1, true]} />
+                <meshStandardMaterial
+                  color={C.lampShade}
+                  roughness={0.5}
+                  metalness={0.25}
+                  side={2}
+                />
+              </mesh>
+              {/* The bulb, which is the part that reads as switched on. */}
+              <mesh position={[0, -0.094, 0]} rotation={[Math.PI / 2, 0, 0]}>
+                <circleGeometry args={[0.074, 24]} />
+                <meshStandardMaterial
+                  color={C.lampGlow}
+                  emissive={C.lampGlow}
+                  {...lift(1.6, 0.5)}
+                  roughness={1}
+                />
+              </mesh>
+              {/* The light, and the point it aims at, both children of the
+                  head so they swing with it and there is nothing to keep in
+                  step. */}
+              <primitive object={lampTarget} position={[0, -1, 0]} />
+              <spotLight
+                position={[0, -0.09, 0]}
+                target={lampTarget}
+                color={LAMP.color}
+                intensity={LAMP.intensity}
+                angle={LAMP.angle}
+                penumbra={LAMP.penumbra}
+                distance={LAMP.distance}
+                decay={2}
+              />
+            </group>
+          </group>
         </group>
       </Hot>
 

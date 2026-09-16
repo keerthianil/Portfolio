@@ -69,7 +69,8 @@ export const SceneStage = memo(function SceneStage({
   onReady,
   spilled,
   vision,
-  flying,
+  prodded,
+  lampAim,
   focused,
   flat,
 }: {
@@ -80,7 +81,8 @@ export const SceneStage = memo(function SceneStage({
   onReady: () => void;
   spilled: boolean;
   vision: ColourVision;
-  flying: boolean;
+  prodded: boolean;
+  lampAim: number;
   focused: Hotspot | null;
   /** Null while the WebGL probe is still pending. */
   flat: boolean | null;
@@ -112,7 +114,8 @@ export const SceneStage = memo(function SceneStage({
         reduceMotion={!!shouldReduce}
         spilled={spilled}
         vision={vision}
-        flying={flying}
+        prodded={prodded}
+        lampAim={lampAim}
         focused={focused}
       />
     </SceneBoundary>
