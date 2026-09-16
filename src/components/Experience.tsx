@@ -108,6 +108,27 @@ export function Experience() {
     return () => window.clearTimeout(id);
   }, [sceneReady, flat]);
 
+  /**
+   * The curtain comes up after six seconds whatever the scene has to say.
+   *
+   * It waits for the scene to report ready, and a scene that never reports is
+   * a black rectangle over a working site for as long as the visitor is
+   * willing to look at it. That is not hypothetical: a tab opened in the
+   * background gets its animation frames throttled to nothing until it is
+   * looked at, and a phone that is slow to hand over a WebGL context takes
+   * whatever time it takes. Both end with the page loaded, the nav mounted,
+   * every route reachable, and none of it visible.
+   *
+   * Six seconds is past the point where the room normally arrives and short
+   * of the point where somebody leaves. If the room turns up later it just
+   * fades in behind an open curtain, which is a worse first frame and an
+   * enormously better failure.
+   */
+  useEffect(() => {
+    const id = window.setTimeout(() => setRevealed(true), 6000);
+    return () => window.clearTimeout(id);
+  }, []);
+
   useEffect(() => {
     if (!revealed || welcomeOpen) return;
     const id = window.setTimeout(() => setShowArrowGlow(true), ARROW_GLOW_AT_MS);
@@ -465,35 +486,36 @@ export function Experience() {
   /**
    * The window, and the sun going down behind it.
    *
-   * Click the pane and the photograph goes to evening, the stars come out in
-   * it, the daylight leaves the room and the desk lamp and the monitor are
-   * what is left lighting it. Click it again and it is the afternoon.
+   * Click the pane and it rains: the sky goes overcast, drops run down the
+   * glass, and the light in the room turns cool and flat with it. Click it
+   * again and the sun comes back out.
    *
    * It replaced a frosted pane that dropped the room's contrast to nothing to
    * make a point about focus indicators. The point was worth making and the
-   * room being ugly for six seconds was the price, so the point moved: the
-   * focus ring in the scene is on all the time now, and the window is allowed
-   * to just be a nice thing to click.
+   * room being ugly on purpose was the price, so the point moved: the focus
+   * ring in the scene is on all the time now. Nothing is being demonstrated
+   * here. Every other thing you can touch in this room is making an argument,
+   * and one of them is allowed to just be nice.
    */
-  const [night, setNight] = useState(false);
-  const toggleNight = useCallback(() => {
-    setNight((value) => {
+  const [raining, setRaining] = useState(false);
+  const toggleRain = useCallback(() => {
+    setRaining((value) => {
       const next = !value;
       setNote(
         next
           ? {
-              title: "Evening",
-              body: "Same room, different light. Everything you make gets looked at in both, and only one of them is the one you made it in.",
+              title: "Rain",
+              body: "No lesson attached to this one. It rains, the room goes cool, and that is the whole of it.",
             }
           : {
-              title: "Afternoon",
-              body: "Daylight back. This is the easy light to design in, which is exactly why it is not the only one worth checking.",
+              title: "Clear",
+              body: "Dry again, and the sunset is where it was. That is my photograph, taken out of a window that looked nothing like this one.",
             },
       );
       setAnnouncement(
         next
-          ? "Evening. The room is down to the desk lamp and the monitor."
-          : "Afternoon. Daylight back through the window.",
+          ? "Raining. The light in the room has gone cool."
+          : "Rain stopped. The window is clear again.",
       );
       return next;
     });
@@ -511,9 +533,9 @@ export function Experience() {
     (object: string) => {
       if (object === "mug") knockOver();
       if (object === "lightSwitch") cycleVision();
-      if (object === "window") toggleNight();
+      if (object === "window") toggleRain();
     },
-    [knockOver, cycleVision, toggleNight],
+    [knockOver, cycleVision, toggleRain],
   );
 
   return (
@@ -552,7 +574,7 @@ export function Experience() {
           onReady={markSceneReady}
           spilled={spilled}
           vision={vision}
-          night={night}
+          raining={raining}
           focused={focused}
           flat={flat}
         />

@@ -71,26 +71,42 @@ export function WindowFrame({
    */
   const chrome = (
     <>
-      <div className="border-border bg-surface-raised flex h-[34px] shrink-0 items-center gap-4 border-b px-4">
-        <span className="flex items-center gap-2">
+      {/*
+        The dots stay three millimetres across and the things you press are
+        24px square around them.
+
+        They were 12px buttons, which is a fine mouse target and half of what
+        a finger needs. They are drawn as a span inside a button now rather
+        than as a button that is the dot, and the row's own gap comes off to
+        pay for the buttons being twice the size, so the chrome looks the same
+        and stops being three tiny targets 8px apart.
+      */}
+      <div className="border-border bg-surface-raised flex h-9 shrink-0 items-center gap-3 border-b px-2.5 sm:gap-4 sm:px-4">
+        <span className="flex items-center">
           <button
             type="button"
             onClick={onClose}
             aria-label={`Close ${title}`}
-            className="bg-accent block h-3 w-3 cursor-pointer rounded-full transition-all duration-150 hover:scale-125 hover:brightness-125"
-          />
-          <span
-            aria-hidden="true"
-            className="bg-highlight/40 block h-3 w-3 rounded-full"
-          />
+            className="group flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
+          >
+            <span className="bg-accent block h-3 w-3 rounded-full transition-all duration-150 group-hover:scale-125 group-hover:brightness-125" />
+          </button>
+          <span className="flex h-6 w-6 items-center justify-center">
+            <span
+              aria-hidden="true"
+              className="bg-highlight/40 block h-3 w-3 rounded-full"
+            />
+          </span>
           <button
             type="button"
             onClick={() => setMaximised((value) => !value)}
             aria-label={
               maximised ? `Restore ${title} size` : `Maximise ${title}`
             }
-            className="bg-text-muted/60 hover:bg-text-muted block h-3 w-3 cursor-pointer rounded-full transition-all duration-150 hover:scale-125"
-          />
+            className="group flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
+          >
+            <span className="bg-text-muted/60 group-hover:bg-text-muted block h-3 w-3 rounded-full transition-all duration-150 group-hover:scale-125" />
+          </button>
         </span>
         <span className="text-text-muted flex-1 truncate text-center font-mono text-xs tracking-wide">
           {title}
@@ -98,7 +114,7 @@ export function WindowFrame({
         <button
           type="button"
           onClick={onClose}
-          className="text-text-muted hover:text-text hover:bg-bg/60 -mr-1 flex h-7 shrink-0 cursor-pointer items-center gap-1 rounded-md px-1.5 font-mono text-xs transition-colors duration-200"
+          className="text-text-muted hover:text-text hover:bg-bg/60 -mr-1 flex h-8 shrink-0 cursor-pointer items-center gap-1 rounded-md px-2 font-mono text-xs transition-colors duration-200"
         >
           {screen ? "Exit [esc]" : "esc"}
           <span className="sr-only">Close {title}</span>
@@ -148,12 +164,17 @@ export function WindowFrame({
           a laptop: bezel, notch, chin. It is the same move the room makes,
           which is that the thing you touched is the thing you get.
         */}
-        <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-5">
+        {/* The device is drawn tight to the edges on a phone. A laptop bezel
+            is a nice joke on a desk and it is 50px of a 375px screen, which
+            is the width of five characters of the terminal inside it. */}
+        <div className="absolute inset-0 flex items-center justify-center p-1 sm:p-5">
           <div
             className={[
               "relative flex h-full w-full max-w-[1600px] flex-col",
               "bg-[#17171b] shadow-[0_30px_80px_rgba(0,0,0,0.65)] ring-1 ring-white/8",
-              laptop ? "rounded-[20px] p-2 sm:p-3" : "rounded-[12px] p-1.5 sm:p-2",
+              laptop
+                ? "rounded-[14px] p-1 sm:rounded-[20px] sm:p-3"
+                : "rounded-[10px] p-1 sm:rounded-[12px] sm:p-2",
             ].join(" ")}
           >
             {/* The screen itself, and everything on it */}
@@ -188,7 +209,7 @@ export function WindowFrame({
                 every click aimed at the icons on the desktop beside it. The
                 window itself takes its events back.
               */}
-              <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-[5%]">
+              <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-[2%] sm:pb-[5%]">
                 <AnimatePresence>
                 {(screen.windowOpen ?? true) && (
                 <motion.section
@@ -199,11 +220,11 @@ export function WindowFrame({
                       ? "h-full w-full rounded-none border-0"
                       : screen.files
                         ? // A lane down the right for the files on the desktop
-                          "mx-auto w-[94%] max-w-[1180px] rounded-xl lg:mr-[168px] lg:w-[calc(94%-140px)]"
-                        : "mx-auto w-[96%] max-w-[1400px] rounded-xl",
+                          "mx-auto w-[99%] rounded-lg sm:w-[94%] sm:max-w-[1180px] sm:rounded-xl lg:mr-[168px] lg:w-[calc(94%-140px)]"
+                        : "mx-auto w-[99%] rounded-lg sm:w-[96%] sm:max-w-[1400px] sm:rounded-xl",
                     "transition-[width,height,border-radius] duration-300 ease-out",
                   ].join(" ")}
-                  style={maximised ? undefined : { height: "88%" }}
+                  style={maximised ? undefined : { height: "94%" }}
                   {...windowMotion}
                 >
                   {chrome}

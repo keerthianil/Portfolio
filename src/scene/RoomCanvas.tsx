@@ -18,7 +18,7 @@ export function RoomCanvas({
   onReady,
   spilled,
   vision,
-  night,
+  raining,
   focused,
   className,
 }: {
@@ -29,7 +29,7 @@ export function RoomCanvas({
   onReady?: () => void;
   spilled: boolean;
   vision: ColourVision;
-  night: boolean;
+  raining: boolean;
   focused: Hotspot | null;
   className?: string;
 }) {
@@ -42,27 +42,28 @@ export function RoomCanvas({
    * has to point at the keyboard, so it gets a real target to aim at.
    */
   /**
-   * Evening.
+   * The weather.
    *
-   * The sun going down is not one dimmer on the whole room. The daylight
-   * through the window all but goes, the warm rim off the front right goes
-   * with it, the overhead comes down to what one lamp in a room actually
-   * does, and the two things still emitting, the desk lamp and the monitor,
-   * come up. That last part is what makes it read as evening rather than as
-   * a screenshot with the brightness pulled down: at night the screen is the
-   * brightest thing in the room, and it always is.
+   * Rain is not one dimmer on the room. Overcast light is cooler and flatter
+   * and comes from a wider source, so the daylight through the window loses
+   * about half its intensity and all of its warmth, and the warm rim off the
+   * front right, which is the sun, goes with it. The overhead comes down a
+   * little. The two things that are actually switched on, the desk lamp and
+   * the monitor, come up, because that is what you do when it goes grey
+   * outside, and it is the part that makes the room read as cooler rather
+   * than as a screenshot with the brightness pulled down.
    *
-   * The moon is cool, so the window's light changes colour as well as
-   * intensity. A dimmed warm light reads as a lamp on a timer.
+   * The colours change as well as the numbers. A dimmed warm light reads as
+   * the afternoon wearing on; a cool one reads as weather.
    */
-  const dusk = {
-    ambient: night ? 0.5 : 1,
-    key: night ? 0.34 : 1,
-    bar: night ? 1.2 : 1,
-    screenGlow: night ? 1.85 : 1,
-    window: night ? 0.16 : 1,
-    rim: night ? 0.25 : 1,
-    bounce: night ? 0.62 : 1,
+  const weather = {
+    ambient: raining ? 0.88 : 1,
+    key: raining ? 0.72 : 1,
+    bar: raining ? 1.15 : 1,
+    screenGlow: raining ? 1.3 : 1,
+    window: raining ? 0.52 : 1,
+    rim: raining ? 0.34 : 1,
+    bounce: raining ? 0.86 : 1,
   };
 
   const barTarget = useMemo(() => {
@@ -100,14 +101,14 @@ export function RoomCanvas({
         <AdaptiveDpr pixelated />
 
         <ambientLight
-          color={night ? "#3b4463" : LIGHTS.ambient.color}
-          intensity={LIGHTS.ambient.intensity * dusk.ambient}
+          color={raining ? "#57606e" : LIGHTS.ambient.color}
+          intensity={LIGHTS.ambient.intensity * weather.ambient}
         />
 
         {/* Key: overhead front-left, the light that makes the desk readable. */}
         <spotLight
           color={LIGHTS.key.color}
-          intensity={LIGHTS.key.intensity * dusk.key}
+          intensity={LIGHTS.key.intensity * weather.key}
           position={LIGHTS.key.position}
           angle={LIGHTS.key.angle}
           penumbra={LIGHTS.key.penumbra}
@@ -121,7 +122,7 @@ export function RoomCanvas({
         <primitive object={barTarget} />
         <spotLight
           color={LIGHTS.bar.color}
-          intensity={LIGHTS.bar.intensity * dusk.bar}
+          intensity={LIGHTS.bar.intensity * weather.bar}
           position={LIGHTS.bar.position}
           angle={LIGHTS.bar.angle}
           penumbra={LIGHTS.bar.penumbra}
@@ -132,8 +133,8 @@ export function RoomCanvas({
 
         {/* Daylight through the window on the right wall. */}
         <pointLight
-          color={night ? "#8ba2d8" : LIGHTS.window.color}
-          intensity={LIGHTS.window.intensity * dusk.window}
+          color={raining ? "#9fb2c6" : LIGHTS.window.color}
+          intensity={LIGHTS.window.intensity * weather.window}
           position={LIGHTS.window.position}
           distance={LIGHTS.window.distance}
           decay={2}
@@ -142,7 +143,7 @@ export function RoomCanvas({
         {/* The monitor's own spill onto the desk in front of it. */}
         <pointLight
           color={LIGHTS.screenGlow.color}
-          intensity={LIGHTS.screenGlow.intensity * dusk.screenGlow}
+          intensity={LIGHTS.screenGlow.intensity * weather.screenGlow}
           position={LIGHTS.screenGlow.position}
           distance={LIGHTS.screenGlow.distance}
           decay={2}
@@ -151,7 +152,7 @@ export function RoomCanvas({
         {/* Burgundy bounce off the back wall. */}
         <pointLight
           color={LIGHTS.bounce.color}
-          intensity={LIGHTS.bounce.intensity * ROOM.bounce * dusk.bounce}
+          intensity={LIGHTS.bounce.intensity * ROOM.bounce * weather.bounce}
           position={LIGHTS.bounce.position}
           distance={LIGHTS.bounce.distance}
           decay={2}
@@ -161,7 +162,7 @@ export function RoomCanvas({
             its top half rather than a void. */}
         <pointLight
           color={LIGHTS.wallWash.color}
-          intensity={LIGHTS.wallWash.intensity * ROOM.bounce * dusk.bounce}
+          intensity={LIGHTS.wallWash.intensity * ROOM.bounce * weather.bounce}
           position={LIGHTS.wallWash.position}
           distance={LIGHTS.wallWash.distance}
           decay={2}
@@ -170,7 +171,7 @@ export function RoomCanvas({
         {/* Warm rim from the front right. */}
         <directionalLight
           color={LIGHTS.rim.color}
-          intensity={LIGHTS.rim.intensity * ROOM.rim * dusk.rim}
+          intensity={LIGHTS.rim.intensity * ROOM.rim * weather.rim}
           position={LIGHTS.rim.position}
         />
 
@@ -180,7 +181,7 @@ export function RoomCanvas({
           idleMotion={!reduceMotion}
           spilled={spilled}
           vision={vision}
-          night={night}
+          raining={raining}
           focused={focused}
         />
 

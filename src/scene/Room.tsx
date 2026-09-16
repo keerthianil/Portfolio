@@ -11,8 +11,10 @@ import {
   makeCalendarTexture,
   makeCoffeeTexture,
   makeLaptopTexture,
+  makeBeadTexture,
   makeLeafTexture,
   makeMouseTexture,
+  makeRainTexture,
   makeNoteTexture,
   makeReaderTexture,
   makeScreenTexture,
@@ -117,8 +119,8 @@ interface RoomProps {
   spilled: boolean;
   /** Which colour vision the wall switch by the door is currently simulating. */
   vision: ColourVision;
-  /** True once the sun has gone down and the room is on its own lamps. */
-  night: boolean;
+  /** True while it is raining outside and the room has gone cool with it. */
+  raining: boolean;
   /** Which object's mirror button currently has focus, if any. */
   focused: Hotspot | null;
 }
@@ -231,7 +233,7 @@ export function Room({
   idleMotion,
   spilled,
   vision,
-  night,
+  raining,
   focused,
 }: RoomProps) {
   /**
@@ -282,6 +284,7 @@ export function Room({
   const puddle = useRef<Mesh>(null);
   const stream = useRef<Group>(null);
   const pen = useRef<Group>(null);
+  const rain = useRef<Group>(null);
   /** 0 is upright and full, 1 is over and empty. */
   const progress = useRef(0);
   const screen = useMemo(() => makeScreenTexture(), []);
@@ -297,10 +300,48 @@ export function Room({
   const wood = useMemo(() => makeWoodTexture(), []);
   const mouseMap = useMemo(() => makeMouseTexture(), []);
   const mouseShell = useMemo(() => makeMouseGeometry(), []);
+  const rainMap = useMemo(() => makeRainTexture(), []);
+  const beadMap = useMemo(() => makeBeadTexture(), []);
 
-  // The pane is repainted when the sun goes down, and only then. The stars
-  // and the moon are in the same canvas as the photograph.
-  useEffect(() => sky.setNight(night), [sky, night]);
+  // The pane is repainted when the weather turns, and only then. The cloud
+  // and the far rain are in the same canvas as the photograph.
+  useEffect(() => sky.setRain(raining), [sky, raining]);
+
+  /**
+   * The rain on the glass. Where each drop starts, how long its tail is and
+   * how fast it falls, decided once.
+   *
+   * They fall at different speeds on purpose. Give every drop the same speed
+   * and the pane reads as one sheet of texture sliding down, which is what
+   * rain in a video game looked like in about 2004.
+   */
+  const drops = useMemo(() => {
+    const noise = (n: number) => {
+      const x = Math.sin(n * 57.3 + 19.1) * 43758.5453;
+      return x - Math.floor(x);
+    };
+    return Array.from({ length: 20 }, (_, i) => ({
+      x: (noise(i * 5 + 1) - 0.5) * 1.06,
+      y: (noise(i * 5 + 2) - 0.5) * 1.3,
+      z: 0.0575 + noise(i * 5 + 3) * 0.002,
+      length: 0.13 + noise(i * 5 + 4) * 0.15,
+      width: 0.03 + noise(i * 5 + 6) * 0.018,
+      speed: 0.42 + noise(i * 5 + 5) * 0.55,
+    }));
+  }, []);
+
+  /** The ones that have stopped and are sitting on the glass. */
+  const beads = useMemo(() => {
+    const noise = (n: number) => {
+      const x = Math.sin(n * 113.7 + 71.9) * 43758.5453;
+      return x - Math.floor(x);
+    };
+    return Array.from({ length: 22 }, (_, i) => ({
+      x: (noise(i * 4 + 1) - 0.5) * 1.08,
+      y: (noise(i * 4 + 2) - 0.5) * 1.24,
+      r: 0.018 + noise(i * 4 + 3) * 0.03,
+    }));
+  }, []);
   useEffect(
     () => () => {
       screen.dispose();
@@ -316,6 +357,8 @@ export function Room({
       wood.dispose();
       mouseMap.dispose();
       mouseShell.dispose();
+      rainMap.dispose();
+      beadMap.dispose();
     },
     [
       screen,
@@ -331,6 +374,8 @@ export function Room({
       wood,
       mouseMap,
       mouseShell,
+      rainMap,
+      beadMap,
     ],
   );
 
@@ -380,6 +425,27 @@ export function Room({
     steam.current.position.y = 0.105 + k * 0.22;
     steam.current.rotation.y = t * 0.35;
     steam.current.scale.setScalar(0.5 + k * 1.1);
+  });
+
+  /**
+   * The rain runs down the glass.
+   *
+   * Each drop falls at its own speed and wraps back to the top of the pane
+   * when it leaves the bottom, so twenty quads are a shower that never ends
+   * and never repeats visibly.
+   *
+   * Positions come off the ref rather than out of state. Twenty drops at
+   * sixty frames a second is twelve hundred re-renders a second if this is
+   * state, and none of them would be a render anybody needed.
+   */
+  useFrame((_, delta) => {
+    const group = rain.current;
+    if (!group) return;
+    for (let i = 0; i < group.children.length; i += 1) {
+      const drop = group.children[i];
+      drop.position.y -= drops[i].speed * delta;
+      if (drop.position.y < -0.72) drop.position.y = 0.72;
+    }
   });
 
   /**
@@ -704,10 +770,12 @@ export function Room({
         {/*
           The pane, and the one thing on this wall you can click.
 
-          Click it and the sun finishes going down: the photograph goes to
-          evening, the stars come out in it, and every light in the room
-          except the desk lamp and the monitor drops away. Click it again and
-          it is afternoon.
+          Click it and it rains: the photograph goes overcast, drops start
+          running down the glass, and the light in the room turns cool with
+          it. Click it again and the sun is back out.
+
+          Nothing is being demonstrated. Every other thing you can touch in
+          this room is making a point, and one of them is allowed not to.
 
           The pane is the hot object rather than the whole window, because
           Hot scales what it wraps by three percent and a window frame that
@@ -725,7 +793,7 @@ export function Room({
               map={sky.texture}
               emissiveMap={sky.texture}
               emissive={C.cream}
-              {...lift(night ? 0.3 : 0.9, 0.35)}
+              {...lift(raining ? 0.3 : 0.5, 0.35)}
               roughness={1}
             />
           </mesh>
@@ -749,18 +817,60 @@ export function Room({
 
         {/* The glass over the picture. A single sheet with almost nothing in
             it, so the photograph is what you see and the glass is only the
-            reason it has a sheen. */}
+            reason it has a sheen. Wet glass carries more of one. */}
         <mesh position={[0, 1.62, 0.055]}>
           <planeGeometry args={[1.14, 1.3]} />
           <meshStandardMaterial
             color={C.glass}
             transparent
-            opacity={night ? 0.16 : 0.08}
+            opacity={raining ? 0.14 : 0.08}
             roughness={0.12}
             metalness={0.3}
             depthWrite={false}
           />
         </mesh>
+
+        {/*
+          The water on the glass, in two parts.
+
+          The beads have stopped and are sitting there. The drops are still
+          running, and they are the only thing in this room that moves on its
+          own without being asked, so they are also the only thing here that
+          reduced motion has to take away. It takes the running drops and
+          leaves the beads: a wet window with nothing moving on it is still a
+          wet window, and it is still raining in the picture behind it.
+        */}
+        <group position={[0, 1.62, 0]} visible={raining}>
+          {beads.map((bead, i) => (
+            <mesh key={i} position={[bead.x, bead.y, 0.057]}>
+              <planeGeometry args={[bead.r, bead.r]} />
+              <meshBasicMaterial
+                map={beadMap}
+                transparent
+                opacity={0.85}
+                depthWrite={false}
+              />
+            </mesh>
+          ))}
+        </group>
+
+        <group
+          ref={rain}
+          position={[0, 1.62, 0]}
+          visible={raining && idleMotion}
+        >
+          {drops.map((drop, i) => (
+            <mesh key={i} position={[drop.x, drop.y, drop.z]}>
+              <planeGeometry args={[drop.width, drop.length]} />
+              <meshBasicMaterial
+                map={rainMap}
+                transparent
+                opacity={0.9}
+                depthWrite={false}
+              />
+            </mesh>
+          ))}
+        </group>
       </group>
 
       {/*

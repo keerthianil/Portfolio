@@ -30,14 +30,23 @@ const HOTSPOT_ROUTES: Partial<Record<Hotspot, RouteId>> = {
  * If the scene throws at runtime, fall back rather than take the page down
  * with it. A dropped GPU context or a driver bug should cost you the room, not
  * the site.
+ *
+ * It reports the failure upwards as well as swallowing it. The curtain over
+ * the page only lifts once the scene says it is ready, and a scene that threw
+ * on its way up never says anything, so catching the error silently left the
+ * whole site behind a black rectangle with the working flat view underneath
+ * it. A scene that has failed is as ready as it is ever going to be.
  */
 class SceneBoundary extends Component<
-  { fallback: ReactNode; children: ReactNode },
+  { fallback: ReactNode; children: ReactNode; onFail: () => void },
   { failed: boolean }
 > {
   state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
+  }
+  componentDidCatch() {
+    this.props.onFail();
   }
   render() {
     return this.state.failed ? this.props.fallback : this.props.children;
@@ -60,7 +69,7 @@ export const SceneStage = memo(function SceneStage({
   onReady,
   spilled,
   vision,
-  night,
+  raining,
   focused,
   flat,
 }: {
@@ -71,7 +80,7 @@ export const SceneStage = memo(function SceneStage({
   onReady: () => void;
   spilled: boolean;
   vision: ColourVision;
-  night: boolean;
+  raining: boolean;
   focused: Hotspot | null;
   /** Null while the WebGL probe is still pending. */
   flat: boolean | null;
@@ -93,7 +102,7 @@ export const SceneStage = memo(function SceneStage({
   if (flat) return fallback;
 
   return (
-    <SceneBoundary fallback={fallback}>
+    <SceneBoundary fallback={fallback} onFail={onReady}>
       <RoomCanvas
         className="absolute inset-0"
         camera={camera}
@@ -103,7 +112,7 @@ export const SceneStage = memo(function SceneStage({
         reduceMotion={!!shouldReduce}
         spilled={spilled}
         vision={vision}
-        night={night}
+        raining={raining}
         focused={focused}
       />
     </SceneBoundary>

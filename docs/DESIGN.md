@@ -37,14 +37,26 @@ A door on the left wall and a window on the right, because a room with three
 blank walls is a set. Both do something. Beside the door is a switch that runs
 the room through the three dichromacies, which is the argument against letting
 colour carry meaning on its own and it lands faster than a paragraph about it
-would. The window is where the daylight comes from, and clicking it takes the
-daylight away: the sun finishes going down, the stars come out in the
-photograph, and the room drops to the desk lamp and the monitor. Nothing you
-made gets looked at in one light.
+would. The window is where the daylight comes from, and clicking it makes it
+rain: the sky goes overcast, drops run down the glass, and the light in the
+room turns cool and flat with it.
+
+The rain is not making a point. Everything else you can touch in this room is
+an argument, and one of them is allowed to just be nice to look at. The drops
+are geometry rather than an animated texture, because moving a texture means a
+GPU upload per frame and moving twenty quads does not, and they are the one
+thing in the room that reduced motion takes away outright: the beads clinging
+to the glass stay, the running drops do not.
 
 Three things on the walls, and the third is the mug. Each is one click and puts
 a two line card up for six seconds. None of them is undoable, which is the only
 reason a portfolio is allowed to have any of them.
+
+The photograph in the window has its saturation pushed and its emissive pulled
+down. An emissive map is what makes a window read as a source of light instead
+of a picture hung on a wall, and it washes a photograph toward white as it
+brightens. Asking it to glow less and asking the canvas for more colour gets a
+window that is bright and is still a sunset.
 
 The monitor is a screensaver: one project, held 3.4s, then changed over 0.7s.
 The canvas behind it is only repainted while that change is in flight and only

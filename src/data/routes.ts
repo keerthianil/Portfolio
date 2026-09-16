@@ -113,6 +113,6 @@ export const SCENE_PROPS: SceneProp[] = [
   {
     object: "window",
     label: "the window",
-    action: "Change the light through",
+    action: "Start or stop the rain at",
   },
 ];

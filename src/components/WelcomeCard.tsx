@@ -90,7 +90,7 @@ export function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
             instead of saying "currently" forever. */}
         <p className="border-highlight/40 bg-accent/15 text-text/90 rounded-full border px-4 py-2 text-[13px]">
           <span className="bg-highlight mr-2 inline-block h-2 w-2 rounded-full align-middle" aria-hidden="true" />
-          Open to full-time roles from January 2026
+          Open to full-time roles from January 2027
         </p>
 
         <button
