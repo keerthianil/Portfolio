@@ -47,9 +47,22 @@ export const SCENE = {
   highlight: new Color("#d4a0a0"),
   cream: new Color("#f2eae1"),
   paper: new Color("#f0ece0"),
-  /** The paper plane. A shade under the notebook, so it is paper and not a
-      light source. */
-  plane: new Color("#e6e0d2"),
+
+  /**
+   * The rubber duck. The one saturated thing in this room that is not maroon,
+   * which is a rule being broken on purpose: a duck that is not yellow is not
+   * a duck. It is pulled toward the sticky note rather than toward a bath toy,
+   * so it sits in the room's own family of warm yellows instead of arriving
+   * from a different palette.
+   */
+  duck: new Color("#e9bc42"),
+  duckBeak: new Color("#d9762c"),
+
+  /** The desk lamp: a dark painted shell, warm inside, steel at the joints. */
+  lampMetal: new Color("#2e2b2a"),
+  lampJoint: new Color("#6e6a66"),
+  lampShade: new Color("#3f3936"),
+  lampGlow: new Color("#ffe3b4"),
   note: new Color("#e8d77c"),
 
   mug: new Color("#2b2d33"),
@@ -108,17 +121,16 @@ export const LIGHTS = {
   /**
    * Overhead, front-left. Does the actual work of making the desk readable.
    *
-   * It moved in toward the middle of the desk. Out at x -1.15 it was closer
-   * to the door on the left wall than to the thing it is supposed to be
-   * lighting, and with an inverse square falloff that put the door two and a
-   * half times over: tone mapping then compressed it toward white, so
-   * repainting the timber darker changed almost nothing. A light aimed at
-   * the desk is the fix for a wall that is too bright, not a darker wall.
+   * It moved in toward the middle of the desk once, to stop the door on the
+   * left wall being blown out, and moved straight back: it also lights the
+   * switch beside that door, and the switch went dark with it. The door was
+   * fixed where it should have been, in the timber, and the light went back
+   * to lighting the room.
    */
   key: {
     color: "#fff0dd",
-    intensity: 18,
-    position: [-0.72, 2.8, 1.55] as [number, number, number],
+    intensity: 20,
+    position: [-1.15, 2.75, 1.7] as [number, number, number],
     angle: 1.05,
     penumbra: 1,
   },
@@ -146,7 +158,7 @@ export const LIGHTS = {
   /** Maroon off the back wall. This is what keeps the shadows warm, not grey. */
   bounce: {
     color: "#8b2332",
-    intensity: 2.5,
+    intensity: 2.75,
     position: [-1.15, 1.5, -1.5] as [number, number, number],
     distance: 2.8,
   },
@@ -170,17 +182,30 @@ export const LIGHTS = {
   /** Warm rim from the front right, so objects separate from the background. */
   rim: {
     color: "#f0d9c0",
-    intensity: 0.64,
+    intensity: 0.74,
     position: [2.4, 1.7, 2] as [number, number, number],
   },
   /** A dim wash high on the back wall, so its top half is a wall and not a void. */
   wallWash: {
     color: "#a8404f",
-    intensity: 1.35,
+    intensity: 1.55,
     position: [0, 2.4, -1.0] as [number, number, number],
     distance: 3.4,
   },
-  ambient: { color: "#6a5449", intensity: 1.18 },
+  ambient: { color: "#6a5449", intensity: 1.34 },
+} as const;
+
+/**
+ * The desk lamp, which is the one light in the room attached to a thing you
+ * can see and move. It lives with the geometry rather than in the rig above,
+ * because it is parented to the lamp's own head and swings with it.
+ */
+export const LAMP = {
+  color: "#ffddab",
+  intensity: 3.6,
+  angle: 0.62,
+  penumbra: 0.75,
+  distance: 2.2,
 } as const;
 
 

@@ -18,7 +18,8 @@ export function RoomCanvas({
   onReady,
   spilled,
   vision,
-  flying,
+  prodded,
+  lampAim,
   focused,
   className,
 }: {
@@ -29,7 +30,8 @@ export function RoomCanvas({
   onReady?: () => void;
   spilled: boolean;
   vision: ColourVision;
-  flying: boolean;
+  prodded: boolean;
+  lampAim: number;
   focused: Hotspot | null;
   className?: string;
 }) {
@@ -156,7 +158,8 @@ export function RoomCanvas({
           idleMotion={!reduceMotion}
           spilled={spilled}
           vision={vision}
-          flying={flying}
+          prodded={prodded}
+          lampAim={lampAim}
           focused={focused}
         />
 

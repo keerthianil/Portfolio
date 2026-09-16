@@ -48,19 +48,34 @@ its top twenty centimetres above the door's, and painted the brightest colour
 in the room. The door is a leaf with two stiles and three rails standing proud
 of it, and the panels are the leaf showing through between them.
 
-Three things you can touch, and none of them is on a wall. The mug goes over
-and rights itself. The switch runs the simulation. The paper plane on the desk
-takes a circuit of the room and lands back on the spot it took off from.
+Four things you can touch. The mug goes over and rights itself. The switch by
+the door runs the simulation. The lamp swings its arm across the desk and the
+light goes with it. The rubber duck between the laptop and the calendar tips
+over, rocks, and squeaks.
 
-The plane is not making a point. Everything else you can touch here is an
+The duck is not making a point. Everything else you can touch here is an
 argument and one of them is allowed to just be nice, and a portfolio that
 cannot afford one of those is making a claim about its author that it does not
-intend to make. It is also the one thing in the room where reduced motion
-changes what happens rather than how fast it happens: the plane hops a
-centimetre and settles instead of crossing the frame, because a thrown object
-sweeping through somebody's field of view is exactly what the setting is for.
+intend to make. It is also the one saturated thing in this room that is not
+maroon, which is a rule broken on purpose: a duck that is not yellow is not a
+duck. The yellow is pulled toward the sticky note rather than toward a bath
+toy, so it sits in the room's own family of warm yellows.
 
-Each of the three puts a two line card up for six seconds. None of them is
+Its squeak is synthesised in the browser with two oscillators rather than
+loaded as a file. A rubber duck makes two noises and not one, the squeeze
+rising and the release falling, and a fifth of a second of that is an envelope
+and two pitch bends. It does not need to be an asset.
+
+There was no lamp for a long time and there was still a light on the desk: it
+came from a bar clipped to the top of the monitor, which is a real object and
+is also not a lamp, so the brightest thing on the desk came from something
+nobody could see. The lamp's arm is laid out by where its joints are rather
+than as a chain of nested rotations, because nested rotations compound and the
+first version summed to about ninety degrees and shone at the viewer. Its
+spot light is a child of the head, so nothing in the code moves the light: the
+arm turns and the light is bolted to it.
+
+Each of the four puts a two line card up for six seconds. None of them is
 undoable, which is the only reason a portfolio is allowed to have any of them.
 
 The photograph in the window has its saturation pushed and its emissive pulled

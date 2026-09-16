@@ -17,6 +17,7 @@ import {
   type RouteId,
 } from "@/data/routes";
 import { CAMERA_LEAD_MS } from "@/lib/motion";
+import { squeak } from "@/lib/squeak";
 import { flatStore } from "@/lib/webgl";
 import type { Hotspot } from "@/scene/Room";
 import { COLOUR_VISION, type ColourVision } from "@/scene/palette";
@@ -486,41 +487,68 @@ export function Experience() {
   /**
    * The window, and the sun going down behind it.
    *
-   * Throw it and it takes a lap of the room: out over the desk, around to
-   * the left, back along the far wall and down onto the spot it took off
-   * from. Five seconds, and then it is folded on the desk again.
+   * Prod it and it tips onto its front and rocks until it stops, and it
+   * squeaks. The squeak is synthesised rather than loaded: a fifth of a
+   * second of sound that is two pitch bends does not need to be a file in the
+   * repo.
    *
    * Nothing is being demonstrated by it. The mug is about undo and the switch
-   * by the door is about colour, and this one is a paper plane. Every room
-   * somebody actually works in has one thing in it that is there for no
-   * reason at all, and a portfolio that cannot afford one of those is making
-   * a different claim about its author than it thinks it is.
-   *
-   * This is the third thing to stand in this slot. A frosted pane dropped the
-   * room's contrast to make a point about focus indicators, which was worth
-   * making and was making it by being ugly on purpose, so the point moved to
-   * the focus ring being on all the time. Then the window rained. The window
-   * is scenery now and the fun is an object on the desk, which is where you
-   * are already looking.
+   * by the door is about colour, and this is a duck. Every desk somebody
+   * actually works at has one thing on it that is there for no reason, and a
+   * portfolio that cannot afford one of those is making a claim about its
+   * author that it does not intend to make.
    */
-  const [flying, setFlying] = useState(false);
-  const landTimer = useRef<number | undefined>(undefined);
+  const [prodded, setProdded] = useState(false);
+  const settleTimer = useRef<number | undefined>(undefined);
 
-  useEffect(() => () => window.clearTimeout(landTimer.current), []);
+  useEffect(() => () => window.clearTimeout(settleTimer.current), []);
 
-  const throwPlane = useCallback(() => {
-    if (flying) return;
-    setFlying(true);
+  const prodDuck = useCallback(() => {
+    if (prodded) return;
+    setProdded(true);
+    squeak();
     setNote({
-      title: "Paper plane",
-      body: "It comes back. Nothing in this room does anything you cannot undo, which is the only reason any of it is allowed to be here.",
+      title: "Rubber duck",
+      body: "The one on a developer's desk is there to have the bug explained to it out loud, which works, and that is the part nobody can account for.",
     });
-    setAnnouncement("The paper plane is in the air. It lands in a moment.");
-    landTimer.current = window.setTimeout(() => {
-      setFlying(false);
-      setAnnouncement("The paper plane has landed on the desk.");
-    }, 5200);
-  }, [flying]);
+    setAnnouncement("The duck squeaks and rocks.");
+    settleTimer.current = window.setTimeout(() => setProdded(false), 1500);
+  }, [prodded]);
+
+  /**
+   * The desk lamp, and which end of the desk it is pointed at.
+   *
+   * There was no lamp in this room and there was still a light on the desk,
+   * which came from a bar clipped to the top of the monitor. That is a real
+   * object and it is also not a lamp, so the brightest thing on the desk came
+   * from something nobody could see. Clicking this one swings the arm across
+   * across the desk, and the light is a child of the lamp's head, so there is
+   * nothing here that moves the light. The arm turns and the light is bolted
+   * to it.
+   */
+  const [lampAim, setLampAim] = useState(0);
+  const swingLamp = useCallback(() => {
+    setLampAim((value) => {
+      const next = value === 0 ? 1 : 0;
+      setNote(
+        next === 1
+          ? {
+              title: "Lamp swung out",
+              body: "Over the middle of the desk. It is the only light in this room attached to a thing you can move, and the pool moves with it.",
+            }
+          : {
+              title: "Lamp over the laptop",
+              body: "Back where it was, which is where a lamp on a desk spends most of its life.",
+            },
+      );
+      setAnnouncement(
+        next === 1
+          ? "The lamp is swung out over the desk."
+          : "The lamp is back over the laptop.",
+      );
+      return next;
+    });
+  }, []);
 
   /**
    * Which object's mirror button has focus, so the scene can put a ring on it
@@ -534,9 +562,10 @@ export function Experience() {
     (object: string) => {
       if (object === "mug") knockOver();
       if (object === "lightSwitch") cycleVision();
-      if (object === "plane") throwPlane();
+      if (object === "duck") prodDuck();
+      if (object === "lamp") swingLamp();
     },
-    [knockOver, cycleVision, throwPlane],
+    [knockOver, cycleVision, prodDuck, swingLamp],
   );
 
   return (
@@ -574,7 +603,8 @@ export function Experience() {
           onProp={playProp}
           onReady={markSceneReady}
           spilled={spilled}
-          flying={flying}
+          prodded={prodded}
+          lampAim={lampAim}
           vision={vision}
           focused={focused}
           flat={flat}
