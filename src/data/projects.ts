@@ -221,18 +221,21 @@ export const PROJECTS: Project[] = [
 ];
 
 /**
- * `resume` is deliberately empty, and it is deliberately a `string` rather
- * than a literal.
+ * `resume` is a `string` rather than a literal, and it takes either a path in
+ * this site or a link to somewhere else.
  *
- * The resume is not in this repository. It is a personal document, the
- * repository is public, and anything committed to a public repository is
- * public for as long as the repository exists whether or not it is still in
- * the latest commit. So it lives somewhere else and this holds the link.
+ * It is a path today. The resume ships in `public/` and the site serves it,
+ * which is the only arrangement where the link works: the site is built from
+ * this repository, so a file that is not in the repository is not on the
+ * server either. It was taken out once on the grounds that a public
+ * repository makes it public, which is true and is also true of the site,
+ * which is the whole point of putting it there.
  *
- * Paste a share link here and the three places that link to it come back: the
- * About footer, the Resume icon on the laptop's desktop, and the line under
- * the timeline. Leave it empty and all three stay away rather than pointing
- * at a file that is not there. See `src/components/ResumeLink.tsx`.
+ * Moving it to a share link later is a one line change here and nothing else,
+ * because every link to it goes through `ResumeLink`. Empty it and the three
+ * places that link to it disappear rather than pointing at a file that is not
+ * there: the About footer, the Resume icon on the laptop's desktop, and the
+ * line under the timeline.
  */
 export const CONTACT: {
   email: string;
@@ -243,5 +246,5 @@ export const CONTACT: {
   email: "keerthiareddy6@gmail.com",
   github: "https://github.com/keerthianil",
   linkedin: "https://linkedin.com/in/keerthiareddy",
-  resume: "",
+  resume: "/KeerthiAnilResume.pdf",
 };

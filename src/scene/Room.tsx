@@ -848,15 +848,20 @@ export function Room({
 
         {/* The glass. One photograph, lit from behind by its own emissive so
             the window is a source of light and not a picture on a wall. */}
+        {/*
+          Unlit, on purpose.
+
+          It was a standard material, so the room's own lights fell on it and
+          the photograph got darker every time anything in here dimmed,
+          including the blind that is hanging in front of it. What is out of a
+          window does not change because somebody drew the blind: the blind
+          covers it, the weather outside carries on. A basic material takes
+          the texture at its own value and ignores every light in the room,
+          which is also the honest description of a window.
+        */}
         <mesh position={[0, 1.52, 0.012]}>
           <planeGeometry args={[1.02, 1.08]} />
-          <meshStandardMaterial
-            map={sky.texture}
-            emissiveMap={sky.texture}
-            emissive={C.cream}
-            {...lift(0.32, 0)}
-            roughness={1}
-          />
+          <meshBasicMaterial map={sky.texture} color={"#cdc9c2"} />
         </mesh>
 
         {/* The sheen on it, so there is glass in front of the picture. */}

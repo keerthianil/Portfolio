@@ -6,15 +6,14 @@ import { CONTACT } from "@/data/projects";
 /**
  * A link to the resume, or nothing at all.
  *
- * The resume is not in this repository. It is a personal document and the
- * repository is public, so it is hosted somewhere else and `CONTACT.resume`
- * holds the link. While that is empty this renders nothing, which is the point
- * of the component: there is one place to paste a URL and three places that
- * quietly disappear until somebody does, rather than three links to a file
- * that is not there.
+ * `CONTACT.resume` holds either a path in this site or a link to a copy
+ * hosted somewhere else, and this works for both. While it is empty this
+ * renders nothing, which is the point of the component: there is one place to
+ * change and three places that quietly disappear rather than three links to a
+ * file that is not there.
  *
- * A path gets `download`, because that only works same origin. A URL opens in
- * a new tab instead, which is what a browser does with a cross origin
+ * A path gets `download`, because that attribute only works same origin. A URL
+ * opens in a new tab instead, which is what a browser does with a cross origin
  * `download` anyway.
  */
 export function ResumeLink({

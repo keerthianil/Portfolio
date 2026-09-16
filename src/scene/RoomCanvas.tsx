@@ -1,14 +1,86 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { AdaptiveDpr, ContactShadows } from "@react-three/drei";
 import { Object3D } from "three";
+import type { AmbientLight, DirectionalLight, PointLight } from "three";
 import type { CameraState } from "@/data/routes";
 import { CameraRig } from "./CameraRig";
 import { ROOM } from "./config";
 import { LIGHTS, SCENE, type ColourVision } from "./palette";
 import { Room, type Hotspot } from "./Room";
+
+/**
+ * The three lights the blind takes down with it: the daylight through the
+ * window, the warm rim off the front right, which is the sun, and a little of
+ * the ambient.
+ *
+ * They are animated here rather than set from the prop, and they trail the
+ * slats on purpose. Driven straight off the prop the room went dark on the
+ * click, a full second before the blind it was supposed to be caused by had
+ * finished coming down, which reads as a light switch somebody hid in a
+ * window.
+ *
+ * The level damps slower than the slats fall, and then the first 45% of it
+ * does nothing at all. A blind that is half down is not half a blind: the
+ * slats are still open enough that the light is barely touched, and the room
+ * only loses it over the last part of the travel, as the slats close on each
+ * other. Without the dead zone most of the dimming was over before the blind
+ * had visibly landed, which was the whole complaint.
+ *
+ * Mutating the light intensities in a frame loop rather than re-rendering:
+ * this changes sixty times a second for about a second, and not one of those
+ * is a render anybody needs.
+ */
+function Daylight({ blindsDown }: { blindsDown: number }) {
+  const ambient = useRef<AmbientLight>(null);
+  const daylight = useRef<PointLight>(null);
+  const rim = useRef<DirectionalLight>(null);
+  const level = useRef(0);
+
+  useFrame((_, delta) => {
+    level.current += (blindsDown - level.current) * Math.min(1, delta * 2.6);
+    const past = Math.max(0, (level.current - 0.45) / 0.55);
+    // Squared on top of the dead zone, so what light does go is lost late.
+    const shut = Math.min(1, past * past);
+
+    // A closed venetian blind is not a wall. The slats are tilted and some of
+    // the daylight gets past them, so this never reaches nothing.
+    if (daylight.current)
+      daylight.current.intensity = LIGHTS.window.intensity * (1 - shut * 0.84);
+    if (rim.current)
+      rim.current.intensity = LIGHTS.rim.intensity * ROOM.rim * (1 - shut * 0.45);
+    if (ambient.current)
+      ambient.current.intensity = LIGHTS.ambient.intensity * (1 - shut * 0.2);
+  });
+
+  return (
+    <>
+      <ambientLight
+        ref={ambient}
+        color={LIGHTS.ambient.color}
+        intensity={LIGHTS.ambient.intensity}
+      />
+      {/* Daylight through the window on the right wall. */}
+      <pointLight
+        ref={daylight}
+        color={LIGHTS.window.color}
+        intensity={LIGHTS.window.intensity}
+        position={LIGHTS.window.position}
+        distance={LIGHTS.window.distance}
+        decay={2}
+      />
+      {/* Warm rim from the front right, which is the sun. */}
+      <directionalLight
+        ref={rim}
+        color={LIGHTS.rim.color}
+        intensity={LIGHTS.rim.intensity * ROOM.rim}
+        position={LIGHTS.rim.position}
+      />
+    </>
+  );
+}
 
 export function RoomCanvas({
   camera,
@@ -43,16 +115,6 @@ export function RoomCanvas({
    * the world origin, which is the floor in front of the desk. The bar light
    * has to point at the keyboard, so it gets a real target to aim at.
    */
-  /**
-   * The blind over the window, in the light rig.
-   *
-   * It takes most of the daylight out and leaves a little, because a closed
-   * venetian blind is not a wall: the slats are tilted and some of the light
-   * gets past them. The ambient comes down with it, so the room reads as
-   * shaded rather than as the same room with one lamp switched off.
-   */
-  const shade = 1 - blindsDown * 0.84;
-
   const barTarget = useMemo(() => {
     const object = new Object3D();
     object.position.set(...LIGHTS.bar.target);
@@ -87,10 +149,7 @@ export function RoomCanvas({
       >
         <AdaptiveDpr pixelated />
 
-        <ambientLight
-          color={LIGHTS.ambient.color}
-          intensity={LIGHTS.ambient.intensity * (1 - blindsDown * 0.2)}
-        />
+        <Daylight blindsDown={blindsDown} />
 
         {/* Key: overhead front-left, the light that makes the desk readable. */}
         <spotLight
@@ -115,15 +174,6 @@ export function RoomCanvas({
           penumbra={LIGHTS.bar.penumbra}
           distance={LIGHTS.bar.distance}
           target={barTarget}
-          decay={2}
-        />
-
-        {/* Daylight through the window on the right wall. */}
-        <pointLight
-          color={LIGHTS.window.color}
-          intensity={LIGHTS.window.intensity * shade}
-          position={LIGHTS.window.position}
-          distance={LIGHTS.window.distance}
           decay={2}
         />
 
@@ -153,13 +203,6 @@ export function RoomCanvas({
           position={LIGHTS.wallWash.position}
           distance={LIGHTS.wallWash.distance}
           decay={2}
-        />
-
-        {/* Warm rim from the front right. */}
-        <directionalLight
-          color={LIGHTS.rim.color}
-          intensity={LIGHTS.rim.intensity * ROOM.rim * (1 - blindsDown * 0.45)}
-          position={LIGHTS.rim.position}
         />
 
         <Room
