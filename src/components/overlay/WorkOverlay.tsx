@@ -1,8 +1,10 @@
 "use client";
 
+import { useCallback } from "react";
 import { AnimatePresence } from "motion/react";
 import { Code, ExternalLink, Mail } from "lucide-react";
 import { CONTACT, PROJECTS } from "@/data/projects";
+import { setReturnTo } from "@/lib/returnTo";
 import { useSubRoute } from "@/lib/useSubRoute";
 import { CaseStudy } from "./CaseStudy";
 import { ProjectCard } from "./ProjectCard";
@@ -18,6 +20,16 @@ export function WorkOverlay({ onClose }: { onClose: () => void }) {
     open: openProject,
     close: closeProject,
   } = useSubRoute("work");
+
+  /**
+   * A case study links into the research document behind it. Record the case
+   * study we are leaving so that closing the document comes back to it, with
+   * the projects window still open underneath.
+   */
+  const openResearch = useCallback((researchId: string) => {
+    setReturnTo(window.location.hash);
+    window.location.hash = `research/${researchId}`;
+  }, []);
 
   return (
     <WindowFrame
@@ -69,6 +81,8 @@ export function WorkOverlay({ onClose }: { onClose: () => void }) {
             <li>
               <a
                 href={`mailto:${CONTACT.email}`}
+                target="_blank"
+                rel="noreferrer"
                 className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-[15px] transition-colors duration-200"
               >
                 <Mail size={16} aria-hidden="true" />
@@ -78,6 +92,8 @@ export function WorkOverlay({ onClose }: { onClose: () => void }) {
             <li>
               <a
                 href={CONTACT.github}
+                target="_blank"
+                rel="noreferrer"
                 className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-[15px] transition-colors duration-200"
               >
                 <Code size={16} aria-hidden="true" />
@@ -87,6 +103,8 @@ export function WorkOverlay({ onClose }: { onClose: () => void }) {
             <li>
               <a
                 href={CONTACT.linkedin}
+                target="_blank"
+                rel="noreferrer"
                 className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-[15px] transition-colors duration-200"
               >
                 <ExternalLink size={16} aria-hidden="true" />
@@ -99,7 +117,12 @@ export function WorkOverlay({ onClose }: { onClose: () => void }) {
 
       <AnimatePresence>
         {openId && (
-          <CaseStudy key={openId} id={openId} onClose={closeProject} />
+          <CaseStudy
+            key={openId}
+            id={openId}
+            onClose={closeProject}
+            onOpenResearch={openResearch}
+          />
         )}
       </AnimatePresence>
     </WindowFrame>

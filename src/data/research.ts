@@ -540,6 +540,12 @@ export const RESEARCH: ResearchItem[] = [
     date: "Aug 2026",
     summary:
       "A heuristic evaluation of five fitness app onboarding flows, a reproducible score for onboarding cost, and a redesign that cuts eighteen screens to six.",
+    links: [
+      {
+        href: "https://www.figma.com/design/Un0EwvJ568KPnA6QDOcnXe/Onboarding-Cliff?node-id=0-1",
+        label: "The redesign, in Figma",
+      },
+    ],
     facts: [
       { value: "5", label: "apps scored" },
       { value: "100", label: "point scale, higher is worse" },

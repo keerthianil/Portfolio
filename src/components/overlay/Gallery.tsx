@@ -22,6 +22,11 @@ import { useModalFocus } from "@/lib/useModalFocus";
  * Thumbnails open full size. A 240px thumbnail of a phone screenshot tells you
  * roughly nothing, so a gallery without a way through to the real image is a
  * decoration rather than a section.
+ *
+ * Every still carries a number, counted across the whole section rather than
+ * per group, so the prose above can say "screen 4" and mean something. The
+ * order of `ASSETS[project]` is therefore load bearing: reorder a group and the
+ * references in the case study point at the wrong picture.
  */
 
 interface OpenShot {
@@ -180,10 +185,12 @@ export function Gallery({
                 {group.items.map((item) => {
                   const href = src(group, item);
                   const index = flat.findIndex((shot) => shot.src === href);
+                  const number = (index < 0 ? 0 : index) + 1;
                   return (
                     <li key={item.file} className="flex">
                       <button
                         type="button"
+                        aria-label={`Screen ${number}. ${item.alt}`}
                         onClick={() =>
                           setOpen({
                             src: href,
@@ -192,8 +199,17 @@ export function Gallery({
                             index: index < 0 ? 0 : index,
                           })
                         }
-                        className="group border-border hover:border-highlight/50 flex w-full cursor-pointer flex-col overflow-hidden rounded-lg border text-left transition-colors duration-200"
+                        className="group border-border hover:border-highlight/50 relative flex w-full cursor-pointer flex-col overflow-hidden rounded-lg border text-left transition-colors duration-200"
                       >
+                        {/* The number the prose refers to. Drawn on the image
+                            rather than under it, so it stays attached to the
+                            picture when the grid reflows. */}
+                        <span
+                          aria-hidden="true"
+                          className="bg-bg/80 text-text absolute top-2 left-2 z-10 rounded-md px-1.5 py-0.5 font-mono text-[11px] tabular-nums backdrop-blur-sm"
+                        >
+                          {number}
+                        </span>
                         {/* Already sized and converted once. Running these
                             through the image pipeline would re-encode an
                             optimised file. */}
@@ -281,7 +297,7 @@ function Lightbox({
       >
         <div className="flex w-full items-center justify-between gap-3">
           <p className="text-text-muted font-mono text-[11px]">
-            {shot.index + 1} of {total}
+            Screen {shot.index + 1} of {total}
           </p>
           <div className="flex items-center gap-1">
             <button

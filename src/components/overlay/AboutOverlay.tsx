@@ -343,6 +343,8 @@ export function AboutOverlay({ onClose }: { onClose: () => void }) {
               */}
               <a
                 href={`mailto:${CONTACT.email}`}
+                target="_blank"
+                rel="noreferrer"
                 className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 transition-colors duration-200"
               >
                 <Mail size={14} aria-hidden="true" />

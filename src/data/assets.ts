@@ -352,21 +352,29 @@ export const ASSETS: Record<string, AssetGroup[]> = {
   threadline: [
     {
       title: "Today",
+      modes: APPEARANCES,
       items: [
         {
-          file: "add-item",
-          alt: "Threadline's Today tab: what are you wearing, a streak counter at zero days, and insights naming the most worn and least worn items.",
+          file: "today-home",
+          alt: "Threadline's Today tab: what are you wearing, a streak counter, and insights naming the most worn and least worn items.",
         },
         {
           file: "quick-log",
           alt: "The log outfit sheet: a three column grid of clothing to tap, with no typing and nothing to scroll through.",
           caption: "The core loop, and it has to cost less than five seconds.",
         },
+        {
+          file: "today-empty",
+          alt: "The Today tab with nothing logged: start with your 10 most-worn items, not your whole closet.",
+          caption:
+            "The empty state asks for ten items, not a catalogued wardrobe.",
+        },
       ],
     },
     {
       title: "The pre-purchase check",
       note: "The interaction that does not exist in any competitor. Category, then price, then verdict, one question at a time.",
+      modes: APPEARANCES,
       items: [
         {
           file: "check-input",
@@ -379,17 +387,37 @@ export const ASSETS: Record<string, AssetGroup[]> = {
       ],
     },
     {
-      title: "The closet and the numbers",
+      title: "The closet",
+      modes: APPEARANCES,
       items: [
         {
           file: "wardrobe",
           alt: "The closet: ten items in a grid, each with its cost per wear and its wear count.",
         },
         {
-          file: "utilization",
-          alt: "The Insights tab: a wardrobe health score of 67 drawn as three concentric arcs, with utilization, cost per wear and category balance listed under it.",
+          file: "item-detail",
+          alt: "One item open: cost per wear, total wears, days since last worn, and a twelve week wear history drawn as a heatmap.",
+          caption: "Where the cost per wear number actually comes from.",
+        },
+        {
+          file: "closet-empty",
+          alt: "The closet with nothing in it, offering to add a first item.",
+        },
+      ],
+    },
+    {
+      title: "Insights and settings",
+      modes: APPEARANCES,
+      items: [
+        {
+          file: "insights",
+          alt: "The Insights tab: a wardrobe health score of 75 drawn as three concentric arcs, with utilization, cost per wear and category balance listed under it.",
           caption:
             "Three arcs rather than one ring, because the parts do not sum to the total.",
+        },
+        {
+          file: "settings",
+          alt: "Settings: a monthly spend target, a utilization target, and a line saying everything stays on this device and nothing is uploaded.",
         },
       ],
     },
@@ -398,6 +426,7 @@ export const ASSETS: Record<string, AssetGroup[]> = {
   aria: [
     {
       title: "Audits",
+      modes: APPEARANCES,
       items: [
         {
           file: "audits",
@@ -410,7 +439,31 @@ export const ASSETS: Record<string, AssetGroup[]> = {
       ],
     },
     {
+      title: "The three lenses",
+      note: "One screen, inspected three ways. Annotate is a human dropping a pin. Contrast and Colour Vision are arithmetic, so the app does them itself and shows its working.",
+      modes: APPEARANCES,
+      items: [
+        {
+          file: "annotate",
+          alt: "The Annotate lens on the Home Feed screen, with four numbered pins dropped on it, colour coded by severity.",
+          caption:
+            "A pin, not a list item. Where the violation is matters as much as what it is.",
+        },
+        {
+          file: "contrast",
+          alt: "The Contrast lens, showing a measured ratio of 21.00 to 1 with a pass against every WCAG level, sampled from the foreground and background swatches.",
+        },
+        {
+          file: "color",
+          alt: "The Colour Vision lens simulating deuteranopia, with a slider between the original and the simulation and a warning that the two colours collapse.",
+          caption:
+            "The check contrast maths cannot catch: whether two colours stay distinguishable at all.",
+        },
+      ],
+    },
+    {
       title: "Findings",
+      modes: APPEARANCES,
       items: [
         {
           file: "findings",
@@ -420,7 +473,7 @@ export const ASSETS: Record<string, AssetGroup[]> = {
           file: "finding",
           alt: "One finding: WCAG 1.4.3 contrast, critical severity, the measured 2.8 to 1 ratio, and the exact colour that fixes it.",
           caption:
-            "Contrast is arithmetic, so the app computes it. Everything it cannot compute, it asks about instead of guessing.",
+            "Every finding names the criterion it breaks and the change that resolves it.",
         },
       ],
     },
@@ -444,7 +497,8 @@ export const ASSETS: Record<string, AssetGroup[]> = {
 
   travelplanner: [
     {
-      title: "The app",
+      title: "Destinations",
+      modes: APPEARANCES,
       items: [
         {
           file: "destinations",
@@ -452,7 +506,25 @@ export const ASSETS: Record<string, AssetGroup[]> = {
         },
         {
           file: "destination",
-          alt: "The Paris page, with a photograph of the Eiffel Tower and two saved trips under it with their dates.",
+          alt: "The Paris page, with a photograph of the Eiffel Tower and the two trips saved under it with their dates.",
+          caption:
+            "A trip belongs to a destination. Deleting the destination has to take the trips with it.",
+        },
+      ],
+    },
+    {
+      title: "Trips",
+      modes: APPEARANCES,
+      items: [
+        {
+          file: "trips",
+          alt: "TravelPlanner's trip list, showing six trips across three cities with their date ranges.",
+        },
+        {
+          file: "trip",
+          alt: "One trip open, with its dates and duration, and empty Activities and Expenses sections under it.",
+          caption:
+            "Activities and expenses hang off the trip, which is the third level of the same ownership chain.",
         },
       ],
     },

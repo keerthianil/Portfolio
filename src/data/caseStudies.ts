@@ -10,14 +10,17 @@
  * What goes: the elaboration. If a sentence is explaining a sentence that
  * already landed, it belongs in the research document instead.
  *
- * `figures` are only ever the ones that are an argument rather than a
- * screenshot. Every actual screen is in the Screens gallery at the bottom of
- * the same page, so a phone capture in the middle of the prose is the same
- * image twice, at four times the height.
+ * There is no hero image and no clip up here any more. Every screen and every
+ * recording is in the Screens gallery at the bottom of the same page, so a
+ * portrait capture beside the title was the same asset twice, and the one on
+ * top was the one nobody had scrolled to yet.
  *
- * `metrics` are only ever real measured numbers. The projects with a study
- * behind them have four tiles. The ones without say so in `metricsNote` rather
- * than filling the row with something that sounds like a result.
+ * `figures` survive, and they are only ever the ones that are an argument
+ * rather than a picture of the app: a diagram, a chart, a table.
+ *
+ * `metrics` are only ever real measured numbers, and a project without them
+ * simply has no tiles. A sentence explaining that there was no study is a
+ * sentence apologising for a thing nobody asked about.
  */
 
 export interface Metric {
@@ -30,14 +33,6 @@ export interface Figure {
   src: string;
   alt: string;
   caption?: string;
-}
-
-export interface Clip {
-  mp4: string;
-  webm: string;
-  poster: string;
-  /** Described, not decorative: the audio is the content. */
-  description: string;
 }
 
 export interface Section {
@@ -54,18 +49,19 @@ export interface CaseStudy {
   id: string;
   title: string;
   subtitle: string;
-  /** What I actually did. The grid card carries a job title; this carries the work. */
-  role: string;
+  /**
+   * What I actually did, on the two research projects only. Everything else in
+   * this list was mine end to end, so a My part heading under six of eight
+   * cards is a heading that never varies, which is furniture.
+   */
+  role?: string;
   timeframe: string;
   repo?: string;
   /** Published design file, when there is one. */
   figma?: { href: string; label: string };
   /** The long version, in the research section. */
   research?: { id: string; label: string }[];
-  hero?: Figure;
-  clip?: Clip;
   metrics?: Metric[];
-  metricsNote?: string;
   sections: Section[];
 }
 
@@ -77,22 +73,13 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     role: "Research design, the math reading and navigation model, chart and table accessibility, and the study instrumentation.",
     timeframe: "Sep 2025 to Feb 2026, Roux Institute at Northeastern",
     repo: "https://github.com/keerthianil/EducationApp",
+    figma: {
+      href: "https://www.figma.com/design/Ydkv7vqzHmqKCt64QeOUhp/StemAlly?node-id=0-1",
+      label: "Design file",
+    },
     research: [
       { id: "stemally-study", label: "The full case study, with the numbers" },
     ],
-    hero: {
-      src: "hero-worksheet-vs-screenreader.png",
-      alt: "Two columns. On the left, a rendered fraction as it appears on a worksheet, captioned as an image with no structure a screen reader can enter. On the right, the same fraction written out as one long line of speech, captioned as one breath you cannot move around inside.",
-      caption:
-        "The worksheet on the left. What a screen reader says about it on the right.",
-    },
-    clip: {
-      mp4: "/video/stemally-math-mode.mp4",
-      webm: "/video/stemally-math-mode.webm",
-      poster: "/video/stemally-math-mode-poster.jpg",
-      description:
-        "A screen recording with VoiceOver running. Focus is inside an equation and each swipe steps to the next part of it, which VoiceOver speaks one term at a time.",
-    },
     metrics: [
       { value: "6", label: "blind and low-vision participants" },
       { value: "15,400", label: "logged interactions" },
@@ -106,6 +93,14 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         body: [
           "Blind and low-vision students get handed math worksheets that assume you can see them. The equation is an image. The triangle is an image. The bar chart has a caption that says see figure 3.",
           "The lab already had a backend that turned those PDFs into structured content, so the information existed. That made it a design question: how do you present an equation so a student can read it, rather than hear it read at them? Reading means you can move around. A wall of speech gives you listening.",
+        ],
+        figures: [
+          {
+            src: "hero-worksheet-vs-screenreader.png",
+            alt: "Two columns. On the left, a rendered fraction as it appears on a worksheet, captioned as an image with no structure a screen reader can enter. On the right, the same fraction written out as one long line of speech, captioned as one breath you cannot move around inside.",
+            caption:
+              "The worksheet on the left. What a screen reader says about it on the right.",
+          },
         ],
       },
       {
@@ -164,21 +159,12 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       { id: "tactilenav-report", label: "The literature review behind it" },
       { id: "aps-request", label: "The data request sent to the city" },
     ],
-    clip: {
-      mp4: "/video/tactilenav-route-map.mp4",
-      webm: "/video/tactilenav-route-map.webm",
-      poster: "/video/tactilenav-route-map-poster.jpg",
-      description:
-        "A screen recording with VoiceOver running. Focus steps along a route from one intersection to the next, and each one is announced with the streets that meet there.",
-    },
     metrics: [
       { value: "19", label: "intersections in the data request to the city" },
       { value: "50", label: "fields requested per intersection" },
       { value: "4.0mm", label: "line width, held constant at every scale" },
       { value: "643", label: "junctions found from map node topology" },
     ],
-    metricsNote:
-      "No user study numbers here. This was tested in the field but not instrumented the way StemAlly was, so there is nothing measured to report.",
     sections: [
       {
         id: "summary",
@@ -237,9 +223,12 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     id: "ally",
     title: "Ally",
     subtitle: "An accessibility app that failed its own rules twice",
-    role: "Product design, research and SwiftUI build, end to end.",
     timeframe: "2026",
     repo: "https://github.com/keerthianil/Ally",
+    figma: {
+      href: "https://www.figma.com/design/0AVQiGKiMKUE4Z68Nd1Rrx/Ally?node-id=31-60",
+      label: "Design file",
+    },
     metrics: [
       { value: "18", label: "contrast assertions that failed when measured" },
       { value: "1.75:1", label: "what the score ring was actually drawing at" },
@@ -294,7 +283,6 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     id: "threadline",
     title: "Threadline",
     subtitle: "Your closet, priced per wear",
-    role: "Product design, research and SwiftUI build, end to end.",
     timeframe: "2026",
     repo: "https://github.com/keerthianil/Threadline",
     figma: {
@@ -353,11 +341,8 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     id: "aria",
     title: "ARIA",
     subtitle: "An accessibility lens for a product that already shipped",
-    role: "Product design and SwiftUI build, end to end.",
     timeframe: "2026",
     repo: "https://github.com/keerthianil/ARIA",
-    metricsNote:
-      "No study behind this one. What is measurable here is what the app computes on device, not anything about how people used it.",
     sections: [
       {
         id: "summary",
@@ -405,15 +390,8 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     id: "portfolio",
     title: "An Interactive Desk",
     subtitle: "A portfolio you walk into, that also works with the screen off",
-    role: "Design, build and direction, with AI assistance.",
     timeframe: "2026",
     repo: "https://github.com/keerthianil/Portfolio",
-    hero: {
-      src: "room.webp",
-      alt: "The room this site opens on: a desk with a wide monitor, an open laptop, a keyboard, a mug, a rubber duck and a desk calendar, lit from a window to the left.",
-      caption:
-        "Hand built rather than exported from a modelling tool. Every object on this desk is a route, and every one is also a button you can tab to.",
-    },
     metrics: [
       { value: "4", label: "routes, all driven by the URL hash" },
       { value: "0", label: "objects in the room that are not also buttons" },
@@ -469,10 +447,11 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     id: "swaptitude",
     title: "Swaptitude",
     subtitle: "Teach one thing, learn another",
-    role: "SwiftUI and Firebase, in a team of four.",
     timeframe: "2025",
-    metricsNote:
-      "Coursework, built in a team of four. Nothing here was measured with users, so there are no numbers to put in a row of tiles.",
+    figma: {
+      href: "https://www.figma.com/design/EwcJ2adgMQA9KSAmJGBysq/Swaptitude?node-id=0-1",
+      label: "Design file",
+    },
     sections: [
       {
         id: "summary",
@@ -520,10 +499,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     id: "travelplanner",
     title: "TravelPlanner",
     subtitle: "The one that is about persistence rather than touch",
-    role: "SwiftUI and Core Data, solo.",
     timeframe: "2025",
-    metricsNote:
-      "Coursework, and the honest description is a competent CRUD app. Nothing measured, nothing to put in tiles.",
     sections: [
       {
         id: "summary",
