@@ -1,14 +1,19 @@
 /**
  * The projects, strongest first.
  *
- * One list rather than two sections. The order is the argument: the first four
- * went in front of people who were not me, and by the time you are at the
- * bottom of the grid you are in coursework. Nobody reads a nine card grid
- * bottom up, so the ranking does the work that a heading was doing.
+ * One list rather than two sections. The order is the argument: the first two
+ * came out of the research assistantship and went in front of blind and
+ * low-vision users, and by the time you are at the bottom of the grid you are
+ * in coursework. Nobody reads an eight card grid bottom up, so the ranking
+ * does the work that a heading was doing.
  *
  * `tint` is each app's own accent, taken from its shipping colour tokens rather
- * than picked to match this site. Nine burgundy cards would say nothing about
- * nine different products.
+ * than picked to match this site. Eight burgundy cards would say nothing about
+ * eight different products.
+ *
+ * `role` is set on two cards only. It is a job title, and only the research
+ * assistantship has one worth putting on the grid. What I actually did on each
+ * project is in the case study, where there is room to be specific.
  */
 
 export interface ProjectShot {
@@ -22,17 +27,25 @@ export interface Project {
   title: string;
   /** One line. What changed, not what it contains. */
   summary: string;
-  role: string;
+  /** Job title, on the two research projects only. */
+  role?: string;
   timeframe: string;
   /** The app's own accent, used for the card field only. */
   tint: string;
   repo?: string;
+  /** A published design file, if there is one. */
+  figma?: string;
   /**
    * False when only `.webp` exists for this project, which is everything
    * captured from the simulator rather than run through the original
    * optimisation pass.
    */
   avif?: boolean;
+  /**
+   * Phone captures composite as two angled screens. A browser capture is
+   * landscape and has to sit square on, or it reads as a broken phone.
+   */
+  shape?: "phone" | "wide";
   /** Up to two screens, shown angled on the card. */
   cover: ProjectShot[];
 }
@@ -44,8 +57,8 @@ export const PROJECTS: Project[] = [
     title: "StemAlly",
     summary:
       "A STEM reader for blind students. Equations you move around inside, and figures you explore by touch.",
-    role: "Research assistant and iOS developer, Roux Institute",
-    timeframe: "2025 to now",
+    role: "Research assistant, Roux Institute",
+    timeframe: "2025 to 2026",
     tint: "#1c636f",
     repo: "https://github.com/keerthianil/EducationApp",
     cover: [
@@ -65,7 +78,7 @@ export const PROJECTS: Project[] = [
     title: "TactileNav",
     summary:
       "Tactile street maps you read with one finger. Every line is a physical millimetre, so the scale never lies.",
-    role: "Research assistant, Roux Institute, with Vatsalya Rohitbhai Dabhi",
+    role: "Research assistant, Roux Institute",
     timeframe: "2026",
     tint: "#023e8a",
     repo: "https://github.com/keerthianil/TactileNav",
@@ -81,32 +94,11 @@ export const PROJECTS: Project[] = [
     ],
   },
   {
-    id: "aria",
-    title: "ARIA",
-    summary:
-      "An accessibility audit tool for designers reviewing a built product. It runs the checks that are maths on device, and refuses to guess at the rest.",
-    role: "Product design and SwiftUI build, end to end",
-    timeframe: "2026",
-    tint: "#3b62d0",
-    repo: "https://github.com/keerthianil/ARIA",
-    cover: [
-      {
-        file: "audit",
-        alt: "An ARIA audit summary: thirteen findings across five screens of Spotify iOS, split by severity.",
-      },
-      {
-        file: "finding",
-        alt: "An ARIA finding detail, showing WCAG 1.4.3, a critical severity, the failing contrast ratio and the fix.",
-      },
-    ],
-  },
-  {
     id: "ally",
     avif: true,
     title: "Ally",
     summary:
       "An accessibility app that failed its own rules twice, and the tests that came out of catching it.",
-    role: "Product design, research and SwiftUI build, end to end",
     timeframe: "2026",
     tint: "#b3338b",
     repo: "https://github.com/keerthianil/Ally",
@@ -126,11 +118,12 @@ export const PROJECTS: Project[] = [
     avif: true,
     title: "Threadline",
     summary:
-      "A wardrobe tracker that prices a purchase against what you already own. Financial framing, never guilt.",
-    role: "Product design and SwiftUI build, end to end",
+      "A wardrobe tracker that prices a purchase against what you already own. Money, never guilt.",
     timeframe: "2026",
     tint: "#4c7c96",
     repo: "https://github.com/keerthianil/Threadline",
+    figma:
+      "https://www.figma.com/design/8zM6wy1k9kJXzKFYKOIKfY/Threadline?node-id=0-1",
     cover: [
       {
         file: "wardrobe",
@@ -143,40 +136,37 @@ export const PROJECTS: Project[] = [
     ],
   },
   {
-    id: "indoorexplorer",
-    title: "IndoorExplorer",
+    id: "aria",
+    title: "ARIA",
     summary:
-      "An indoor floor plan you read by dragging a finger across it. Rooms, corridors, stairs and lifts each get their own tone and haptic.",
-    role: "Coursework, SwiftUI",
-    timeframe: "2025",
-    tint: "#2b7a6f",
+      "An accessibility audit tool for designers. It runs the checks that are maths, and refuses to guess at the rest.",
+    timeframe: "2026",
+    tint: "#3b62d0",
+    repo: "https://github.com/keerthianil/ARIA",
     cover: [
       {
-        file: "map",
-        alt: "IndoorExplorer's floor plan, with rooms and corridors drawn as flat blocks.",
+        file: "audit",
+        alt: "An ARIA audit summary: thirteen findings across five screens of Spotify iOS, split by severity.",
       },
       {
-        file: "corridor",
-        alt: "A corridor selected in IndoorExplorer, with its name and feedback pattern announced.",
+        file: "finding",
+        alt: "An ARIA finding detail, showing WCAG 1.4.3, a critical severity, the failing contrast ratio and the fix.",
       },
     ],
   },
   {
-    id: "shapetracer",
-    title: "ShapeTracer",
+    id: "portfolio",
+    title: "An Interactive Desk",
     summary:
-      "Trace a shape with one finger and feel where the edge is. Haptics and a generated tone carry the whole interface.",
-    role: "Coursework, SwiftUI",
-    timeframe: "2025",
-    tint: "#6b4ea8",
+      "This site. A 3D room where every object is a route, and every object is also a real button you can tab to.",
+    timeframe: "2026",
+    tint: "#8b6a4c",
+    shape: "wide",
+    repo: "https://github.com/keerthianil/Portfolio",
     cover: [
       {
-        file: "shapes",
-        alt: "ShapeTracer's shape picker, offering a circle and a square.",
-      },
-      {
-        file: "trace-circle",
-        alt: "A circle being traced in ShapeTracer, with a live accuracy percentage under it.",
+        file: "room",
+        alt: "The room this site opens on: a desk with a monitor, a laptop, a mug and a rubber duck, lit from a window.",
       },
     ],
   },
@@ -184,8 +174,7 @@ export const PROJECTS: Project[] = [
     id: "swaptitude",
     title: "Swaptitude",
     summary:
-      "A skill swap marketplace: teach one thing, learn another. Firebase auth, a live post feed and matching, built by four of us.",
-    role: "Coursework, SwiftUI and Firebase, team of four",
+      "A skill swap marketplace: teach one thing, learn another. Firebase auth, a live feed and matching, built by four of us.",
     timeframe: "2025",
     tint: "#c9971a",
     cover: [
@@ -203,8 +192,7 @@ export const PROJECTS: Project[] = [
     id: "travelplanner",
     title: "TravelPlanner",
     summary:
-      "Destinations, trips and dates, backed by Core Data. The one in this set that is about persistence rather than about touch.",
-    role: "Coursework, SwiftUI and Core Data",
+      "Destinations, trips and dates on Core Data. The one here that is about persistence rather than touch.",
     timeframe: "2025",
     tint: "#2d6aa8",
     cover: [

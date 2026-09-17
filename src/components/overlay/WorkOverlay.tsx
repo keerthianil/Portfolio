@@ -41,15 +41,14 @@ export function WorkOverlay({ onClose }: { onClose: () => void }) {
         <header className="flex flex-col gap-2">
           <h2 className="font-display text-3xl sm:text-4xl">Projects</h2>
           <p className="text-text/80 max-w-2xl text-[15px] leading-relaxed">
-            Nine, strongest first. The first five went in front of people who
-            were not me, with the accessibility work tested rather than
-            claimed, and each of their case studies says what I would fix.
+            Eight projects that show what I can build. Some are academic, some
+            are research work, and some I made on my own time.
           </p>
         </header>
 
         {/*
           One list, strongest first. No filter pills: a control that never
-          changes the result is furniture, and with nine cards the order is
+          changes the result is furniture, and with eight cards the order is
           doing the filtering.
         */}
         <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -63,8 +62,8 @@ export function WorkOverlay({ onClose }: { onClose: () => void }) {
         <section className="border-border bg-surface-raised flex flex-col gap-4 rounded-xl border p-6">
           <h3 className="font-display text-xl">Thanks for reading</h3>
           <p className="text-text/80 max-w-prose text-[15px] leading-relaxed">
-            If any of this is useful to you, or you want the long version of one
-            of them, I would like to hear from you.
+            If any of this is useful to you, or you want to see more, I am easy
+            to find.
           </p>
           <ul className="mt-1 flex flex-wrap gap-x-7 gap-y-2">
             <li>
@@ -73,7 +72,7 @@ export function WorkOverlay({ onClose }: { onClose: () => void }) {
                 className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-[15px] transition-colors duration-200"
               >
                 <Mail size={16} aria-hidden="true" />
-                {CONTACT.email}
+                Email me
               </a>
             </li>
             <li>
@@ -82,7 +81,7 @@ export function WorkOverlay({ onClose }: { onClose: () => void }) {
                 className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-[15px] transition-colors duration-200"
               >
                 <Code size={16} aria-hidden="true" />
-                github.com/keerthianil
+                GitHub
               </a>
             </li>
             <li>
@@ -91,7 +90,7 @@ export function WorkOverlay({ onClose }: { onClose: () => void }) {
                 className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-[15px] transition-colors duration-200"
               >
                 <ExternalLink size={16} aria-hidden="true" />
-                linkedin.com/in/keerthiareddy
+                LinkedIn
               </a>
             </li>
           </ul>
