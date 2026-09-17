@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Keyboard, MousePointerClick, Rotate3d, SunMedium } from "lucide-react";
+import {
+  Command,
+  Keyboard,
+  MousePointerClick,
+  Rotate3d,
+  SunMedium,
+} from "lucide-react";
 
 const ITEMS = [
   {
@@ -19,6 +25,12 @@ const ITEMS = [
   {
     Icon: Keyboard,
     body: "Every object in the room is also a real button. Tab reaches all of them, Escape closes whatever is open, and nothing here needs a mouse.",
+  },
+  {
+    // A shortcut nobody is told about does not exist, which is the same
+    // argument that took two custom gestures out of TactileNav.
+    Icon: Command,
+    body: "If you already know what you are looking for, press Command K, or Control K, and type. Every project, every research document and every section is in there.",
   },
 ];
 
