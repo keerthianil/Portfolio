@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { CalendarDays, Download, Mail } from "lucide-react";
+import { Download, Mail } from "lucide-react";
 import {
   ABOUT_BLOCKS,
   BOOT_INTERVALS,
@@ -335,19 +335,12 @@ export function AboutOverlay({ onClose }: { onClose: () => void }) {
                 Read resume
               </ResumeLink>
               {/*
-                The same timeline the folder on the desktop opens. The folder
-                is in a column that is hidden below 1024px, which left the
-                timeline reachable on a phone only by finding a two centimetre
-                calendar in the room. This is the row everybody reaches.
+                No timeline link here. The terminal ends on the resume and a
+                way to get in touch, which are the two things somebody who has
+                just read about me is actually after. The timeline is its own
+                object: the folder on this desktop, and the calendar in the
+                room.
               */}
-              <button
-                type="button"
-                onClick={openTimeline}
-                className="text-highlight hover:text-text inline-flex min-h-6 cursor-pointer items-center gap-2 py-1 transition-colors duration-200"
-              >
-                <CalendarDays size={14} aria-hidden="true" />
-                Timeline
-              </button>
               <a
                 href={`mailto:${CONTACT.email}`}
                 className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 transition-colors duration-200"
