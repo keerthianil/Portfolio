@@ -74,7 +74,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     timeframe: "Sep 2025 to Feb 2026, Roux Institute at Northeastern",
     repo: "https://github.com/keerthianil/EducationApp",
     figma: {
-      href: "https://www.figma.com/design/Ydkv7vqzHmqKCt64QeOUhp/StemAlly?node-id=0-1",
+      href: "https://www.figma.com/design/Ydkv7vqzHmqKCt64QeOUhp/StemAlly?node-id=8-98",
       label: "Design file",
     },
     research: [
@@ -449,7 +449,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     subtitle: "Teach one thing, learn another",
     timeframe: "2025",
     figma: {
-      href: "https://www.figma.com/design/EwcJ2adgMQA9KSAmJGBysq/Swaptitude?node-id=0-1",
+      href: "https://www.figma.com/design/EwcJ2adgMQA9KSAmJGBysq/Swaptitude?node-id=9-76",
       label: "Design file",
     },
     sections: [
