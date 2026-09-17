@@ -7,7 +7,7 @@ import { motion, useReducedMotion } from "motion/react";
 // lucide v1 dropped every brand glyph, so there is no Figma or GitHub mark to
 // use. The link text carries it, which is what a screen reader was reading
 // anyway.
-import { BookOpen, Code, Frame, X } from "lucide-react";
+import { BookOpen, Code, ExternalLink, Frame, X } from "lucide-react";
 import { ASSETS } from "@/data/assets";
 import { CASE_STUDIES } from "@/data/caseStudies";
 import { OVERLAY_MS, pick, springModal } from "@/lib/motion";
@@ -31,9 +31,15 @@ import { Gallery } from "./Gallery";
 export function CaseStudy({
   id,
   onClose,
+  onOpenResearch,
 }: {
   id: string;
   onClose: () => void;
+  /**
+   * Follows a link into the research section, remembering where it was so
+   * closing that document comes back here rather than dropping into the room.
+   */
+  onOpenResearch: (researchId: string) => void;
 }) {
   const study = CASE_STUDIES[id];
   const assets = ASSETS[id];
@@ -98,13 +104,6 @@ export function CaseStudy({
   if (!study) return null;
 
   /**
-   * Not every project has a hero or a clip. Without one, the five column
-   * header left a third of the screen empty beside the title, so it collapses
-   * to a single column and the metric tiles spread out instead.
-   */
-  const hasMedia = !!(study.hero || study.clip);
-
-  /**
    * Portalled to the body on purpose. The parent window animates on `y`, and a
    * transformed ancestor becomes the containing block for `position: fixed`, so
    * rendered in place this modal was sized to the window rather than to the
@@ -166,66 +165,44 @@ export function CaseStudy({
           className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain"
         >
           <div className="mx-auto max-w-[1000px] px-5 py-8 sm:px-8 sm:py-10">
-            <header
-              className={
-                hasMedia
-                  ? "grid gap-8 lg:grid-cols-5"
-                  : "flex flex-col gap-4"
-              }
-            >
-              <div
-                className={
-                  hasMedia
-                    ? "flex flex-col gap-4 lg:col-span-2"
-                    : "flex max-w-[76ch] flex-col gap-4"
-                }
-              >
-                <p className="text-text-muted font-mono text-[11px] tracking-wide">
-                  {study.timeframe}
-                </p>
-                <h2 className="font-display text-3xl leading-tight sm:text-4xl">
-                  {study.title}
-                </h2>
-                <p className="text-text/85 text-[15px] leading-relaxed">
-                  {study.subtitle}
-                </p>
+            <header className="flex max-w-[76ch] flex-col gap-4">
+              <p className="text-text-muted font-mono text-[11px] tracking-wide">
+                {study.timeframe}
+              </p>
+              <h2 className="font-display text-3xl leading-tight sm:text-4xl">
+                {study.title}
+              </h2>
+              <p className="text-text/85 text-[15px] leading-relaxed">
+                {study.subtitle}
+              </p>
 
-                {study.metrics && (
-                  <dl
-                    className={[
-                      "mt-1 grid grid-cols-2 gap-3",
-                      hasMedia ? "" : "sm:grid-cols-4",
-                    ].join(" ")}
-                  >
-                    {study.metrics.map((metric) => (
-                      <div
-                        key={metric.label}
-                        className="border-border bg-surface-raised rounded-lg border p-3"
-                      >
-                        <dt className="sr-only">{metric.label}</dt>
-                        <dd>
-                          <span className="font-display text-highlight block text-2xl leading-none">
-                            {metric.value}
-                          </span>
-                          <span className="text-text-muted mt-1.5 block text-[12px] leading-snug">
-                            {metric.label}
-                          </span>
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-                )}
-                {study.metricsNote && (
-                  <p className="text-text-muted text-[12px] leading-relaxed">
-                    {study.metricsNote}
-                  </p>
-                )}
+              {study.metrics && (
+                <dl className="mt-1 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {study.metrics.map((metric) => (
+                    <div
+                      key={metric.label}
+                      className="border-border bg-surface-raised rounded-lg border p-3"
+                    >
+                      <dt className="sr-only">{metric.label}</dt>
+                      <dd>
+                        <span className="font-display text-highlight block text-2xl leading-none">
+                          {metric.value}
+                        </span>
+                        <span className="text-text-muted mt-1.5 block text-[12px] leading-snug">
+                          {metric.label}
+                        </span>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
 
-                {/*
-                  What I did, under the facts rather than above them. The grid
-                  card carries a job title where there is one; this carries the
-                  work, which is the part worth reading.
-                */}
+              {/*
+                Only the two research projects carry this. Everything else in
+                the grid was hers end to end, so a My part heading that never
+                varies across six cards is furniture rather than information.
+              */}
+              {study.role && (
                 <div className="border-border border-t pt-4">
                   <h3 className="text-text-muted font-mono text-[11px] tracking-wide uppercase">
                     My part
@@ -234,97 +211,58 @@ export function CaseStudy({
                     {study.role}
                   </p>
                 </div>
+              )}
 
-                <ul className="flex flex-col gap-1">
-                  {study.repo && (
-                    <li>
-                      <a
-                        href={study.repo}
-                        className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-sm transition-colors duration-200"
-                      >
-                        <Code size={14} aria-hidden="true" />
-                        GitHub
-                      </a>
-                    </li>
-                  )}
-                  {study.figma && (
-                    <li>
-                      <a
-                        href={study.figma.href}
-                        className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-sm transition-colors duration-200"
-                      >
-                        <Frame size={14} aria-hidden="true" />
-                        {study.figma.label}
-                      </a>
-                    </li>
-                  )}
-                  {study.research?.map((link) => (
-                    <li key={link.id}>
-                      <a
-                        href={`#research/${link.id}`}
-                        className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-sm transition-colors duration-200"
-                      >
-                        <BookOpen size={14} aria-hidden="true" />
-                        {link.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div
-                className={
-                  hasMedia ? "flex flex-col gap-5 lg:col-span-3" : "hidden"
-                }
-              >
-                {study.hero && (
-                  <figure className="flex flex-col gap-2">
-                    {/* Capped and proportional. Two of these are portrait
-                        phone captures, and at full column width one of them
-                        was most of a screen on its own. Both max constraints
-                        with both dimensions auto is the one combination a
-                        browser scales proportionally to fit. */}
-                    <Image
-                      src={`/images/case/${study.id}/${study.hero.src}`}
-                      alt={study.hero.alt}
-                      width={1600}
-                      height={760}
-                      className="border-border mx-auto block h-auto max-h-[300px] w-auto max-w-full rounded-xl border"
-                    />
-                    {study.hero.caption && (
-                      <figcaption className="text-text-muted text-[12px]">
-                        {study.hero.caption}
-                      </figcaption>
-                    )}
-                  </figure>
-                )}
-
-                {study.clip && (
-                  <figure className="flex flex-col gap-2">
-                    {/* Not muted and not autoplaying. These are screen reader
-                        recordings: the audio is the content, so it gets
-                        controls and a description rather than a silent loop. */}
-                    {/* Capped by height, not by width. These are portrait
-                        phone captures, so a 300px width is a 650px tall block
-                        in a column that is already carrying a hero. */}
-                    <video
-                      controls
-                      preload="metadata"
-                      poster={study.clip.poster}
-                      className="border-border bg-bg mx-auto block max-h-[320px] w-auto max-w-full rounded-xl border"
+              {/*
+                Anything that leaves this site opens in a new tab. Following a
+                GitHub link out of a case study threw away the room, the open
+                panel and the scroll position, and getting back meant a browser
+                Back that landed on the grid rather than where you were.
+              */}
+              <ul className="flex flex-wrap gap-x-6 gap-y-1">
+                {study.repo && (
+                  <li>
+                    <a
+                      href={study.repo}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-sm transition-colors duration-200"
                     >
-                      <source src={study.clip.webm} type="video/webm" />
-                      <source src={study.clip.mp4} type="video/mp4" />
-                    </video>
-                    <figcaption className="text-text-muted text-[12px] leading-relaxed">
-                      {study.clip.description}{" "}
-                      <span className="text-text/60">
-                        Captions are not written yet.
-                      </span>
-                    </figcaption>
-                  </figure>
+                      <Code size={14} aria-hidden="true" />
+                      GitHub
+                      <ExternalLink size={12} aria-hidden="true" className="opacity-60" />
+                      <span className="sr-only">(opens in a new tab)</span>
+                    </a>
+                  </li>
                 )}
-              </div>
+                {study.figma && (
+                  <li>
+                    <a
+                      href={study.figma.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-sm transition-colors duration-200"
+                    >
+                      <Frame size={14} aria-hidden="true" />
+                      {study.figma.label}
+                      <ExternalLink size={12} aria-hidden="true" className="opacity-60" />
+                      <span className="sr-only">(opens in a new tab)</span>
+                    </a>
+                  </li>
+                )}
+                {study.research?.map((link) => (
+                  <li key={link.id}>
+                    <button
+                      type="button"
+                      onClick={() => onOpenResearch(link.id)}
+                      className="text-highlight hover:text-text inline-flex min-h-6 cursor-pointer items-center gap-2 py-1 text-sm transition-colors duration-200"
+                    >
+                      <BookOpen size={14} aria-hidden="true" />
+                      {link.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </header>
 
             <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_200px]">

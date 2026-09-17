@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Download, ExternalLink } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { ArrowLeft, Download, ExternalLink } from "lucide-react";
 import {
   RESEARCH,
   type Block,
   type ResearchDoc,
   type ResearchItem,
 } from "@/data/research";
+import { peekReturnTo, takeReturnTo } from "@/lib/returnTo";
 import { useSubRoute } from "@/lib/useSubRoute";
 import { WindowFrame } from "./WindowFrame";
 
@@ -31,10 +32,33 @@ export function ResearchOverlay({ onClose }: { onClose: () => void }) {
   const { openId, open, close } = useSubRoute("research");
   const item = RESEARCH.find((entry) => entry.id === openId) ?? null;
 
+  /**
+   * If we got here from a case study, closing goes back to it rather than to
+   * the room. You opened a window, opened a case study, scrolled, and followed
+   * a link: throwing all four of those away on close is the rudest thing a
+   * panel can do.
+   */
+  const closeWindow = useCallback(() => {
+    const back = takeReturnTo();
+    if (back) {
+      window.location.hash = back;
+      return;
+    }
+    onClose();
+  }, [onClose]);
+
+  const closeDocument = useCallback(() => {
+    if (peekReturnTo()) {
+      closeWindow();
+      return;
+    }
+    close();
+  }, [close, closeWindow]);
+
   return (
     <WindowFrame
       title="Research"
-      onClose={onClose}
+      onClose={closeWindow}
       escapeEnabled={!item}
       paper
     >
@@ -67,7 +91,7 @@ export function ResearchOverlay({ onClose }: { onClose: () => void }) {
 
         <div className="relative sm:pl-10">
           {item ? (
-            <Reader key={item.id} item={item} onBack={close} />
+            <Reader key={item.id} item={item} onBack={closeDocument} />
           ) : (
             <Shelf onOpen={open} />
           )}
@@ -158,13 +182,18 @@ function Reader({
   if (doc) {
     return (
       <article className="mx-auto flex max-w-[72ch] flex-col gap-6 px-5 py-8 sm:px-8 sm:py-10">
+        {/* A button that looks like a button. It was an underlined text link
+            in a mono face, at the top of a cream page full of other maroon
+            text, and she could not find it and kept reaching for the close
+            control instead. A 44px target with a border and an arrow. */}
         <button
           type="button"
           onClick={() => setDoc(null)}
           autoFocus
-          className="self-start font-mono text-[12px] text-[#8b2332] underline decoration-[#8b2332]/40 underline-offset-4 transition-colors hover:decoration-[#8b2332]"
+          className="group inline-flex min-h-11 cursor-pointer items-center gap-2 self-start rounded-full border border-[#0c0a09]/25 bg-[#f7f1e9] px-4 py-2 text-[13px] font-medium text-[#0c0a09]/80 transition-colors duration-200 hover:border-[#8b2332] hover:bg-[#8b2332] hover:text-[#f2eae1]"
         >
-          Back to {item.title}
+          <ArrowLeft size={15} aria-hidden="true" />
+          Back
         </button>
         <header className="flex flex-col gap-2">
           <p className="font-mono text-[10px] tracking-widest uppercase text-[#0c0a09]/50">
@@ -183,9 +212,10 @@ function Reader({
         type="button"
         onClick={onBack}
         autoFocus
-        className="self-start font-mono text-[12px] text-[#8b2332] underline decoration-[#8b2332]/40 underline-offset-4 transition-colors hover:decoration-[#8b2332]"
+        className="group inline-flex min-h-11 cursor-pointer items-center gap-2 self-start rounded-full border border-[#0c0a09]/25 bg-[#f7f1e9] px-4 py-2 text-[13px] font-medium text-[#0c0a09]/80 transition-colors duration-200 hover:border-[#8b2332] hover:bg-[#8b2332] hover:text-[#f2eae1]"
       >
-        Back to the shelf
+        <ArrowLeft size={15} aria-hidden="true" />
+        Back
       </button>
 
       <header className="flex flex-col gap-2">
@@ -249,22 +279,33 @@ function Reader({
             <a
               href={item.file.href}
               download
-              className="inline-flex items-center gap-2 text-[14px] text-[#8b2332] transition-opacity hover:opacity-70"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-11 items-center gap-2 text-[14px] text-[#8b2332] transition-opacity hover:opacity-70"
             >
               <Download size={14} aria-hidden="true" />
               {item.file.label}
             </a>
           )}
-          {item.links?.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="inline-flex items-center gap-2 text-[14px] text-[#8b2332] transition-opacity hover:opacity-70"
-            >
-              <ExternalLink size={14} aria-hidden="true" />
-              {link.label}
-            </a>
-          ))}
+          {item.links?.map((link) => {
+            // A hash is somewhere on this site; anything else leaves it, and
+            // anything that leaves it opens in its own tab rather than taking
+            // the room, the open panel and the scroll position with it.
+            const away = !link.href.startsWith("#");
+            return (
+              <a
+                key={link.href}
+                href={link.href}
+                target={away ? "_blank" : undefined}
+                rel={away ? "noreferrer" : undefined}
+                className="inline-flex min-h-11 items-center gap-2 text-[14px] text-[#8b2332] transition-opacity hover:opacity-70"
+              >
+                <ExternalLink size={14} aria-hidden="true" />
+                {link.label}
+                {away && <span className="sr-only">(opens in a new tab)</span>}
+              </a>
+            );
+          })}
         </div>
       )}
     </article>

@@ -12,9 +12,10 @@ import { CONTACT } from "@/data/projects";
  * change and three places that quietly disappear rather than three links to a
  * file that is not there.
  *
- * A path gets `download`, because that attribute only works same origin. A URL
- * opens in a new tab instead, which is what a browser does with a cross origin
- * `download` anyway.
+ * It always opens in a new tab. A path also gets `download`, because that
+ * attribute only works same origin. Either way the room, the open panel and
+ * the scroll position behind it survive: following a PDF out of an open case
+ * study and then pressing Back lands you on the grid, not where you were.
  */
 export function ResumeLink({
   className,
@@ -31,9 +32,9 @@ export function ResumeLink({
     <a
       href={href}
       className={className}
-      {...(hosted
-        ? { target: "_blank", rel: "noreferrer" }
-        : { download: true })}
+      target="_blank"
+      rel="noreferrer"
+      {...(hosted ? {} : { download: true })}
     >
       {children}
     </a>
