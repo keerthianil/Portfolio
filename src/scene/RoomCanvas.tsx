@@ -4,8 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { AdaptiveDpr, ContactShadows } from "@react-three/drei";
 import { Object3D } from "three";
-import type { AmbientLight, DirectionalLight, PointLight } from "three";
+import type { AmbientLight, DirectionalLight, PointLight, SpotLight } from "three";
 import type { CameraState } from "@/data/routes";
+import { reading } from "@/lib/reading";
 import { CameraRig } from "./CameraRig";
 import { ROOM } from "./config";
 import { LIGHTS, SCENE, type ColourVision } from "./palette";
@@ -79,6 +80,42 @@ function Daylight({ blindsDown }: { blindsDown: number }) {
         position={LIGHTS.rim.position}
       />
     </>
+  );
+}
+
+/**
+ * The bar light on the monitor, which comes down a little while you read.
+ *
+ * The same argument as the camera drift next to it: a room that is completely
+ * still behind an open panel stops being a room. A third of the desk light is
+ * enough to notice on the way back and not enough to notice going.
+ *
+ * Damped at a quarter of the speed of the scroll it follows, and mutated in
+ * the frame loop rather than re-rendered, for the same reason the blind is.
+ */
+function BarLight({ target, dim }: { target: Object3D; dim: boolean }) {
+  const light = useRef<SpotLight>(null);
+  const level = useRef(0);
+
+  useFrame((_, delta) => {
+    const wanted = dim ? reading.progress : 0;
+    level.current += (wanted - level.current) * Math.min(1, delta * 1.6);
+    if (light.current)
+      light.current.intensity = LIGHTS.bar.intensity * (1 - level.current * 0.34);
+  });
+
+  return (
+    <spotLight
+      ref={light}
+      color={LIGHTS.bar.color}
+      intensity={LIGHTS.bar.intensity}
+      position={LIGHTS.bar.position}
+      angle={LIGHTS.bar.angle}
+      penumbra={LIGHTS.bar.penumbra}
+      distance={LIGHTS.bar.distance}
+      target={target}
+      decay={2}
+    />
   );
 }
 
@@ -166,16 +203,7 @@ export function RoomCanvas({
             keyboard. Its geometry is in Room.tsx at the same position, so the
             lamp you can see and the light you can see are the same lamp. */}
         <primitive object={barTarget} />
-        <spotLight
-          color={LIGHTS.bar.color}
-          intensity={LIGHTS.bar.intensity}
-          position={LIGHTS.bar.position}
-          angle={LIGHTS.bar.angle}
-          penumbra={LIGHTS.bar.penumbra}
-          distance={LIGHTS.bar.distance}
-          target={barTarget}
-          decay={2}
-        />
+        <BarLight target={barTarget} dim={!reduceMotion} />
 
         {/* The monitor's own spill onto the desk in front of it. */}
         <pointLight
@@ -231,6 +259,7 @@ export function RoomCanvas({
           state={camera}
           yawRef={yawRef}
           smoothTime={reduceMotion ? 0 : ROOM.smoothTime}
+          drift={!reduceMotion}
           portrait={portrait}
         />
       </Canvas>

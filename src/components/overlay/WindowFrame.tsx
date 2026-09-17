@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useModalFocus } from "@/lib/useModalFocus";
 import { OVERLAY_MS, pick } from "@/lib/motion";
+import { onReadingScroll, resetReadingProgress } from "@/lib/reading";
 
 /**
  * The window every overlay lives in. It slides up from the bottom edge over the
@@ -62,6 +63,13 @@ export function WindowFrame({
   const [maximised, setMaximised] = useState(false);
 
   /**
+   * Put the room back when the panel goes. Without this it stays leaned over
+   * at whatever angle the bottom of the last thing you read left it at, which
+   * reads as a bug rather than as reading.
+   */
+  useEffect(() => resetReadingProgress, []);
+
+  /**
    * Red closes, green goes full bleed. Yellow is drawn and does nothing.
    *
    * It is a `span`, not a disabled button: a dot that never minimises anything
@@ -81,7 +89,10 @@ export function WindowFrame({
         pay for the buttons being twice the size, so the chrome looks the same
         and stops being three tiny targets 8px apart.
       */}
-      <div className="border-border bg-surface-raised flex h-9 shrink-0 items-center gap-3 border-b px-2.5 sm:gap-4 sm:px-4">
+      <div
+        data-print="hide"
+        className="border-border bg-surface-raised flex h-9 shrink-0 items-center gap-3 border-b px-2.5 sm:gap-4 sm:px-4"
+      >
         <span className="flex items-center">
           <button
             type="button"
@@ -123,7 +134,22 @@ export function WindowFrame({
 
       {/* The bottom nav's close button floats over the bottom edge of this
           window, so the scroll area keeps a lane clear underneath it. */}
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-[104px]">
+      {/*
+        How far through this you are, as a hairline across the top of the
+        content rather than as a number. Decorative and `aria-hidden`: the
+        scrollbar is the real affordance and this is the one that survives a
+        trackpad, which hides it.
+      */}
+      <div aria-hidden="true" data-print="hide" className="relative h-px shrink-0">
+        <div
+          className="bg-highlight absolute inset-y-0 left-0"
+          style={{ width: "calc(var(--reading, 0) * 100%)" }}
+        />
+      </div>
+      <div
+        onScroll={onReadingScroll}
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-[104px]"
+      >
         {children}
       </div>
     </>
@@ -292,13 +318,28 @@ export function WindowFrame({
           <button
             type="button"
             onClick={onClose}
+            data-print="hide"
             className="absolute top-5 right-5 z-10 flex h-9 cursor-pointer items-center gap-1.5 rounded-full bg-[#0c0a09]/8 px-4 font-mono text-xs text-[#0c0a09]/70 transition-colors duration-200 hover:bg-[#0c0a09]/15 hover:text-[#0c0a09]"
           >
             esc
             <span className="sr-only">Close {title}</span>
           </button>
 
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#f2eae1] pb-[104px]">
+          {/* The same hairline, in the ink this sheet is printed in. */}
+          <div
+            aria-hidden="true"
+            data-print="hide"
+            className="relative h-px shrink-0 bg-[#f2eae1]"
+          >
+            <div
+              className="absolute inset-y-0 left-0 bg-[#8b2332]"
+              style={{ width: "calc(var(--reading, 0) * 100%)" }}
+            />
+          </div>
+          <div
+            onScroll={onReadingScroll}
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#f2eae1] pb-[104px]"
+          >
             {children}
           </div>
         </motion.section>
