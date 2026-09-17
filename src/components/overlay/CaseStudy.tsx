@@ -1,19 +1,28 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, useReducedMotion } from "motion/react";
-import { ExternalLink, X } from "lucide-react";
-import { CASE_STUDIES, type Section } from "@/data/caseStudies";
-import { PROJECTS } from "@/data/projects";
+// lucide v1 dropped every brand glyph, so there is no Figma or GitHub mark to
+// use. The link text carries it, which is what a screen reader was reading
+// anyway.
+import { BookOpen, Code, Frame, X } from "lucide-react";
+import { ASSETS } from "@/data/assets";
+import { CASE_STUDIES } from "@/data/caseStudies";
 import { OVERLAY_MS, pick, springModal } from "@/lib/motion";
+import { onReadingScroll, resetReadingProgress } from "@/lib/reading";
 import { useModalFocus } from "@/lib/useModalFocus";
-
-const TOC: Section["id"][] = ["summary", "challenge", "approach", "results"];
+import { Gallery } from "./Gallery";
 
 /**
  * One case study, opened over the grid.
+ *
+ * Every project has one and every one has the same four sections, plus Screens
+ * at the bottom for the projects that have more shots than the card holds.
+ * There is no short brief path any more: a grid where half the cards open a
+ * case study and half open an apology ranks itself, and the coursework is in
+ * the list because it is worth looking at.
  *
  * The table of contents tracks scroll with an IntersectionObserver rather than
  * a scroll handler, and it is a real list of links so it works before the
@@ -27,10 +36,26 @@ export function CaseStudy({
   onClose: () => void;
 }) {
   const study = CASE_STUDIES[id];
+  const assets = ASSETS[id];
   const shouldReduce = useReducedMotion();
-  const containerRef = useModalFocus(true, onClose);
+  /**
+   * The lightbox in the Screens section puts its own Escape handler on
+   * `window`. Both would fire, and the case study would close underneath it.
+   */
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const containerRef = useModalFocus(true, onClose, { escape: !lightboxOpen });
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState<Section["id"]>("summary");
+
+  const toc = useMemo(() => {
+    const entries = (study?.sections ?? []).map((section) => ({
+      id: section.id as string,
+      title: section.title,
+    }));
+    if (assets?.length) entries.push({ id: "screens", title: "Screens" });
+    return entries;
+  }, [study, assets]);
+
+  const [active, setActive] = useState<string>(toc[0]?.id ?? "summary");
 
   useEffect(() => {
     const root = scrollRef.current;
@@ -40,41 +65,44 @@ export function CaseStudy({
         const visible = entries
           .filter((entry) => entry.isIntersecting)
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
-        if (visible) setActive(visible.target.id as Section["id"]);
+        if (visible) setActive(visible.target.id);
       },
       { root, rootMargin: "0px 0px -55% 0px", threshold: 0.01 },
     );
-    const id = window.setTimeout(() => {
-      TOC.forEach((section) => {
-        const element = root.querySelector(`#${section}`);
+    const timer = window.setTimeout(() => {
+      toc.forEach((section) => {
+        const element = root.querySelector(`#${section.id}`);
         if (element) observer.observe(element);
       });
     }, 100);
     return () => {
-      window.clearTimeout(id);
+      window.clearTimeout(timer);
       observer.disconnect();
     };
-  }, []);
+  }, [toc]);
 
-  const jump = useCallback((section: Section["id"]) => {
+  /**
+   * The case study scrolls inside its own container, over a window that has
+   * its own. Closing it hands reading back to the grid underneath, which is at
+   * the top, so the room goes back with it.
+   */
+  useEffect(() => resetReadingProgress, []);
+
+  const jump = useCallback((section: string) => {
     const root = scrollRef.current;
     const target = root?.querySelector<HTMLElement>(`#${section}`);
     if (!root || !target) return;
-    root.scrollTo({
-      top: target.offsetTop - 24,
-      behavior: "smooth",
-    });
+    root.scrollTo({ top: target.offsetTop - 24, behavior: "smooth" });
   }, []);
 
-  // Five of the nine projects have a written case study. The other four are
-  // coursework, and a made up case study is worse than an honest short one, so
-  // they get a brief from the card's own data and a link to the code.
-  if (!study) {
-    return createPortal(
-      <ShortBrief id={id} onClose={onClose} containerRef={containerRef} />,
-      document.body,
-    );
-  }
+  if (!study) return null;
+
+  /**
+   * Not every project has a hero or a clip. Without one, the five column
+   * header left a third of the screen empty beside the title, so it collapses
+   * to a single column and the metric tiles spread out instead.
+   */
+  const hasMedia = !!(study.hero || study.clip);
 
   /**
    * Portalled to the body on purpose. The parent window animates on `y`, and a
@@ -85,6 +113,7 @@ export function CaseStudy({
   return createPortal(
     <div className="fixed inset-0 z-[800] flex items-center justify-center px-3 py-6 sm:px-6">
       <motion.div
+        data-print="hide"
         className="bg-bg/75 absolute inset-0 backdrop-blur-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -105,7 +134,10 @@ export function CaseStudy({
         exit={shouldReduce ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 10 }}
         transition={pick(!!shouldReduce, springModal)}
       >
-        <div className="border-border bg-surface-raised flex h-[42px] shrink-0 items-center justify-between border-b px-4">
+        <div
+          data-print="hide"
+          className="border-border bg-surface-raised flex h-[42px] shrink-0 items-center justify-between border-b px-4"
+        >
           <span className="text-text-muted truncate font-mono text-xs">
             {study.title}
           </span>
@@ -119,16 +151,37 @@ export function CaseStudy({
           </button>
         </div>
 
+        {/* Progress across the top of the case study. It sits under the title
+            bar rather than over it, so it never crosses the close button. */}
+        <div aria-hidden="true" data-print="hide" className="relative h-px shrink-0">
+          <div
+            className="bg-highlight absolute inset-y-0 left-0"
+            style={{ width: "calc(var(--reading, 0) * 100%)" }}
+          />
+        </div>
+
         <div
           ref={scrollRef}
+          onScroll={onReadingScroll}
           className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain"
         >
           <div className="mx-auto max-w-[1000px] px-5 py-8 sm:px-8 sm:py-10">
-            <header className="grid gap-8 lg:grid-cols-5">
-              <div className="flex flex-col gap-4 lg:col-span-2">
+            <header
+              className={
+                hasMedia
+                  ? "grid gap-8 lg:grid-cols-5"
+                  : "flex flex-col gap-4"
+              }
+            >
+              <div
+                className={
+                  hasMedia
+                    ? "flex flex-col gap-4 lg:col-span-2"
+                    : "flex max-w-[76ch] flex-col gap-4"
+                }
+              >
                 <p className="text-text-muted font-mono text-[11px] tracking-wide">
-                  {study.role}
-                  <span className="block">{study.timeframe}</span>
+                  {study.timeframe}
                 </p>
                 <h2 className="font-display text-3xl leading-tight sm:text-4xl">
                   {study.title}
@@ -138,7 +191,12 @@ export function CaseStudy({
                 </p>
 
                 {study.metrics && (
-                  <dl className="mt-1 grid grid-cols-2 gap-3">
+                  <dl
+                    className={[
+                      "mt-1 grid grid-cols-2 gap-3",
+                      hasMedia ? "" : "sm:grid-cols-4",
+                    ].join(" ")}
+                  >
                     {study.metrics.map((metric) => (
                       <div
                         key={metric.label}
@@ -163,18 +221,62 @@ export function CaseStudy({
                   </p>
                 )}
 
-                {study.repo && (
-                  <a
-                    href={study.repo}
-                    className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-sm transition-colors duration-200"
-                  >
-                    <ExternalLink size={14} aria-hidden="true" />
-                    Source
-                  </a>
-                )}
+                {/*
+                  What I did, under the facts rather than above them. The grid
+                  card carries a job title where there is one; this carries the
+                  work, which is the part worth reading.
+                */}
+                <div className="border-border border-t pt-4">
+                  <h3 className="text-text-muted font-mono text-[11px] tracking-wide uppercase">
+                    My part
+                  </h3>
+                  <p className="text-text/80 mt-1.5 text-[14px] leading-relaxed">
+                    {study.role}
+                  </p>
+                </div>
+
+                <ul className="flex flex-col gap-1">
+                  {study.repo && (
+                    <li>
+                      <a
+                        href={study.repo}
+                        className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-sm transition-colors duration-200"
+                      >
+                        <Code size={14} aria-hidden="true" />
+                        GitHub
+                      </a>
+                    </li>
+                  )}
+                  {study.figma && (
+                    <li>
+                      <a
+                        href={study.figma.href}
+                        className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-sm transition-colors duration-200"
+                      >
+                        <Frame size={14} aria-hidden="true" />
+                        {study.figma.label}
+                      </a>
+                    </li>
+                  )}
+                  {study.research?.map((link) => (
+                    <li key={link.id}>
+                      <a
+                        href={`#research/${link.id}`}
+                        className="text-highlight hover:text-text inline-flex min-h-6 items-center gap-2 py-1 text-sm transition-colors duration-200"
+                      >
+                        <BookOpen size={14} aria-hidden="true" />
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
               </div>
 
-              <div className="flex flex-col gap-5 lg:col-span-3">
+              <div
+                className={
+                  hasMedia ? "flex flex-col gap-5 lg:col-span-3" : "hidden"
+                }
+              >
                 {study.hero && (
                   <figure className="flex flex-col gap-2">
                     <Image
@@ -266,6 +368,15 @@ export function CaseStudy({
                     ))}
                   </section>
                 ))}
+
+                {assets?.length ? (
+                  <Gallery
+                    projectId={study.id}
+                    groups={assets}
+                    onLightboxChange={setLightboxOpen}
+                  />
+                ) : null}
+
                 <div className="h-16" aria-hidden="true" />
               </div>
 
@@ -274,7 +385,7 @@ export function CaseStudy({
                 className="hidden self-start lg:sticky lg:top-2 lg:block"
               >
                 <ul className="flex flex-col gap-1">
-                  {study.sections.map((section) => (
+                  {toc.map((section) => (
                     <li key={section.id}>
                       <a
                         href={`#${section.id}`}
@@ -302,108 +413,5 @@ export function CaseStudy({
       </motion.div>
     </div>,
     document.body,
-  );
-}
-
-/**
- * What opens for a project with no written case study: the same facts the card
- * carries, at reading size, and a link to the code. Shorter than a case study
- * and honest about being shorter.
- */
-function ShortBrief({
-  id,
-  onClose,
-  containerRef,
-}: {
-  id: string;
-  onClose: () => void;
-  containerRef: React.RefObject<HTMLDivElement | null>;
-}) {
-  const project = PROJECTS.find((item) => item.id === id);
-  if (!project) return null;
-
-  return (
-    <div className="fixed inset-0 z-[800] flex items-center justify-center px-3 py-6 sm:px-6">
-      <div
-        className="bg-bg/75 absolute inset-0 backdrop-blur-sm"
-        aria-hidden="true"
-        onClick={onClose}
-      />
-      <section
-        ref={containerRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label={project.title}
-        className="bg-surface border-border relative flex max-h-full w-full max-w-[720px] flex-col overflow-hidden rounded-2xl border shadow-2xl"
-      >
-        <div className="border-border bg-surface-raised flex shrink-0 items-center gap-4 border-b px-5 py-3">
-          <h2 className="font-display flex-1 truncate text-lg">
-            {project.title}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-text-muted hover:text-text cursor-pointer font-mono text-xs"
-          >
-            esc
-            <span className="sr-only">Close {project.title}</span>
-          </button>
-        </div>
-
-        <div className="flex flex-col gap-6 overflow-y-auto px-6 py-7">
-          <p className="text-text/85 text-[17px] leading-relaxed">
-            {project.summary}
-          </p>
-          <dl className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <dt className="text-text-muted font-mono text-[11px] tracking-wide uppercase">
-                Role
-              </dt>
-              <dd className="text-text/85 mt-1 text-[15px]">{project.role}</dd>
-            </div>
-            <div>
-              <dt className="text-text-muted font-mono text-[11px] tracking-wide uppercase">
-                When
-              </dt>
-              <dd className="text-text/85 mt-1 text-[15px]">
-                {project.timeframe}
-              </dd>
-            </div>
-          </dl>
-
-          <div className="flex gap-3">
-            {project.cover.map((shot) => (
-              // Already sized and converted once. Running these through
-              // next/image would re-encode an optimised file.
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={shot.file}
-                src={`/images/projects/${project.id}/${shot.file}.webp`}
-                alt={shot.alt}
-                loading="lazy"
-                decoding="async"
-                className="border-border w-1/2 rounded-lg border object-cover"
-              />
-            ))}
-          </div>
-
-          <p className="text-text-muted border-border border-t pt-5 text-sm leading-relaxed">
-            This one has no written case study. It was coursework, the decisions
-            are in its readme, and inventing a narrative for it after the fact
-            would be the opposite of the point of the rest of this site.
-            {project.repo ? " The code is below." : ""}
-          </p>
-
-          {project.repo && (
-            <a
-              href={project.repo}
-              className="text-highlight hover:text-text self-start text-[15px] transition-colors duration-200"
-            >
-              Read the code
-            </a>
-          )}
-        </div>
-      </section>
-    </div>
   );
 }
