@@ -145,11 +145,11 @@ export const PROJECTS: Project[] = [
     repo: "https://github.com/keerthianil/ARIA",
     cover: [
       {
-        file: "audit",
+        file: "audit-light",
         alt: "An ARIA audit summary: thirteen findings across five screens of Spotify iOS, split by severity.",
       },
       {
-        file: "finding",
+        file: "finding-dark",
         alt: "An ARIA finding detail, showing WCAG 1.4.3, a critical severity, the failing contrast ratio and the fix.",
       },
     ],
@@ -179,11 +179,11 @@ export const PROJECTS: Project[] = [
     tint: "#c9971a",
     cover: [
       {
-        file: "feed",
-        alt: "Swaptitude's home feed, showing skill swap posts: english for piano, guitar for something else.",
+        file: "home-dark",
+        alt: "Swaptitude's home feed in dark mode, showing skill swap posts: english for piano, guitar for something else.",
       },
       {
-        file: "explore",
+        file: "explore-light",
         alt: "Swaptitude's explore tab, browsing skills by category: music, languages, technology, cooking.",
       },
     ],
@@ -197,11 +197,11 @@ export const PROJECTS: Project[] = [
     tint: "#2d6aa8",
     cover: [
       {
-        file: "destinations",
+        file: "destinations-light",
         alt: "TravelPlanner's destination list, with photographs of Paris, Tokyo and New York.",
       },
       {
-        file: "destination",
+        file: "destination-dark",
         alt: "A TravelPlanner destination page for Paris, with two saved trips under it.",
       },
     ],

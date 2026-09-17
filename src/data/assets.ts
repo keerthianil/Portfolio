@@ -481,15 +481,40 @@ export const ASSETS: Record<string, AssetGroup[]> = {
 
   swaptitude: [
     {
-      title: "The app",
+      title: "The feed",
+      modes: APPEARANCES,
       items: [
         {
-          file: "feed",
-          alt: "Swaptitude's home feed: skill swap posts offering english for piano and guitar for something else, each with a match state.",
+          file: "home",
+          alt: "Swaptitude's home feed: skill swap posts offering english for piano and guitar for something else, each carrying the state of the match.",
+          caption:
+            "A post you do not match says why, rather than offering a disabled button.",
         },
         {
           file: "explore",
           alt: "Swaptitude's explore tab, browsing skills by category: music, languages, technology, cooking, art and crafts, sports and fitness.",
+          caption:
+            "Browse by category, because a marketplace with nothing near you still has to show you something.",
+        },
+      ],
+    },
+    {
+      title: "Posting and matching",
+      modes: APPEARANCES,
+      items: [
+        {
+          file: "post",
+          alt: "The create post screen: what you can teach, at what level, and what you want to learn, each with a category and a specific skill.",
+          caption:
+            "Both halves of the swap are one form, because a post with only one half cannot match anything.",
+        },
+        {
+          file: "matches",
+          alt: "The matches tab with nothing in it, and a line saying matches appear here when you connect with someone.",
+        },
+        {
+          file: "profile",
+          alt: "A profile: handle, rating, and counts of posts and reviews, with the user's own posts listed under it.",
         },
       ],
     },
