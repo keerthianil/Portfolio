@@ -51,16 +51,20 @@ export interface AboutBlock {
   label?: string;
 }
 
+/**
+ * Six blocks, about two hundred words.
+ *
+ * It was four hundred and read like a bio somebody else had written. The cut
+ * is the point: everything that was an achievement is in the work section
+ * already, and a terminal that scrolls is a terminal nobody finishes.
+ *
+ * Two pieces of art, not three. The map went with the paragraph it belonged to.
+ */
 export const ABOUT_BLOCKS: AboutBlock[] = [
   {
     kind: "text",
     content:
-      "It started with a cursor. In 2021 I built a way to move one with your face: the nose as an anchor, a blink to click, because somebody who could not use a mouse still needed to use a computer. Everything I have done since is a version of that.",
-  },
-  {
-    kind: "text",
-    content:
-      "I came to design through code. I was the one on the team asking why the button was 22 points instead of 44, and at some point that stopped being a side interest and became the job.",
+      "I tell people I work in accessibility and then change the subject, because the long version takes a while. The short version is that in 2021 I built a way to move a cursor with your face, for somebody who could not use a mouse, and I have been doing a version of that ever since.",
   },
   {
     kind: "art",
@@ -70,32 +74,12 @@ export const ABOUT_BLOCKS: AboutBlock[] = [
   {
     kind: "text",
     content:
-      "At the Roux Institute I built StemAlly, a reader that lets a blind student move around inside an equation instead of hearing it read at them once. Six participants, two document conditions, 15,400 logged interactions. My favourite number in that study is the one that made me look bad: tactile figures beat equation navigation 43 to 1, which is to say I had spent most of my time on the wrong half of it.",
-  },
-  {
-    kind: "art",
-    label: "An intersection drawn as tactile lines",
-    content: ART_MAP,
+      "Mostly iOS, mostly for blind and low-vision users. At the Roux Institute I built StemAlly, a reader that lets a student move around inside an equation instead of hearing it read at them once, and TactileNav, street maps you read with one finger. Six participants, 15,400 logged interactions, and the most useful number in that study was the one that told me I had spent my time on the wrong half of it.",
   },
   {
     kind: "text",
     content:
-      "Then TactileNav, tactile street maps you read with one finger. The hard part was never the map. It was that the screen reader and the app both want single finger touches, and only one of us can have them. I solved that twice, in opposite directions, before I got it right.",
-  },
-  {
-    kind: "text",
-    content:
-      "I do the whole thing. The research, the design, and the SwiftUI that actually ships, without handing it off in the middle. Partly that is stubbornness. Mostly it is that the interesting decisions live at the seams, and they get lost when the work changes hands.",
-  },
-  {
-    kind: "text",
-    content:
-      "If you want to know whether I am any good, look at what I took out. Four rotors down to one. A fullscreen math mode that lasted three days. Five claims pulled out of my own write-up because I could not source them. Anybody can add.",
-  },
-  {
-    kind: "text",
-    content:
-      "Before Boston I was a software engineer at Capgemini in Bengaluru, writing APIs and running UAT. Before that I ran a 200 person student club, which is where you learn project management several years before anyone calls it that.",
+      "What bothers me about how software gets built is that almost nobody talks to the person who will use it. Teams design for somebody they have never met and never watched. So I do the whole thing, research through design through the SwiftUI that ships, without handing it off in the middle, because the interesting decisions live at the seams and that is exactly where they get lost.",
   },
   {
     kind: "art",
@@ -105,12 +89,7 @@ export const ABOUT_BLOCKS: AboutBlock[] = [
   {
     kind: "text",
     content:
-      "Off the clock: I do not function before the first coffee and I have stopped pretending otherwise. I have been disappearing into fiction since I was a kid and I still do, most nights. And I get my ten thousand steps and my gym session in, which is less about discipline than about needing somewhere to put the restlessness.",
-  },
-  {
-    kind: "text",
-    content:
-      "The through line, if you want one: I would rather ship a smaller thing that measures itself than a bigger thing that claims to work.",
+      "Off the clock: nothing happens before the first coffee. I have been disappearing into fiction since I was a kid and I still do, most nights. And I get my ten thousand steps and my gym session in, which is less about discipline than about needing somewhere to put the restlessness.",
   },
 ];
 

@@ -210,17 +210,32 @@ export function Gallery({
                         >
                           {number}
                         </span>
-                        {/* Already sized and converted once. Running these
-                            through the image pipeline would re-encode an
-                            optimised file. */}
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={href}
-                          alt={item.alt}
-                          loading="lazy"
-                          decoding="async"
-                          className="bg-bg w-full object-cover"
-                        />
+                        {/* The space is reserved before the image arrives.
+                            These are lazy, so without an aspect ratio the row
+                            is two pixels tall until it loads and then shoves
+                            everything below it down the page. */}
+                        <span
+                          className={[
+                            "bg-bg block w-full",
+                            // Phone captures are all about 9:19.5. The one
+                            // browser capture in the set is not.
+                            projectId === "portfolio"
+                              ? "aspect-[16/10]"
+                              : "aspect-[9/19.5]",
+                          ].join(" ")}
+                        >
+                          {/* Already sized and converted once. Running these
+                              through the image pipeline would re-encode an
+                              optimised file. */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={href}
+                            alt={item.alt}
+                            loading="lazy"
+                            decoding="async"
+                            className="h-full w-full object-cover"
+                          />
+                        </span>
                         {item.caption && (
                           <span className="text-text-muted block px-3 py-2 text-[12px] leading-snug">
                             {item.caption}
