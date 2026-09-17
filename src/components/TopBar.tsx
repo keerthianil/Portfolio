@@ -22,6 +22,7 @@ export function TopBar({
   return (
     <>
       <header
+        data-print="hide"
         inert={hidden || overlayOpen}
         className={[
           "fixed top-0 left-0 z-[600] flex h-16 w-full items-center",

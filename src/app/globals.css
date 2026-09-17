@@ -180,3 +180,119 @@ main:focus-visible {
 .loading-rise {
   animation: loading-rise 0.8s ease-out 0.4s both;
 }
+
+/* ---------------------------------------------------------------------------
+   Print.
+
+   People print case studies. Without this, Cmd+P produced a black rectangle:
+   the room is a canvas, the panels are `position: fixed` inside it, and a
+   printer resolves fixed against the page rather than against a viewport, so
+   everything piled onto page one over a background that most printers drop.
+
+   The fix is to take the room away entirely and let the open panel become a
+   normal document. Ink on paper, not the site's palette: a dark theme printed
+   is either unreadable or a cartridge.
+
+   Only what is on screen prints. If nothing is open you get the room's text
+   content, which is the welcome card and the nav, and that is correct: there
+   was nothing to print.
+--------------------------------------------------------------------------- */
+@media print {
+  /* Colour-adjust off, so the printer's own "ignore backgrounds" default is
+     the one that applies and nothing lays down a full page of ink. */
+  * {
+    background: transparent !important;
+    color: #111 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    -webkit-print-color-adjust: economy;
+    print-color-adjust: economy;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  /* The room, the chrome, and every control. A button on paper is a lie. */
+  canvas,
+  video,
+  nav[aria-label="Sections"],
+  .skip-link,
+  [data-print="hide"] {
+    display: none !important;
+  }
+
+  /* Fixed positioning resolves against the page when printing, which stacks
+     every overlay on page one. Unpin all of it and let the document flow. */
+  [role="dialog"],
+  [role="dialog"] > div,
+  .fixed {
+    position: static !important;
+    max-width: none !important;
+    max-height: none !important;
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    backdrop-filter: none !important;
+    transform: none !important;
+    border: 0 !important;
+    padding: 0 !important;
+    inset: auto !important;
+  }
+
+  /* Scrolling regions have to give up their height or they print one screenful
+     and stop. */
+  .overflow-y-auto,
+  .overflow-x-auto {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  main {
+    box-shadow: none !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  figure,
+  table,
+  blockquote,
+  li {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* A link on paper is a dead end unless it says where it goes. Internal
+     hashes are left alone: printing "(#work/stemally)" helps nobody. */
+  a[href^="http"]::after,
+  a[href^="mailto:"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    word-break: break-all;
+  }
+
+  /* The two figure captions and the metric tiles carry the argument, so they
+     get borders back rather than floating. */
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  th,
+  td {
+    border-bottom: 1px solid #ccc !important;
+  }
+}

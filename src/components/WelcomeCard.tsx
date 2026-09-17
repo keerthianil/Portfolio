@@ -25,6 +25,7 @@ export function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
   return (
     <motion.div
       inert={leaving}
+      data-print="hide"
       className="pointer-events-none fixed inset-0 z-[550] flex items-center justify-center px-6"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
