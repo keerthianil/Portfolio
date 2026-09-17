@@ -2,10 +2,8 @@ export interface TimelineEntry {
   id: string;
   from: string;
   to: string;
-  /** Sort key and chart position, as YYYYMM. */
+  /** Sort key, as YYYYMM. Newest first. */
   start: number;
-  /** Last month of the entry, as YYYYMM. Null while it is still running. */
-  end: number | null;
   role: string;
   org: string;
   place: string;
@@ -14,27 +12,20 @@ export interface TimelineEntry {
 }
 
 /**
- * Work and study, newest first.
+ * Work and study, from the resume, with the current role first and the rest
+ * newest first after it.
  *
- * `start` and `end` are here so the chart can draw the real shape of it rather
- * than a list of dates in a column. Overlapping rows are real and there are
- * several: the research assistantship ran alongside both the teaching work and
- * the role at Clean Harbors, and the club and the undergraduate research
- * assistantship ran alongside the degree.
- *
- * `LANE_SPAN` is the window the chart draws. It is stated rather than derived
- * so the axis lands on whole years instead of on whatever month the oldest
- * entry happens to start in.
+ * Overlapping rows are real and there are several, which a stack of calendar
+ * pages states rather than draws. A chart that drew them was tried and removed:
+ * it read as analysis sitting next to the thing it analysed, and it pushed the
+ * calendar off a panel whose whole job is to be the calendar you clicked.
  */
-export const LANE_SPAN = { from: 201901, to: 202612 };
-
 export const TIMELINE: TimelineEntry[] = [
   {
     id: "roux",
     from: "Sep 2025",
     to: "now",
     start: 202509,
-    end: null,
     role: "Research assistant and iOS developer",
     org: "The Roux Institute, Northeastern University",
     place: "Boston, MA",
@@ -50,7 +41,6 @@ export const TIMELINE: TimelineEntry[] = [
     from: "Dec 2025",
     to: "May 2026",
     start: 202512,
-    end: 202605,
     role: "Technical project manager",
     org: "Clean Harbors",
     place: "Norwell, MA",
@@ -65,7 +55,6 @@ export const TIMELINE: TimelineEntry[] = [
     from: "Sep 2025",
     to: "Dec 2025",
     start: 202509,
-    end: 202512,
     role: "Teaching assistant, iOS development",
     org: "Northeastern University",
     place: "Boston, MA",
@@ -80,7 +69,6 @@ export const TIMELINE: TimelineEntry[] = [
     from: "Sep 2024",
     to: "Dec 2026",
     start: 202409,
-    end: 202612,
     role: "MS, Information Systems",
     org: "Northeastern University, College of Engineering",
     place: "Boston, MA",
@@ -92,7 +80,6 @@ export const TIMELINE: TimelineEntry[] = [
     from: "Jun 2023",
     to: "Aug 2024",
     start: 202306,
-    end: 202408,
     role: "Software engineer",
     org: "Capgemini",
     place: "Bengaluru, India",
@@ -107,7 +94,6 @@ export const TIMELINE: TimelineEntry[] = [
     from: "Jan 2023",
     to: "Apr 2023",
     start: 202301,
-    end: 202304,
     role: "Web application developer, internship",
     org: "Varcons Technologies",
     place: "Bengaluru, India, remote",
@@ -122,7 +108,6 @@ export const TIMELINE: TimelineEntry[] = [
     from: "Oct 2021",
     to: "Dec 2022",
     start: 202110,
-    end: 202212,
     role: "Club head, Association of Computer Engineers",
     org: "CMR Institute of Technology, CSE Department",
     place: "Bengaluru, India",
@@ -137,7 +122,6 @@ export const TIMELINE: TimelineEntry[] = [
     from: "Aug 2021",
     to: "Dec 2021",
     start: 202108,
-    end: 202112,
     role: "Research assistant, accessibility technology",
     org: "CMR Institute of Technology",
     place: "Bengaluru, India",
@@ -153,7 +137,6 @@ export const TIMELINE: TimelineEntry[] = [
     from: "Aug 2019",
     to: "Jun 2023",
     start: 201908,
-    end: 202306,
     role: "BE, Computer Science",
     org: "CMR Institute of Technology",
     place: "Bengaluru, India",

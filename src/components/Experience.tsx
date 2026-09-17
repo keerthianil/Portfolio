@@ -23,7 +23,6 @@ import type { Hotspot } from "@/scene/Room";
 import { COLOUR_VISION, type ColourVision } from "@/scene/palette";
 import { BottomNav } from "./BottomNav";
 import { CommandPalette } from "./CommandPalette";
-import { CursorGlow } from "./CursorGlow";
 import { Curtain } from "./Curtain";
 import { RoomNote, type RoomNoteContent } from "./RoomNote";
 import { SceneObjectButtons } from "./SceneObjectButtons";
@@ -573,8 +572,6 @@ export function Experience() {
       {/* Mounted only once the room is up, so the first thing a visitor sees
           is not a light hanging over a black curtain. It takes itself off on
           a coarse pointer and under reduced motion. */}
-      {revealed && <CursorGlow />}
-
       {/* Outside every overlay, because it goes over all of them. It renders
           nothing until Cmd+K, and the shortcut is announced in the help menu. */}
       {revealed && <CommandPalette />}

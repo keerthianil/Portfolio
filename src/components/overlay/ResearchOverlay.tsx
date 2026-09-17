@@ -397,7 +397,7 @@ function Blocks({ blocks }: { blocks: Block[] }) {
                   alt={block.alt}
                   loading="lazy"
                   decoding="async"
-                  className="w-full rounded-lg border border-[#0c0a09]/15"
+                  className="mx-auto block h-auto max-h-[420px] w-auto max-w-full rounded-lg border border-[#0c0a09]/15"
                 />
                 {block.caption && (
                   <figcaption className="text-[12px] leading-relaxed text-[#0c0a09]/55">
@@ -416,7 +416,7 @@ function Blocks({ blocks }: { blocks: Block[] }) {
                   preload="metadata"
                   poster={block.poster}
                   aria-label={block.alt}
-                  className="mx-auto w-full max-w-[300px] rounded-lg border border-[#0c0a09]/15"
+                  className="mx-auto block max-h-[420px] w-auto max-w-full rounded-lg border border-[#0c0a09]/15"
                 >
                   {block.webm && <source src={block.webm} type="video/webm" />}
                   <source src={block.mp4} type="video/mp4" />

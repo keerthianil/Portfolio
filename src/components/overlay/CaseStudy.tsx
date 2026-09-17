@@ -279,12 +279,17 @@ export function CaseStudy({
               >
                 {study.hero && (
                   <figure className="flex flex-col gap-2">
+                    {/* Capped and proportional. Two of these are portrait
+                        phone captures, and at full column width one of them
+                        was most of a screen on its own. Both max constraints
+                        with both dimensions auto is the one combination a
+                        browser scales proportionally to fit. */}
                     <Image
                       src={`/images/case/${study.id}/${study.hero.src}`}
                       alt={study.hero.alt}
                       width={1600}
                       height={760}
-                      className="border-border w-full rounded-xl border"
+                      className="border-border mx-auto block h-auto max-h-[300px] w-auto max-w-full rounded-xl border"
                     />
                     {study.hero.caption && (
                       <figcaption className="text-text-muted text-[12px]">
@@ -299,11 +304,14 @@ export function CaseStudy({
                     {/* Not muted and not autoplaying. These are screen reader
                         recordings: the audio is the content, so it gets
                         controls and a description rather than a silent loop. */}
+                    {/* Capped by height, not by width. These are portrait
+                        phone captures, so a 300px width is a 650px tall block
+                        in a column that is already carrying a hero. */}
                     <video
                       controls
                       preload="metadata"
                       poster={study.clip.poster}
-                      className="border-border mx-auto w-full max-w-[300px] rounded-xl border"
+                      className="border-border bg-bg mx-auto block max-h-[320px] w-auto max-w-full rounded-xl border"
                     >
                       <source src={study.clip.webm} type="video/webm" />
                       <source src={study.clip.mp4} type="video/mp4" />
@@ -357,7 +365,7 @@ export function CaseStudy({
                           alt={figure.alt}
                           width={1600}
                           height={900}
-                          className="border-border w-full rounded-xl border"
+                          className="border-border mx-auto block h-auto max-h-[360px] w-auto max-w-full rounded-xl border"
                         />
                         {figure.caption && (
                           <figcaption className="text-text-muted text-[12px]">
