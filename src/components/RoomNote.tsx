@@ -27,6 +27,7 @@ export function RoomNote({ note }: { note: RoomNoteContent | null }) {
 
   return (
     <div
+      data-print="hide"
       className="pointer-events-none fixed inset-x-0 top-20 z-[550] flex justify-center px-4"
       aria-hidden="true"
     >

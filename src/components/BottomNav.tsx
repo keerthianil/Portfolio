@@ -169,6 +169,7 @@ export function BottomNav({
 
   return (
     <nav
+      data-print="hide"
       className={[
         "pointer-events-none fixed bottom-0 left-0 z-[500] h-[100px] w-full",
         inert ? "opacity-0" : "opacity-100 transition-opacity duration-300",

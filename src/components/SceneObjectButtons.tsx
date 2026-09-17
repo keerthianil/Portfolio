@@ -33,7 +33,11 @@ export function SceneObjectButtons({
   inert?: boolean;
 }) {
   return (
-    <div className="pointer-events-none fixed inset-0 z-[520]" inert={inert}>
+    <div
+      data-print="hide"
+      className="pointer-events-none fixed inset-0 z-[520]"
+      inert={inert}
+    >
       <h2 className="sr-only">Things in the room</h2>
       <ul className="absolute top-20 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2">
         {ROUTES.map((route) => (

@@ -22,6 +22,7 @@ export function Curtain({ open }: { open: boolean }) {
   if (shouldReduce) {
     return (
       <motion.div
+        data-print="hide"
         className="bg-bg pointer-events-none fixed inset-0 z-[700]"
         initial={{ opacity: 1 }}
         animate={{ opacity: open ? 0 : 1 }}
@@ -33,7 +34,11 @@ export function Curtain({ open }: { open: boolean }) {
   }
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[700]" aria-hidden="true">
+    <div
+      data-print="hide"
+      className="pointer-events-none fixed inset-0 z-[700]"
+      aria-hidden="true"
+    >
       {(["top", "bottom"] as const).map((edge) => (
         <motion.div
           key={edge}
