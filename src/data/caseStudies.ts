@@ -108,7 +108,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         title: "Challenge",
         body: [
           "My first build let a rendering engine speak the math. I shipped it in November and pulled it six days later. The engine writes its own description of the equation and there is no way inside it, so either I accept whatever it says or I take responsibility for it. I wrote the spoken form myself.",
-          "Then everything that looked like math became math. An answer choice like a. -11 arrives tagged exactly the same as a quadratic, so the screen reader said math equation, double tap to enter math mode four times per question. An expression needs two operators now before it earns its own block.",
+          "Then everything that looked like math became math. An answer choice like a. -11 arrives tagged exactly the same as a quadratic, so the screen reader said math equation, double tap to enter math mode four times per question. An expression needs two operators now before it earns its own block, so the answer choices read as a list again (screen 3).",
         ],
       },
       {
@@ -116,12 +116,12 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         title: "Approach",
         body: [
           "Two conditions, one document of equations and one of diagrams. Six blind and low-vision participants worked through both while thinking aloud.",
-          "The part I would defend hardest is the logging. Every touch, every focus change and every announcement, ten times a second, tagged by condition. 15,400 events. Think-aloud tells you what someone noticed and nothing about where their finger went.",
+          "The part I would defend hardest is the logging. Every touch, every focus change and every announcement, ten times a second, tagged by condition (screen 12). 15,400 events. Think-aloud tells you what someone noticed and nothing about where their finger went.",
         ],
         points: [
           "Four rotors shipped first. More granularity felt more capable and was worse. It is one now, hidden until you enter math mode.",
           "Fullscreen math mode lasted three days. Reading one equation inside a sentence should not cost you your place in the document. It is a state now, not a screen.",
-          "Charts carry four representations at once. Sonification reads shape quickly and values badly, and a table is the reverse.",
+          "Charts carry four representations at once (screens 4 to 9). Sonification reads shape quickly and values badly, and a table is the reverse.",
         ],
       },
       {
@@ -187,13 +187,13 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         id: "approach",
         title: "Approach",
         body: [
-          "Line width and map scale are two independent numbers, and keeping them independent is the whole trick. A road is 4.0mm wide at every zoom level, because that is roughly the narrowest line a fingertip can follow. It is a perceptual constant, not a measurement of asphalt.",
+          "Line width and map scale are two independent numbers, and keeping them independent is the whole trick. A road is 4.0mm wide at every zoom level, because that is roughly the narrowest line a fingertip can follow. It is a perceptual constant, not a measurement of asphalt (screens 2 and 3).",
           "Silence off the streets is the point: it is how a blank block reads as blank. Speech waits for a 0.2 second dwell, so sweeping across six streets you feel all six and hear only the one you stop on.",
         ],
         points: [
           "Intersections come from map node topology rather than from geometry. Two ways that genuinely meet share a node, and two that cross on a bridge do not.",
           "Two custom gestures did not survive. Both became labelled buttons, because a gesture nobody is told about does not exist.",
-          "One fix was removing a channel rather than adding one. Testers could not tell where crossings ended, and the vibration was masking the audio cue that marked it.",
+          "One fix was removing a channel rather than adding one. Testers could not tell where crossings ended, and the vibration was masking the audio cue that marked it (screen 6).",
         ],
         figures: [
           {
@@ -257,7 +257,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         id: "approach",
         title: "Approach",
         body: [
-          "Three tabs. Learn is 55 topics sorted by who is affected rather than by spec section, each one leading with a plain sentence and a demo you drag until the barrier is something you feel. Check turns twenty plain questions into a score, and celebrates before it analyses, because a low score met with silence reads as a verdict. Toolkit is five utilities, including the WCAG reference rebuilt as a deck of cards.",
+          "Three tabs. Learn is 55 topics sorted by who is affected rather than by spec section, each one leading with a plain sentence and a demo you drag until the barrier is something you feel. Check turns twenty plain questions into a score, and celebrates before it analyses, because a low score met with silence reads as a verdict. Toolkit is five utilities, including the WCAG reference rebuilt as a deck of cards (screens 18 and 19).",
           "The visual system was explored in Figma first, including the directions that lost. The first palette was five saturated hues and read as a carnival. Those rejected directions are still in the file, which is what makes designed first a process rather than a claim.",
         ],
         points: [
@@ -269,7 +269,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         title: "Results",
         body: [
           "Ally's whole credibility rests on passing what it teaches, and it did not.",
-          "The README claimed every colour pair cleared AA. Nobody had ever computed it. When I measured, eighteen assertions failed, and the signature score ring was drawing each arc at 1.75:1 against its own track: the most prominent animation in the app was, in light mode, invisible. A test now recomputes every pair in both appearances and fails the build on a regression.",
+          "The README claimed every colour pair cleared AA. Nobody had ever computed it. When I measured, eighteen assertions failed, and the signature score ring was drawing each arc at 1.75:1 against its own track (screen 12): the most prominent animation in the app was, in light mode, invisible. A test now recomputes every pair in both appearances and fails the build on a regression.",
           "Months later a second test found that every text input had an empty label and was leaning on its placeholder. Ally has a Learn topic that tells you exactly not to do this. It was breaking a rule it had written down, in its own words, in five places. Which is the thesis of the app, demonstrated on the app.",
         ],
         points: [
@@ -317,12 +317,12 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         id: "approach",
         title: "Approach",
         body: [
-          "The pre-purchase check is the hero, and it is the interaction that does not exist in any competitor. Category, then price, then verdict, one question at a time, with the count of what you already own sitting inside the input. No model and no network: it runs on device with no latency.",
+          "The pre-purchase check is the hero, and it is the interaction that does not exist in any competitor. Category, then price, then verdict, one question at a time, with the count of what you already own sitting inside the input (screens 4 and 5). No model and no network: it runs on device with no latency.",
           "Financial framing, never sustainability framing. Behaviour change through self interest rather than guilt. The app observes and suggests, and it never shames.",
         ],
         points: [
           "Category is the matching axis because the alternatives do not work. Name matching is unreliable without a model and image matching is a research problem.",
-          "Three arcs, not one ring. A ring split into the weights draws them while implying the parts sum to the total. They do not.",
+          "Three arcs, not one ring (screen 9). A ring split into the weights draws them while implying the parts sum to the total. They do not.",
         ],
       },
       {
@@ -364,7 +364,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         id: "approach",
         title: "Approach",
         body: [
-          "So the line gets drawn and held. Contrast and colour distinguishability are arithmetic, so the app does them on device and shows its working. Everything that needs the semantic layer a screenshot does not carry stays manual, in a lens where a human drops a pin and picks the criterion.",
+          "So the line gets drawn and held. Contrast and colour distinguishability are arithmetic, so the app does them on device and shows its working. Everything that needs the semantic layer a screenshot does not carry stays manual, in a lens where a human drops a pin and picks the criterion (screens 3 to 5).",
           "Pins rather than a list, because a violation's position on screen matters as much as its description. Telling someone the contrast fails is a bug report. Showing them where is a fix.",
         ],
         points: [
@@ -376,7 +376,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         id: "results",
         title: "Results",
         body: [
-          "It ships with a real audit in it: five screens of a music app, thirteen findings across four severity levels, so the workflow is visible the moment you open it.",
+          "It ships with a real audit in it: five screens of a music app, thirteen findings across four severity levels, so the workflow is visible the moment you open it (screens 1 and 2).",
           "ARIA is also the reason Ally exists. Building this one taught me the thing that killed it, which is that auditing is desk work. The app is good and the premise was wrong, and the useful part was working out that the real gap is understanding rather than detection.",
         ],
         points: [
@@ -419,12 +419,12 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         id: "approach",
         title: "Approach",
         body: [
-          "Every object in the room is also a real button, hidden until it is focused, and the scene draws a ring around the focused object in 3D. That ring is on whenever the room is, not behind an accessibility mode.",
-          "The hash is the router, so every view has a URL, and the panels that go a level deeper push a history entry rather than replacing one, so Back closes the panel instead of leaving the site. Without WebGL you get a flat view that is not a picture of the room: every object in it was a link anyway.",
+          "Every object in the room is also a real button, hidden until it is focused, and the scene draws a ring around the focused object in 3D (screen 3). That ring is on whenever the room is, not behind an accessibility mode.",
+          "The hash is the router, so every view has a URL, and the panels that go a level deeper push a history entry rather than replacing one, so Back closes the panel instead of leaving the site. Without WebGL you get a flat view that is not a picture of the room (screen 7): every object in it was a link anyway.",
         ],
         points: [
           "The camera leads the overlay by 700ms, so you arrive at the object before its content covers it.",
-          "Four things in the room do something rather than say something. Pull the blind and the daylight goes with it, because glare is an access need and a room going dark is a better argument than a caption about it.",
+          "Four things in the room do something rather than say something. Pull the blind and the daylight goes with it (screen 2), because glare is an access need and a room going dark is a better argument than a caption about it.",
           "The palette is measured against the background, not eyeballed. A version shipped with the blue channel left in gamma space and every ratio came out inflated, which only shows up if you compute it twice.",
         ],
       },
@@ -521,7 +521,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         id: "approach",
         title: "Approach",
         body: [
-          "One data manager owns the store and every view goes through it. Delete rules are declared on the model rather than implemented in each view, so removing a destination cascades once, in one place.",
+          "One data manager owns the store and every view goes through it. Delete rules are declared on the model rather than implemented in each view, so removing a destination cascades once, in one place (screens 2 and 4).",
           "The API layer never writes to the store directly, so a failed fetch degrades to what is already saved instead of blanking the screen. What is stored locally is the truth and the remote data is a decoration on top of it.",
         ],
         points: [
