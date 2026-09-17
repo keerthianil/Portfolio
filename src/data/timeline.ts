@@ -1,8 +1,11 @@
 export interface TimelineEntry {
+  id: string;
   from: string;
   to: string;
-  /** Sort key, newest first. */
+  /** Sort key and chart position, as YYYYMM. */
   start: number;
+  /** Last month of the entry, as YYYYMM. Null while it is still running. */
+  end: number | null;
   role: string;
   org: string;
   place: string;
@@ -11,15 +14,27 @@ export interface TimelineEntry {
 }
 
 /**
- * From the resume. Newest first. Overlapping rows are real: the research
- * assistantship ran alongside both the teaching assistantship and the Clean
- * Harbors work.
+ * Work and study, newest first.
+ *
+ * `start` and `end` are here so the chart can draw the real shape of it rather
+ * than a list of dates in a column. Overlapping rows are real and there are
+ * several: the research assistantship ran alongside both the teaching work and
+ * the role at Clean Harbors, and the club and the undergraduate research
+ * assistantship ran alongside the degree.
+ *
+ * `LANE_SPAN` is the window the chart draws. It is stated rather than derived
+ * so the axis lands on whole years instead of on whatever month the oldest
+ * entry happens to start in.
  */
+export const LANE_SPAN = { from: 201901, to: 202612 };
+
 export const TIMELINE: TimelineEntry[] = [
   {
+    id: "roux",
     from: "Sep 2025",
     to: "now",
     start: 202509,
+    end: null,
     role: "Research assistant and iOS developer",
     org: "The Roux Institute, Northeastern University",
     place: "Boston, MA",
@@ -31,9 +46,11 @@ export const TIMELINE: TimelineEntry[] = [
     ],
   },
   {
+    id: "clean-harbors",
     from: "Dec 2025",
     to: "May 2026",
     start: 202512,
+    end: 202605,
     role: "Technical project manager",
     org: "Clean Harbors",
     place: "Norwell, MA",
@@ -44,9 +61,11 @@ export const TIMELINE: TimelineEntry[] = [
     ],
   },
   {
+    id: "ta",
     from: "Sep 2025",
     to: "Dec 2025",
-    start: 202508,
+    start: 202509,
+    end: 202512,
     role: "Teaching assistant, iOS development",
     org: "Northeastern University",
     place: "Boston, MA",
@@ -57,9 +76,11 @@ export const TIMELINE: TimelineEntry[] = [
     ],
   },
   {
+    id: "ms",
     from: "Sep 2024",
     to: "Dec 2026",
     start: 202409,
+    end: 202612,
     role: "MS, Information Systems",
     org: "Northeastern University, College of Engineering",
     place: "Boston, MA",
@@ -67,9 +88,11 @@ export const TIMELINE: TimelineEntry[] = [
     lines: ["Graduating December 2026."],
   },
   {
+    id: "capgemini",
     from: "Jun 2023",
     to: "Aug 2024",
     start: 202306,
+    end: 202408,
     role: "Software engineer",
     org: "Capgemini",
     place: "Bengaluru, India",
@@ -80,9 +103,57 @@ export const TIMELINE: TimelineEntry[] = [
     ],
   },
   {
+    id: "varcons",
+    from: "Jan 2023",
+    to: "Apr 2023",
+    start: 202301,
+    end: 202304,
+    role: "Web application developer, internship",
+    org: "Varcons Technologies",
+    place: "Bengaluru, India, remote",
+    kind: "work",
+    lines: [
+      "Built a responsive food ordering system for a cafe in Bangalore, in HTML, CSS and JavaScript.",
+      "Full menu, ordering and reservation flows, designed and built end to end.",
+    ],
+  },
+  {
+    id: "ace",
+    from: "Oct 2021",
+    to: "Dec 2022",
+    start: 202110,
+    end: 202212,
+    role: "Club head, Association of Computer Engineers",
+    org: "CMR Institute of Technology, CSE Department",
+    place: "Bengaluru, India",
+    kind: "work",
+    lines: [
+      "Led the Association of Computer Engineers for 200+ students.",
+      "Organised technical workshops, hackathons and inter-college events. The kind of role where you learn project management before anyone calls it that.",
+    ],
+  },
+  {
+    id: "cmrit-ra",
+    from: "Aug 2021",
+    to: "Dec 2021",
+    start: 202108,
+    end: 202112,
+    role: "Research assistant, accessibility technology",
+    org: "CMR Institute of Technology",
+    place: "Bengaluru, India",
+    kind: "work",
+    lines: [
+      "Built a hands-free computer control system for people with physical disabilities.",
+      "Facial gesture tracking for cursor movement, the nose as an anchor and eye blinks for clicks, plus a custom voice assistant.",
+      "This is the one that started it. Everything since has been a version of the same question.",
+    ],
+  },
+  {
+    id: "be",
     from: "Aug 2019",
     to: "Jun 2023",
     start: 201908,
+    end: 202306,
     role: "BE, Computer Science",
     org: "CMR Institute of Technology",
     place: "Bengaluru, India",
