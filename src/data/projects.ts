@@ -46,6 +46,12 @@ export interface Project {
    * landscape and has to sit square on, or it reads as a broken phone.
    */
   shape?: "phone" | "wide";
+  /**
+   * Alt text for the app icon at /images/projects/<id>/icon.webp. When it is
+   * set the card shows the icon; the screens in `cover` are the fallback for a
+   * project that has no icon yet.
+   */
+  icon?: string;
   /** Up to two screens, shown angled on the card. */
   cover: ProjectShot[];
 }
@@ -53,6 +59,7 @@ export interface Project {
 export const PROJECTS: Project[] = [
   {
     id: "stemally",
+    icon: "The StemAlly app icon: an open book with rays of colour fanning up out of it.",
     avif: true,
     title: "StemAlly",
     summary:
@@ -74,6 +81,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "tactilenav",
+    icon: "The TactileNav app icon: a folded map drawn as three blue panels.",
     avif: true,
     title: "TactileNav",
     summary:
@@ -115,6 +123,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "threadline",
+    icon: "The Threadline app icon: a copper hanger wound with thread, on a frosted tile.",
     avif: true,
     title: "Threadline",
     summary:
@@ -172,6 +181,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "swaptitude",
+    icon: "The Swaptitude app icon: two heads facing each other with arrows circling between them.",
     title: "Swaptitude",
     summary:
       "A skill swap marketplace: teach one thing, learn another. Firebase auth, a live feed and matching, built by four of us.",
@@ -190,6 +200,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "travelplanner",
+    icon: "The TravelPlanner app icon: a plane flying over a travel journal with a globe on its cover.",
     title: "TravelPlanner",
     summary:
       "Destinations, trips and dates on Core Data. The one here that is about persistence rather than touch.",

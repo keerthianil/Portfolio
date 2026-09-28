@@ -6,6 +6,9 @@ import type { Project } from "@/data/projects";
 /**
  * One project.
  *
+ * A project with an app icon shows the icon. The rest of this note is about
+ * the fallback for a project that has none yet.
+ *
  * The screens are 1206x2622 phone captures, so the card composites two of them
  * at an angle on a field tinted with that app's own accent rather than cropping
  * a portrait screenshot into a landscape thumbnail.
@@ -104,10 +107,24 @@ export function ProjectCard({
           ref={artRef}
           className={[
             "absolute inset-0 flex transform-gpu justify-center transition-transform duration-300 ease-out group-hover:scale-[1.03]",
-            wide ? "items-center px-4" : "items-end pb-1",
+            project.icon || wide ? "items-center px-4" : "items-end pb-1",
           ].join(" ")}
         >
-          {project.cover.map((shot, index) => (
+          {/* The app icon, rounded the way the home screen rounds it. The
+              icons are used exactly as they ship. */}
+          {project.icon ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={`/images/projects/${project.id}/icon.webp`}
+              alt={project.icon}
+              width={512}
+              height={512}
+              loading="lazy"
+              decoding="async"
+              className="aspect-square h-[54%] w-auto rounded-[22.37%] shadow-2xl ring-1 ring-black/30"
+            />
+          ) : (
+          project.cover.map((shot, index) => (
             <picture key={shot.file}>
               {/* Only some projects have an avif pair. The rest came off the
                   simulator and were converted once, to webp. */}
@@ -142,7 +159,8 @@ export function ProjectCard({
                 }
               />
             </picture>
-          ))}
+          ))
+          )}
         </div>
       </div>
 
