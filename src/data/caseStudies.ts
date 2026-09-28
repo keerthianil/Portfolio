@@ -270,7 +270,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         body: [
           "Ally's whole credibility rests on passing what it teaches, and it did not.",
           "The README claimed every colour pair cleared AA. Nobody had ever computed it. When I measured, eighteen assertions failed, and the signature score ring was drawing each arc at 1.75:1 against its own track (screen 12): the most prominent animation in the app was, in light mode, invisible. A test now recomputes every pair in both appearances and fails the build on a regression.",
-          "Months later a second test found that every text input had an empty label and was leaning on its placeholder. Ally has a Learn topic that tells you exactly not to do this. It was breaking a rule it had written down, in its own words, in five places. Which is the thesis of the app, demonstrated on the app.",
+          "Months later a second test found that every text input had an empty label and was leaning on its placeholder. Ally has a Learn topic that tells you exactly not to do this. It was breaking a rule it had written down, in its own words, in five places.",
         ],
         points: [
           "Known gap, stated rather than quietly shipped: the exported PDF report rasterizes a view, so the report is an image and is not screen reader accessible.",
@@ -377,7 +377,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         title: "Results",
         body: [
           "It ships with a real audit in it: five screens of a music app, thirteen findings across four severity levels, so the workflow is visible the moment you open it (screens 1 and 2).",
-          "ARIA is also the reason Ally exists. Building this one taught me the thing that killed it, which is that auditing is desk work. The app is good and the premise was wrong, and the useful part was working out that the real gap is understanding rather than detection.",
+          "ARIA is also the reason Ally exists. Building this one taught me the thing that killed it, which is that auditing is desk work. The app is good and the premise was wrong.",
         ],
         points: [
           "What I would change: the report is a rendered view rather than a text layer, which is the same flaw Ally shipped. An accessibility report a screen reader cannot read is an embarrassing thing to hand anyone.",
@@ -404,14 +404,13 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         title: "Summary",
         body: [
           "This site. A desk in a room, built by hand in WebGL rather than exported from a modelling tool, where every object is a route: the monitor is the work, the laptop is about me, the notebook is research, the calendar is the timeline.",
-          "It was built with AI assistance, and the interesting part is what that does and does not do. It writes quickly, and it will happily produce a confident, broken, inaccessible version of anything you ask for. Directing it is the work.",
         ],
       },
       {
         id: "challenge",
         title: "Challenge",
         body: [
-          "Almost every 3D portfolio is unusable with a keyboard, invisible to a screen reader, and a black rectangle without WebGL. That made it exactly the wrong thing for me to build and exactly the right thing to fix. A portfolio about accessibility that is not accessible is an argument against its author.",
+          "Almost every 3D portfolio is unusable with a keyboard, invisible to a screen reader, and a black rectangle without WebGL. A portfolio about accessibility that is not accessible is an argument against its author.",
           "A canvas has no structure. Nothing to tab to, nothing to announce, nothing for a focus ring to sit on. And a scene that fails has to fail into something: a throttled background tab and a shader that throws both produced the same result, which was a working site under a black rectangle that never lifted.",
         ],
       },
@@ -434,7 +433,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         body: [
           "It works with a keyboard, with a screen reader, without WebGL, and at 320px. The curtain over the loading scene has two independent guards on it, both added after a real black screen.",
           "The parts that took longest were not the 3D. They were a modal sized to its animating parent instead of the viewport, two Escape handlers closing two dialogs at once, and an opening animation that ran twice because the panels sat inside a presence wrapper that played their exit when they were told to open.",
-          "What the AI assistance changed is that it made the expensive version affordable. What it did not change is that every one of those decisions still had to be made by somebody, and every claim on this page still had to be checked by somebody.",
+          "It was built with AI assistance, which made the expensive version affordable. What it did not change is that every one of those decisions still had to be made by somebody, and every claim on this page still had to be checked by somebody.",
         ],
         points: [
           "Still open, and stated rather than quietly left out: this has been measured in an emulator at six phone widths and never opened on a real device, and no automated accessibility scan has been run against it.",
