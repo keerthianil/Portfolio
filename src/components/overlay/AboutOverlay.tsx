@@ -5,7 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Download, Mail } from "lucide-react";
 import {
-  ABOUT_BLOCKS,
+  ABOUT_ART,
+  ABOUT_PARAGRAPHS,
   BOOT_INTERVALS,
   BOOT_LINES,
   DESKTOP_ICONS,
@@ -16,6 +17,14 @@ import { useSubRoute } from "@/lib/useSubRoute";
 import { ResumeLink } from "../ResumeLink";
 import { Timeline } from "./Timeline";
 import { WindowFrame } from "./WindowFrame";
+
+/**
+ * The subset of JetBrains Mono this site loads has no box drawing glyphs, so
+ * the browser drew them from a wider fallback and every line with more of them
+ * came out longer: the boxes did not close. Menlo has them at the same advance
+ * as its letters, which is the same fix the name banner uses.
+ */
+const ART_FONT = { fontFamily: 'Menlo, "DejaVu Sans Mono", monospace' };
 
 /**
  * About, as a terminal on the laptop's own screen.
@@ -306,26 +315,43 @@ export function AboutOverlay({ onClose }: { onClose: () => void }) {
             </div>
 
             <div className="flex flex-col gap-5">
-              {ABOUT_BLOCKS.map((block) =>
-                block.kind === "art" ? (
-                  <figure key={block.content} className="my-1">
+              {ABOUT_PARAGRAPHS.map((text) => (
+                <p
+                  key={text}
+                  className="text-text/85 font-sans text-[15px] leading-relaxed"
+                >
+                  {text}
+                </p>
+              ))}
+              {/*
+                The pictures come after the prose so they never interrupt a
+                paragraph. A labelled one is a single image to a screen
+                reader, read by its label; an unlabelled one is not there.
+              */}
+              <div className="flex flex-wrap items-end gap-x-8 gap-y-3">
+                {ABOUT_ART.map((art) =>
+                  art.label ? (
+                    <div key={art.content} role="img" aria-label={art.label}>
+                      <pre
+                        className="text-text-muted overflow-x-auto text-[10px] leading-[1.2] sm:text-[11px]"
+                        style={ART_FONT}
+                        aria-hidden="true"
+                      >
+                        {art.content}
+                      </pre>
+                    </div>
+                  ) : (
                     <pre
+                      key={art.content}
                       className="text-text-muted overflow-x-auto text-[10px] leading-[1.2] sm:text-[11px]"
+                      style={ART_FONT}
                       aria-hidden="true"
                     >
-                      {block.content}
+                      {art.content}
                     </pre>
-                    <figcaption className="sr-only">{block.label}</figcaption>
-                  </figure>
-                ) : (
-                  <p
-                    key={block.content}
-                    className="text-text/85 font-sans text-[15px] leading-relaxed"
-                  >
-                    {block.content}
-                  </p>
-                ),
-              )}
+                  ),
+                )}
+              </div>
               <p className="text-text">- Keerthi</p>
             </div>
 

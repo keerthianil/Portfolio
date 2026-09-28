@@ -10,8 +10,8 @@ export const BOOT_LINES = [
 export const BOOT_INTERVALS = [18, 3, 6, 11];
 
 /**
- * ASCII art, interleaved with the prose the way a terminal would print it.
- * Every block is aria-hidden: read aloud, a box drawing character is noise.
+ * ASCII art. The glyphs themselves are always aria-hidden, because read aloud
+ * a box drawing character is noise; `ABOUT_ART` says what each one means.
  */
 export const NAME_BANNER = [
   "█  █ ████ ████ ███  ████ █  █ ████",
@@ -44,53 +44,38 @@ export const ART_MUG = String.raw`
    │       │──┘
    └───────┘`;
 
-export interface AboutBlock {
-  kind: "text" | "art";
+/**
+ * The bio. Prose only, so the paragraphs read straight through; the pictures
+ * sit after it in `ABOUT_ART`.
+ */
+export const ABOUT_PARAGRAPHS: string[] = [
+  "In 2021 I built a way to move a cursor with your face, for somebody who could not use a mouse. The nose steered and a blink clicked, which made every sneeze a risk. It was rough, it worked, and I have been building versions of it ever since.",
+  "These days it is iOS, mostly for blind and low-vision users. At the Roux Institute I built StemAlly, a math reader you can move around inside instead of hearing an equation once and hoping for the best, and TactileNav, street maps you read with one finger. I tested both with the people they were for, which is the fastest way I know to find out what I got wrong.",
+  "I do the whole thing: the research, the design in Figma, and the SwiftUI that ships. Not because I cannot delegate. Because the decisions that matter live at the seams. A study shows people never find the exit gesture, the designer never hears about it, and the next build adds another gesture nobody will find. Doing all three puts the finding and the fix in the same week. It also leaves exactly one person to blame, which keeps me honest.",
+  "The part I care about is simple to say and hard to do. Watch someone use the thing, then change what you built. Most of what I make is for the people a default design leaves out.",
+  "Off the clock: fiction most nights, which I have been disappearing into since I was a kid, and coffee before anything, which at this point is load-bearing.",
+];
+
+export interface AboutArt {
   content: string;
-  /** For art blocks, what it is, so the screen reader gets something useful. */
+  /**
+   * What the picture says, read in its place. Leave it out and the picture is
+   * decorative and hidden from assistive tech entirely.
+   */
   label?: string;
 }
 
 /**
- * Six blocks, about two hundred words.
- *
- * It was four hundred and read like a bio somebody else had written. The cut
- * is the point: everything that was an achievement is in the work section
- * already, and a terminal that scrolls is a terminal nobody finishes.
- *
- * Two pieces of art, not three. The map went with the paragraph it belonged to.
+ * The equation box carries meaning: it is the gap StemAlly exists to close, so
+ * it gets a real text alternative rather than a name. The mug is decoration.
  */
-export const ABOUT_BLOCKS: AboutBlock[] = [
+export const ABOUT_ART: AboutArt[] = [
   {
-    kind: "text",
-    content:
-      "I tell people I work in accessibility and then change the subject, because the long version takes a while. The short version is that in 2021 I built a way to move a cursor with your face, for somebody who could not use a mouse, and I have been doing a version of that ever since.",
-  },
-  {
-    kind: "art",
-    label: "A worksheet equation, and what a screen reader says about it",
     content: ART_WORKSHEET,
+    label:
+      "A worksheet equation, a x plus 3, all squared, equals 36. Under it, all a screen reader says about it: math equation, double tap to enter math mode.",
   },
-  {
-    kind: "text",
-    content:
-      "Mostly iOS, mostly for blind and low-vision users. At the Roux Institute I built StemAlly, a reader that lets a student move around inside an equation instead of hearing it read at them once, and TactileNav, street maps you read with one finger. Six participants, 15,400 logged interactions, and the most useful number in that study was the one that told me I had spent my time on the wrong half of it.",
-  },
-  {
-    kind: "text",
-    content:
-      "What bothers me about how software gets built is that almost nobody talks to the person who will use it. Teams design for somebody they have never met and never watched. So I do the whole thing, research through design through the SwiftUI that ships, without handing it off in the middle, because the interesting decisions live at the seams and that is exactly where they get lost.",
-  },
-  {
-    kind: "art",
-    label: "A coffee mug with steam",
-    content: ART_MUG,
-  },
-  {
-    kind: "text",
-    content:
-      "Off the clock: nothing happens before the first coffee. I have been disappearing into fiction since I was a kid and I still do, most nights. And I get my ten thousand steps and my gym session in, which is less about discipline than about needing somewhere to put the restlessness.",
-  },
+  { content: ART_MUG },
 ];
 
 export interface DesktopIcon {
