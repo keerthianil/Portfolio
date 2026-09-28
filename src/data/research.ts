@@ -105,7 +105,7 @@ export const RESEARCH: ResearchItem[] = [
       { kind: "h", text: "How I studied it" },
       {
         kind: "p",
-        text: "Two conditions, each a document a teacher might send: one with text and equations, one with diagrams. Six blind and low-vision participants worked through both while thinking aloud, then scored the interface on a questionnaire I read to them. Sessions were compensated. I ran the sessions and took notes.",
+        text: "Two conditions, each a document a teacher might send: one with text and equations, one with diagrams. Six blind and low-vision participants worked through both while thinking aloud, then scored the interface on a questionnaire I read to them. I ran the sessions and took notes.",
       },
       {
         kind: "p",
@@ -233,15 +233,15 @@ export const RESEARCH: ResearchItem[] = [
       },
       {
         kind: "p",
-        text: "They re-read constantly. 71% of elements were returned to at least once, and one was returned to 23 times in a single session. Every navigation feature I built works inside an element. Nothing helped them get back to one, which is what they actually spent their time doing. Returning to question 3 should be one action, not eleven swipes.",
+        text: "They re-read constantly. 71% of elements were returned to at least once. Every navigation feature I built works inside an element. Nothing helped them get back to one, which is what they actually spent their time doing. Returning to question 3 should be one action, not eleven swipes.",
       },
       {
         kind: "p",
-        text: "Tactile figures outweighed equation navigation 43 to 1 in raw interaction, in sessions that ran nearly twice as long, with an eightfold spread between participants. I had spent most of my time on math. The chart and table work in this case study exists because of that number. The spread is its own open question: exploration strategies seem to vary far more between people for figures than for equations.",
+        text: "Tactile figures outweighed equation navigation 43 to 1 in raw interaction, in sessions that ran nearly twice as long. I had spent most of my time on math. The chart and table work in this case study exists because of that number. How people explored figures also varied far more than how they explored equations, which is its own open question.",
       },
       {
         kind: "p",
-        text: "The three-finger back gesture belongs here too. It fired three times in the whole study, all from one participant. It worked. It was announced in a hint. Five of six people never touched it.",
+        text: "The three-finger back gesture belongs here too. It worked, and it was announced in a hint. Five of six people never touched it.",
       },
       {
         kind: "note",
@@ -314,19 +314,10 @@ export const RESEARCH: ResearchItem[] = [
       },
       {
         kind: "figure",
-        src: "/images/case/tactilenav/route-map-tactile.jpeg",
-        alt: "A tactile route map on a phone. Streets are thick blue lines, the active route is cyan, intersections are red squares, and the start and end are yellow dots.",
+        src: "/images/projects/tactilenav/map-congress.webp",
+        alt: "A tactile street map of Congress Square, Portland. Streets are thick blue lines labelled along their length, and intersections are red squares.",
         caption:
           "Drag a finger and each street, intersection and endpoint speaks and vibrates under it.",
-      },
-      {
-        kind: "clip",
-        mp4: "/video/tactilenav-route-map.mp4",
-        webm: "/video/tactilenav-route-map.webm",
-        poster: "/video/tactilenav-route-map-poster.jpg",
-        alt: "A screen recording of TactileNav with VoiceOver running.",
-        caption:
-          "The app's flow with VoiceOver turned on. Captions are not written yet.",
       },
       { kind: "h", text: "What the literature told me, and what it got wrong" },
       {
@@ -376,7 +367,7 @@ export const RESEARCH: ResearchItem[] = [
       { kind: "h", text: "I copied my own worse answer" },
       {
         kind: "p",
-        text: "The route app had reached the opposite conclusion weeks earlier. Under the screen reader its gestures seemed unreliable, so it read raw touch events itself and switched the system's gesture handling off. That version went to the convention and worked.",
+        text: "The route app had reached the opposite conclusion weeks earlier. Under the screen reader its gestures seemed unreliable, so it read raw touch events itself and switched the system's gesture handling off. That version held up in testing.",
       },
       {
         kind: "p",
@@ -433,7 +424,7 @@ export const RESEARCH: ResearchItem[] = [
       },
       {
         kind: "figure",
-        src: "/images/case/tactilenav/app-home-nfb-test.jpeg",
+        src: "/images/case/tactilenav/test-app-tools.jpeg",
         alt: "The test app's tools: CSV touch logs, the haptic feedback tester, and a map designer that draws corridors on a grid and exports JSON.",
         caption:
           "The test app's tools, each a surfaced piece of the shared kit.",
@@ -450,14 +441,13 @@ export const RESEARCH: ResearchItem[] = [
       { kind: "h", text: "What I would change" },
       {
         kind: "p",
-        text: "I would version the shared kit properly. Without releases, one team defensively froze a copy and drifted months behind the rest.",
+        text: "I would version the shared kit properly, so building on it never means freezing a copy to stay safe.",
       },
       {
         kind: "p",
         text: "And I would run a discoverability pass before the field test rather than after. Both apps ended up with four redundant ways to exit a screen, which I added because no single one proved reliable. Four is not a design. It is a hedge.",
       },
     ],
-    file: { href: "/data-request.pdf", label: "The data request, as sent" },
   },
 
   {
@@ -530,7 +520,6 @@ export const RESEARCH: ResearchItem[] = [
         text: "It closes by saying that any subset would help, including just signal locations and types, because a request that demands everything usually gets nothing.",
       },
     ],
-    file: { href: "/data-request.pdf", label: "The request, as sent" },
   },
 
   {

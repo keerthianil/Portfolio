@@ -177,19 +177,6 @@ export const ASSETS: Record<string, AssetGroup[]> = {
         },
       ],
     },
-    {
-      title: "With VoiceOver running",
-      kind: "video",
-      items: [
-        {
-          file: "tactilenav-route-map",
-          poster: "tactilenav-route-map-poster",
-          alt: "A screen recording of TactileNav with VoiceOver running.",
-          caption:
-            "Focus steps along a route from one intersection to the next, each announced with the streets that meet there.",
-        },
-      ],
-    },
   ],
 
   ally: [
