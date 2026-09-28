@@ -85,9 +85,14 @@ anything.
 
 ## Contents
 
-The writing is mine and the projects are real. Where a project has no written
-case study it says so and gives you the code instead, because a narrative
-invented after the fact is the opposite of the point of the rest of it. The
-numbers on the metric tiles are measured numbers or they are not there.
+The writing is mine and the projects are real. Every project has a short case
+study, and the long versions, with the tables and sources, are in Research. The
+numbers on the metric tiles are measured numbers or they are not there, and
+study findings are reported in aggregate only, with no participant, venue or
+session date.
+
+Each project card shows the app's own icon from
+`public/images/projects/<id>/icon.webp`. A project without one shows two of its
+screens instead.
 
 Keerthi Anil

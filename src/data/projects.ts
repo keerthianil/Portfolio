@@ -103,6 +103,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "ally",
+    icon: "The Ally app icon: four overlapping circles in teal, apricot, lavender and green around a small berry dot.",
     avif: true,
     title: "Ally",
     summary:
@@ -146,6 +147,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "aria",
+    icon: "The ARIA app icon: a violet magnifying glass with a location pin inside the lens.",
     title: "ARIA",
     summary:
       "An accessibility audit tool for designers. It runs the checks that are maths, and refuses to guess at the rest.",

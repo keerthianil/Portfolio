@@ -21,21 +21,14 @@ export const NAME_BANNER = [
   "█  █ ████ ████ █  █  ██  █  █ ████",
 ].join("\n");
 
-export const ART_WORKSHEET = String.raw`
-  ┌─────────────────────┐
-  │  (ax + 3)² = 36     │
-  │  ─────────────────  │
-  │  "math equation,    │
-  │   double tap to     │
-  │   enter math mode"  │
-  └─────────────────────┘`;
-
-export const ART_MAP = String.raw`
-   ═══╦═══════╦═══
-      ║       ║
-   ───╬───────╬───
-      ║   ●   ║
-   ═══╩═══════╩═══`;
+/** The rubber duck from the desk, signing off. */
+export const ART_DUCK = [
+  "",
+  "    __",
+  " __( o)>    EOF.",
+  " \\ <_. )    quack.",
+  "  `---'",
+].join("\n");
 
 export const ART_MUG = String.raw`
     ) ) )
@@ -49,11 +42,11 @@ export const ART_MUG = String.raw`
  * sit after it in `ABOUT_ART`.
  */
 export const ABOUT_PARAGRAPHS: string[] = [
-  "In 2021 I built a way to move a cursor with your face, for somebody who could not use a mouse. The nose steered and a blink clicked, which made every sneeze a risk. It was rough, it worked, and I have been building versions of it ever since.",
-  "These days it is iOS, mostly for blind and low-vision users. At the Roux Institute I built StemAlly, a math reader you can move around inside instead of hearing an equation once and hoping for the best, and TactileNav, street maps you read with one finger. I tested both with the people they were for, which is the fastest way I know to find out what I got wrong.",
-  "I do the whole thing: the research, the design in Figma, and the SwiftUI that ships. Not because I cannot delegate. Because the decisions that matter live at the seams. A study shows people never find the exit gesture, the designer never hears about it, and the next build adds another gesture nobody will find. Doing all three puts the finding and the fix in the same week. It also leaves exactly one person to blame, which keeps me honest.",
-  "The part I care about is simple to say and hard to do. Watch someone use the thing, then change what you built. Most of what I make is for the people a default design leaves out.",
-  "Off the clock: fiction most nights, which I have been disappearing into since I was a kid, and coffee before anything, which at this point is load-bearing.",
+  "In 2021 I built a way to move a cursor with your face, for someone who couldn't use a mouse. The nose steered and a blink clicked, which made every sneeze a risk. It was rough, it worked, and I've been building versions of it ever since.",
+  "These days it's iOS, mostly for blind and low-vision users. At the Roux Institute I built StemAlly, a math reader you can actually move around in, instead of hearing an equation once and hoping for the best. And TactileNav, street maps you read with one finger. I tested both with the people they were for, which is the fastest way I know to find out everything I got wrong.",
+  "I do the whole thing: the research, the design in Figma, and the SwiftUI that ships. Not because I can't delegate, I promise. It's that the decisions that matter fall through the gaps between those jobs. A study finds nobody uses the exit gesture, the designer never hears about it, and the next build adds another gesture nobody will find. Doing all three puts the finding and the fix in the same week. It also leaves exactly one person to blame, which keeps me honest.",
+  "What I care about is simple to say and annoyingly hard to do: watch someone use the thing, then change what you built. Most of what I make is for the people a default design leaves out.",
+  "Off the clock: fiction most nights, which I've been disappearing into since I was a kid, and coffee before anything, which at this point is load-bearing.",
 ];
 
 export interface AboutArt {
@@ -66,16 +59,15 @@ export interface AboutArt {
 }
 
 /**
- * The equation box carries meaning: it is the gap StemAlly exists to close, so
- * it gets a real text alternative rather than a name. The mug is decoration.
+ * The mug is decoration. The duck closes the terminal and says something while
+ * it does, so it gets a text alternative.
  */
 export const ABOUT_ART: AboutArt[] = [
-  {
-    content: ART_WORKSHEET,
-    label:
-      "A worksheet equation, a x plus 3, all squared, equals 36. Under it, all a screen reader says about it: math equation, double tap to enter math mode.",
-  },
   { content: ART_MUG },
+  {
+    content: ART_DUCK,
+    label: "A rubber duck signing off: end of file. Quack.",
+  },
 ];
 
 export interface DesktopIcon {
