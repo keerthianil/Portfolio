@@ -21,10 +21,9 @@ reads as finished.
 
 ## Loading
 
-There is no loading screen, on purpose. There was one, and it counted a
-percentage to a hundred against a number nobody was waiting for: the scene
-chunk is lazy and the textures paint on their own, so the number was invented
-and the wait belonged to the number rather than to the page.
+Nothing counts or spins while the room loads. The scene chunk is lazy and the
+textures paint on their own, so any percentage would be invented, and the wait
+would belong to the number rather than to the page.
 
 The curtain opens 60ms after the scene reports ready, and the flat view shows
 immediately because it has nothing to wait for.

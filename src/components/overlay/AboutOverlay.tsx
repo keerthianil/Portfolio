@@ -93,8 +93,9 @@ export function AboutOverlay({ onClose }: { onClose: () => void }) {
    *
    * The boot runs about five and a half seconds, which is five and a half
    * seconds of nothing if you cannot see the bars filling. So any key, and a
-   * click anywhere in the window, finishes it immediately, and reduced motion
-   * arrives with it already finished.
+   * tap or click on the terminal, finishes it immediately, and reduced motion
+   * arrives with it already finished. The tap is on the terminal only, so the
+   * same tap cannot also open a folder on the desktop beside it.
    */
   const skip = useCallback(() => {
     setLine(BOOT_LINES.length);
@@ -253,6 +254,7 @@ export function AboutOverlay({ onClose }: { onClose: () => void }) {
         {/* Terminal */}
         <div
           ref={bodyRef}
+          onPointerDown={booted ? undefined : skip}
           className="font-mono flex-1 px-3.5 py-6 text-[13px] leading-relaxed sm:px-9 sm:py-7"
         >
           <div className="mx-auto flex max-w-[70ch] flex-col gap-5">
@@ -278,7 +280,7 @@ export function AboutOverlay({ onClose }: { onClose: () => void }) {
                 <p className="text-text">Ready.</p>
               ) : (
                 <p className="text-text-muted pt-2 text-xs">
-                  Press any key to skip.
+                  Press any key or tap to skip.
                 </p>
               )}
             </div>

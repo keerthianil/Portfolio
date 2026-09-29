@@ -16,9 +16,8 @@ export interface TimelineEntry {
  * newest first after it.
  *
  * Overlapping rows are real and there are several, which a stack of calendar
- * pages states rather than draws. A chart that drew them was tried and removed:
- * it read as analysis sitting next to the thing it analysed, and it pushed the
- * calendar off a panel whose whole job is to be the calendar you clicked.
+ * pages states rather than draws, because the panel's whole job is to be the
+ * calendar you clicked.
  */
 export const TIMELINE: TimelineEntry[] = [
   {

@@ -87,8 +87,7 @@ export function routeFromHash(hash: string): RouteDefinition | null {
 
 /**
  * Props in the scene that do something but do not open a panel. The mug is the
- * only one: there used to be a speaker here for a voice assistant, and that is
- * gone along with every other voice feature.
+ * only one listed here.
  */
 export interface SceneProp {
   object: string;

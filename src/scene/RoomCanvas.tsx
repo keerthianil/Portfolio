@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { AdaptiveDpr, ContactShadows } from "@react-three/drei";
 import { Object3D } from "three";
 import type { AmbientLight, DirectionalLight, PointLight, SpotLight } from "three";
@@ -119,6 +119,30 @@ function BarLight({ target, dim }: { target: Object3D; dim: boolean }) {
   );
 }
 
+/**
+ * Stops drawing while a panel covers the room.
+ *
+ * Work and About open on the monitor's and the laptop's own screens, so the
+ * room behind them is not visible, and it was still being drawn every frame.
+ * On a phone that GPU time came straight out of scrolling the panel, which ran
+ * at about thirty frames a second. The pause waits for the camera to finish
+ * arriving, so it never freezes a move halfway, and drawing resumes the moment
+ * the panel closes, before the camera starts back.
+ */
+const SETTLE_MS = 600;
+function Hold({ paused }: { paused: boolean }) {
+  const setFrameloop = useThree((state) => state.setFrameloop);
+  useEffect(() => {
+    if (!paused) {
+      setFrameloop("always");
+      return;
+    }
+    const id = window.setTimeout(() => setFrameloop("demand"), SETTLE_MS);
+    return () => window.clearTimeout(id);
+  }, [paused, setFrameloop]);
+  return null;
+}
+
 export function RoomCanvas({
   camera,
   yawRef,
@@ -130,6 +154,7 @@ export function RoomCanvas({
   prodded,
   blindsDown,
   focused,
+  paused = false,
   className,
 }: {
   camera: CameraState;
@@ -142,6 +167,8 @@ export function RoomCanvas({
   prodded: boolean;
   blindsDown: number;
   focused: Hotspot | null;
+  /** True while a panel covers the whole room. */
+  paused?: boolean;
   className?: string;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -185,6 +212,7 @@ export function RoomCanvas({
         }}
       >
         <AdaptiveDpr pixelated />
+        <Hold paused={paused} />
 
         <Daylight blindsDown={blindsDown} />
 

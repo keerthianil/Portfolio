@@ -73,6 +73,7 @@ export const SceneStage = memo(function SceneStage({
   blindsDown,
   focused,
   flat,
+  paused,
 }: {
   camera: CameraState;
   yawRef: React.RefObject<number>;
@@ -86,6 +87,8 @@ export const SceneStage = memo(function SceneStage({
   focused: Hotspot | null;
   /** Null while the WebGL probe is still pending. */
   flat: boolean | null;
+  /** True while a panel covers the whole room, so the scene can stop drawing. */
+  paused: boolean;
 }) {
   const shouldReduce = useReducedMotion();
 
@@ -117,6 +120,7 @@ export const SceneStage = memo(function SceneStage({
         prodded={prodded}
         blindsDown={blindsDown}
         focused={focused}
+        paused={paused}
       />
     </SceneBoundary>
   );

@@ -114,8 +114,8 @@ export const SLIDES: Slide[] = [
   },
   {
     title: "ARIA",
-    line: "It audits itself first",
-    shot: "/images/projects/aria/audit.webp",
+    line: "It refuses to guess",
+    shot: "/images/projects/aria/audit-dark.webp",
   },
   {
     title: "Ally",
@@ -673,12 +673,9 @@ export function makeCalendarTexture(): CanvasTexture {
 
 /**
  * What is outside the window: my photograph of a sunset, and nothing else.
- * There were painted rooftops along the bottom, which fought the picture.
  *
- * It is scenery. There was a frosted pane over it once and weather behind it
- * after that, and both of them were the window asking for attention it did
- * not need: it is a photograph in a frame on a wall, and the thing it is for
- * is being the reason there is daylight in the room.
+ * It is scenery: a photograph in a frame on a wall, and the thing it is for is
+ * being the reason there is daylight in the room.
  */
 export function makeSkyTexture(): { texture: CanvasTexture; dispose: () => void } {
   const width = 512;

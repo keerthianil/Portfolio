@@ -98,11 +98,10 @@ export function Experience() {
   /**
    * The curtain opens as soon as there is a room behind it.
    *
-   * There used to be a progress ring in front of this, counting to a hundred.
-   * It was counting to nothing: the scene chunk is lazy and the textures paint
-   * on their own, so the number was invented and the wait was the number's,
-   * not the page's. The room now shows the moment it can, and the flat view
-   * shows immediately because it has nothing to wait for.
+   * Nothing counts toward it. The scene chunk is lazy and the textures paint
+   * on their own, so any number would be invented. The room shows the moment
+   * it can, and the flat view shows immediately because it has nothing to wait
+   * for.
    */
   useEffect(() => {
     if (!sceneReady && !flat) return;
@@ -612,6 +611,7 @@ export function Experience() {
           vision={vision}
           focused={focused}
           flat={flat}
+          paused={activeRoute === "work" || activeRoute === "about"}
         />
       </main>
 

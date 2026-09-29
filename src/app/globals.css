@@ -152,35 +152,6 @@ main:focus-visible {
   font-size: 0.9375rem;
 }
 
-/* Loading screen. CSS rather than JS, because this paints before hydration has
-   settled and must never depend on an animation frame to be readable. */
-@keyframes loading-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.45;
-  }
-}
-.loading-pulse {
-  animation: loading-pulse 1.6s ease-in-out infinite;
-}
-
-@keyframes loading-rise {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.loading-rise {
-  animation: loading-rise 0.8s ease-out 0.4s both;
-}
-
 /* ---------------------------------------------------------------------------
    Print.
 

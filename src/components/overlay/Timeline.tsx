@@ -14,11 +14,9 @@ import { WindowFrame } from "./WindowFrame";
  * the left with the rings running through them, so the whole thing reads as the
  * object you clicked rather than as a list that happens to have dates.
  *
- * A chart was tried here, with years down the left and each role drawn as a bar
- * in a lane, on the argument that overlapping roles should be visible rather
- * than asserted. It was removed: it read as a piece of analysis sitting next to
- * the thing it analysed, and it took the calendar off the page, which is the
- * one object in the room this panel belongs to.
+ * It stays a calendar rather than a chart of the years. A chart reads as a
+ * piece of analysis sitting next to the thing it analysed, and this panel
+ * belongs to the one object in the room it opens from.
  *
  * It is still an ordered list underneath, and it still scrolls vertically. A
  * horizontal timeline is the classic version of this and it is hostile on a

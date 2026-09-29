@@ -985,10 +985,8 @@ export function Room({
 
         It is in the scene rather than in the DOM because focus here lands on
         an object in a room, and a rectangle drawn over the canvas would be a
-        rectangle drawn over the canvas. It used to appear only during a
-        contrast demonstration that is no longer here; it is on all the time
-        now, which is the only setting a focus indicator has ever been
-        allowed to have.
+        rectangle drawn over the canvas. It is on all the time, which is the
+        only setting a focus indicator has ever been allowed to have.
 
         Two rings, gold on dark brown, so it survives whatever it lands on.
       */}

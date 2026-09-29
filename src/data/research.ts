@@ -115,13 +115,6 @@ export const RESEARCH: ResearchItem[] = [
         kind: "p",
         text: "The task framing mattered too. I told participants explicitly that they were not solving the math, only judging whether it was readable. That single instruction changed the build: I had written code to strip answers out of the spoken text so people could not cheat, and once the task was not about answers, I deleted it.",
       },
-      {
-        kind: "figure",
-        src: "/images/case/stemally/app-home-and-all-files.jpeg",
-        alt: "Two phone screens side by side. On the left, StemAlly's Home tab with worksheets uploaded by a teacher. On the right, the All Files tab listing the seven content types built for the study.",
-        caption:
-          "StemAlly's Home tab with teacher-uploaded worksheets, and the All Files tab showing the seven content types built for the study.",
-      },
       { kind: "h", text: "Deciding who owns the reading experience" },
       {
         kind: "p",
@@ -183,27 +176,6 @@ export const RESEARCH: ResearchItem[] = [
         alt: "Two phone screens side by side. On the left a bar chart in the document flow with a summary above it. On the right the same chart in a fullscreen tactile view with bold high contrast outlines.",
         caption:
           "A bar chart with its computed summary and Show Data Table toggle, and the same chart in high-contrast tactile fullscreen where vibration strength maps to value.",
-      },
-      {
-        kind: "figure",
-        src: "/images/case/stemally/chart-line-pair.jpeg",
-        alt: "Two phone screens side by side. On the left a line graph with a written data description. On the right the same graph in tactile fullscreen with thick line segments and red data point markers.",
-        caption:
-          "On-screen summary with data description, and tactile fullscreen with thick line segments and red data-point markers.",
-      },
-      {
-        kind: "figure",
-        src: "/images/case/stemally/chart-pie-pair.jpeg",
-        alt: "Two phone screens side by side. On the left a pie chart with a percentage legend. On the right the same chart in tactile fullscreen with enlarged slices labelled by percentage.",
-        caption:
-          "Pie chart with percentage legend and Show Data Table toggle, and tactile fullscreen with enlarged slices labelled by percentage.",
-      },
-      {
-        kind: "figure",
-        src: "/images/case/stemally/figure-rectangle-pair.jpeg",
-        alt: "Two phone screens side by side. On the left a geometry figure rendered as a plain rectangle outline. On the right the same figure in tactile fullscreen with thick edges, corner markers and labelled sides.",
-        caption:
-          "A geometry figure gets the same treatment: rendered on screen, then explored in tactile fullscreen with labelled sides.",
       },
       {
         kind: "p",
@@ -312,13 +284,6 @@ export const RESEARCH: ResearchItem[] = [
         kind: "p",
         text: "The interaction that makes it possible is simple to describe. You put a finger on a map and drag, and the map speaks and vibrates under you. Roads buzz. Intersections pulse. Landmarks pulse faster. Which is where the problem starts, because that needs raw one finger touches, and the screen reader also needs one finger touches, since that is how a blind user moves focus and activates anything. Only one of us can have them.",
       },
-      {
-        kind: "figure",
-        src: "/images/projects/tactilenav/map-congress.webp",
-        alt: "A tactile street map of Congress Square, Portland. Streets are thick blue lines labelled along their length, and intersections are red squares.",
-        caption:
-          "Drag a finger and each street, intersection and endpoint speaks and vibrates under it.",
-      },
       { kind: "h", text: "What the literature told me, and what it got wrong" },
       {
         kind: "p",
@@ -410,24 +375,10 @@ export const RESEARCH: ResearchItem[] = [
         caption:
           "Texture carries meaning. Strength is reserved for traffic volume.",
       },
-      {
-        kind: "figure",
-        src: "/images/case/tactilenav/feedback-haptic-setup.jpeg",
-        alt: "The in-app feedback tester, with each map element assigned a haptic pattern that can be previewed before exploring the map.",
-        caption:
-          "Each map element can be assigned and previewed as a haptic pattern before exploring the map.",
-      },
       { kind: "h", text: "The shared kit" },
       {
         kind: "p",
         text: "The map rendering, the vibration engine, the spatial audio, and the touch logging came out of these two apps into one kit other teams now build on. The decision that made it reusable: a map element is pure data, and you hand in a policy that decides what a touch means. Indoor corridors and outdoor crosswalks share the same model and disagree entirely about how they should feel.",
-      },
-      {
-        kind: "figure",
-        src: "/images/case/tactilenav/test-app-tools.jpeg",
-        alt: "The test app's tools: CSV touch logs, the haptic feedback tester, and a map designer that draws corridors on a grid and exports JSON.",
-        caption:
-          "The test app's tools, each a surfaced piece of the shared kit.",
       },
       { kind: "h", text: "Honest scope, and the ask" },
       {

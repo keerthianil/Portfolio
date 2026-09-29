@@ -93,18 +93,24 @@ export function BottomNav({
    * The continuous turn does not start on pointer down, it starts 260ms later,
    * because a click is a pointer down and a pointer up and the two would
    * otherwise both fire: a stop plus however many frames the click took.
+   *
+   * The frame loop only runs while an arrow is held. It used to run for as
+   * long as the nav was mounted, checking a flag every frame, which kept a
+   * phone waking sixty times a second behind every panel for nothing.
    */
+  const frame = useRef(0);
+  const rotate = useRef(onRotate);
   useEffect(() => {
-    let frame = 0;
-    const tick = () => {
-      if (held.current) onRotate(direction.current);
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
+    rotate.current = onRotate;
   }, [onRotate]);
 
-  useEffect(() => () => window.clearTimeout(holdTimer.current), []);
+  useEffect(
+    () => () => {
+      window.clearTimeout(holdTimer.current);
+      cancelAnimationFrame(frame.current);
+    },
+    [],
+  );
 
   const startHold = useCallback(
     (value: 1 | -1) => {
@@ -112,8 +118,15 @@ export function BottomNav({
       onRotateStep(value);
       lastPointerStep.current = Date.now();
       window.clearTimeout(holdTimer.current);
+      cancelAnimationFrame(frame.current);
       holdTimer.current = window.setTimeout(() => {
         held.current = true;
+        const tick = () => {
+          if (!held.current) return;
+          rotate.current(direction.current);
+          frame.current = requestAnimationFrame(tick);
+        };
+        frame.current = requestAnimationFrame(tick);
       }, 260);
     },
     [onRotateStep],
@@ -121,6 +134,7 @@ export function BottomNav({
   const endHold = useCallback(() => {
     held.current = false;
     window.clearTimeout(holdTimer.current);
+    cancelAnimationFrame(frame.current);
   }, []);
 
   const indicatorIndex = hovered

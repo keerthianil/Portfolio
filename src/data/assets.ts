@@ -51,10 +51,6 @@ export const ASSETS: Record<string, AssetGroup[]> = {
           alt: "StemAlly's Home tab: an upload card, a row of files uploaded by a teacher, and a recent files list under it.",
         },
         {
-          file: "all-files",
-          alt: "StemAlly's All Files tab, listing the seven documents built for the study: a math practice test, geometric shapes, bar charts, line graphs, pie charts, data tables, and mixed charts.",
-        },
-        {
           file: "multiple-choice",
           alt: "A multiple choice question. The equation sits in its own block and the four answer options read as a plain list rather than as four things to enter.",
           caption:
@@ -64,7 +60,7 @@ export const ASSETS: Record<string, AssetGroup[]> = {
     },
     {
       title: "Charts, on screen and by touch",
-      note: "Each pair is the same chart twice: in the document flow with a computed summary and a data table toggle, then in the fullscreen tactile view where vibration strength maps to value.",
+      note: "The same chart twice: in the document flow with a computed summary and a data table toggle, then in the fullscreen tactile view where vibration strength maps to value.",
       items: [
         {
           file: "chart-bar-a",
@@ -73,35 +69,6 @@ export const ASSETS: Record<string, AssetGroup[]> = {
         {
           file: "chart-bar-b",
           alt: "The same bar chart in fullscreen tactile view: five thick teal bars with their values printed above them.",
-        },
-        {
-          file: "chart-line-a",
-          alt: "A line graph in the document flow, under the question text, with a Show Data Table toggle.",
-        },
-        {
-          file: "chart-line-b",
-          alt: "The same line graph in fullscreen tactile view: one thick line with large red markers at every data point.",
-        },
-        {
-          file: "chart-pie-a",
-          alt: "A pie chart in the document flow, with a legend listing seven categories and their percentages.",
-        },
-        {
-          file: "chart-pie-b",
-          alt: "The same pie chart in fullscreen tactile view, slices enlarged and pulled apart, each labelled with its percentage.",
-        },
-      ],
-    },
-    {
-      title: "Geometry figures",
-      items: [
-        {
-          file: "figure-rectangle-a",
-          alt: "A geometry question asking for the area of a rectangle. The rectangle is drawn as a thin unlabelled outline.",
-        },
-        {
-          file: "figure-rectangle-b",
-          alt: "The same rectangle in fullscreen tactile view: thick black edges, red markers at the corners and midpoints, and the sides labelled six metres and four metres.",
         },
       ],
     },
@@ -135,10 +102,6 @@ export const ASSETS: Record<string, AssetGroup[]> = {
       title: "The maps",
       items: [
         {
-          file: "home",
-          alt: "TactileNav's home screen: two maps, Congress Square and Street Crossing Audio, plus the feedback tester and the data files.",
-        },
-        {
           file: "map-congress",
           alt: "The tactile street map of Congress Square, Portland. Streets are thick blue lines labelled along their length, and intersections are red squares.",
         },
@@ -154,10 +117,6 @@ export const ASSETS: Record<string, AssetGroup[]> = {
       title: "The crossing simulator",
       note: "Built for one perceptual task: telling whether a vehicle is going straight or turning across your path.",
       items: [
-        {
-          file: "crossing-idle",
-          alt: "The crossing simulator before it starts, with a start listening button and the question asking which street has the green.",
-        },
         {
           file: "crossing-active",
           alt: "The crossing simulator listening, with the traffic controls set to gas engines at normal speed and a stop button.",

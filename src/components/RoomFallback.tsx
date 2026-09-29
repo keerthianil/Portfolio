@@ -32,7 +32,7 @@ const PROP_TITLE: Record<string, string> = {
 };
 
 const BLURB: Record<RouteId, string> = {
-  work: "Nine projects, five of them with a case study",
+  work: "Eight projects, each with a case study",
   about: "Who I am and what I have shipped",
   research: "Studies, reviews and instruments",
   timeline: "Where I have worked and studied",

@@ -108,7 +108,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         title: "Challenge",
         body: [
           "My first build let a rendering engine speak the math. I shipped it in November and pulled it six days later. The engine writes its own description of the equation and there is no way inside it, so either I accept whatever it says or I take responsibility for it. I wrote the spoken form myself.",
-          "Then everything that looked like math became math. An answer choice like a. -11 arrives tagged exactly the same as a quadratic, so the screen reader said math equation, double tap to enter math mode four times per question. An expression needs two operators now before it earns its own block, so the answer choices read as a list again (screen 3).",
+          "Then everything that looked like math became math. An answer choice like a. -11 arrives tagged exactly the same as a quadratic, so the screen reader said math equation, double tap to enter math mode four times per question. An expression needs two operators now before it earns its own block, so the answer choices read as a list again (screen 2).",
         ],
       },
       {
@@ -116,12 +116,12 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         title: "Approach",
         body: [
           "Two conditions, one document of equations and one of diagrams. Six blind and low-vision participants worked through both while thinking aloud.",
-          "The part I would defend hardest is the logging. Every touch, every focus change and every announcement, ten times a second, tagged by condition (screen 12). 15,400 events. Think-aloud tells you what someone noticed and nothing about where their finger went.",
+          "The part I would defend hardest is the logging. Every touch, every focus change and every announcement, ten times a second, tagged by condition (screen 5). 15,400 events. Think-aloud tells you what someone noticed and nothing about where their finger went.",
         ],
         points: [
           "Four rotors shipped first. More granularity felt more capable and was worse. It is one now, hidden until you enter math mode.",
           "Fullscreen math mode lasted three days. Reading one equation inside a sentence should not cost you your place in the document. It is a state now, not a screen.",
-          "Charts carry four representations at once (screens 4 to 9). Sonification reads shape quickly and values badly, and a table is the reverse.",
+          "Charts carry four representations at once (screens 3 and 4). Sonification reads shape quickly and values badly, and a table is the reverse.",
         ],
       },
       {
@@ -187,13 +187,13 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         id: "approach",
         title: "Approach",
         body: [
-          "Line width and map scale are two independent numbers, and keeping them independent is the whole trick. A road is 4.0mm wide at every zoom level, because that is roughly the narrowest line a fingertip can follow. It is a perceptual constant, not a measurement of asphalt (screens 2 and 3).",
+          "Line width and map scale are two independent numbers, and keeping them independent is the whole trick. A road is 4.0mm wide at every zoom level, because that is roughly the narrowest line a fingertip can follow. It is a perceptual constant, not a measurement of asphalt (screens 1 and 2).",
           "Silence off the streets is the point: it is how a blank block reads as blank. Speech waits for a 0.2 second dwell, so sweeping across six streets you feel all six and hear only the one you stop on.",
         ],
         points: [
           "Intersections come from map node topology rather than from geometry. Two ways that genuinely meet share a node, and two that cross on a bridge do not.",
           "Two custom gestures did not survive. Both became labelled buttons, because a gesture nobody is told about does not exist.",
-          "One fix was removing a channel rather than adding one. Testers could not tell where crossings ended, and the vibration was masking the audio cue that marked it (screen 6).",
+          "One fix was removing a channel rather than adding one. Testers could not tell where crossings ended, and the vibration was masking the audio cue that marked it (screen 4).",
         ],
         figures: [
           {

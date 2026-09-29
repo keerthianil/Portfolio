@@ -22,11 +22,10 @@ export function SceneObjectButtons({
   /**
    * Reports which object has focus, so the scene can draw a ring on it.
    *
-   * This used to be passed only while a contrast demonstration was running,
-   * on the argument that the browser's own ring on the button was enough the
-   * rest of the time. It is not: the button is a pill at the top of the
-   * screen and the object it opens is across the room, so without the ring
-   * there is nothing connecting the two. It is on whenever the room is.
+   * The browser's own ring on the button is not enough on its own: the
+   * button is a pill at the top of the screen and the object it opens is
+   * across the room, so without the ring there is nothing connecting the two.
+   * It is on whenever the room is.
    */
   onFocusObject?: (object: Hotspot | null) => void;
   /** Set while an overlay is open, so Tab does not wander into the room behind it. */

@@ -36,12 +36,17 @@ export function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
         delay: 0.2,
       })}
     >
-      <div className="border-border bg-surface/85 pointer-events-auto flex w-full max-w-md flex-col items-center gap-5 rounded-3xl border p-8 text-center shadow-2xl backdrop-blur-md">
+      {/*
+        A phone on its side is under 400px tall, and the card was taller than
+        that, which cut off the only way in. On a short screen it tightens up,
+        and if it still does not fit it scrolls rather than clipping.
+      */}
+      <div className="border-border bg-surface/85 pointer-events-auto flex max-h-[calc(100dvh-1.5rem)] w-full max-w-md flex-col items-center gap-5 overflow-y-auto overscroll-contain rounded-3xl border p-8 text-center shadow-2xl backdrop-blur-md [@media(max-height:520px)]:gap-3 [@media(max-height:520px)]:p-5">
         {/* Not cropped to a circle: the raised hand is the whole point of the
             pose, and a circular mask cuts it off. It sits on a soft burgundy
             glow instead. */}
         <span
-          className="relative flex h-24 w-24 items-center justify-center"
+          className="relative flex h-24 w-24 shrink-0 items-center justify-center [@media(max-height:520px)]:h-16 [@media(max-height:520px)]:w-16"
           aria-hidden="true"
         >
           <span
@@ -57,7 +62,7 @@ export function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
             width={242}
             height={240}
             priority
-            className="relative h-24 w-24 object-contain"
+            className="relative h-24 w-24 object-contain [@media(max-height:520px)]:h-16 [@media(max-height:520px)]:w-16"
           />
         </span>
 
@@ -66,13 +71,13 @@ export function WelcomeCard({ onDismiss }: { onDismiss: () => void }) {
               main, and a second one appearing and then unmounting when the
               card is dismissed rewrites the document outline under anybody
               reading it by headings. */}
-          <p className="font-display text-3xl leading-tight">Keerthi Anil</p>
+          <p className="font-display text-3xl leading-tight [@media(max-height:520px)]:text-2xl">Keerthi Anil</p>
           <p className="text-highlight text-sm tracking-wide">
             Designer, Developer &amp; Researcher
           </p>
         </div>
 
-        <p className="text-lg leading-snug text-balance">
+        <p className="text-lg leading-snug text-balance [@media(max-height:520px)]:text-base">
           I design, build, and research interfaces for the people default
           products miss.
         </p>

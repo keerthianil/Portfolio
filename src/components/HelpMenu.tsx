@@ -3,11 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Command,
+  Hand,
   Keyboard,
   MousePointerClick,
+  PanelBottom,
   Rotate3d,
   SunMedium,
 } from "lucide-react";
+
+const PLAY =
+  "The mug, the rubber duck, the switch by the door and the blind on the window each do something instead. Nothing you do to them is permanent.";
 
 const ITEMS = [
   {
@@ -18,10 +23,7 @@ const ITEMS = [
     Icon: MousePointerClick,
     body: "Click the things on the desk. The monitor, the laptop and the notebook each open a section, and the calendar opens the timeline.",
   },
-  {
-    Icon: SunMedium,
-    body: "The mug, the switch by the door and the window each do something instead. None of it is undoable.",
-  },
+  { Icon: SunMedium, body: PLAY },
   {
     Icon: Keyboard,
     body: "Every object in the room is also a real button. Tab reaches all of them, Escape closes whatever is open, and nothing here needs a mouse.",
@@ -34,8 +36,38 @@ const ITEMS = [
   },
 ];
 
+/**
+ * The same four ideas for a phone. The keyboard lines would be instructions
+ * nobody holding one can follow, and search only opens from a keyboard, so it
+ * is left out rather than described.
+ */
+const TOUCH_ITEMS = [
+  {
+    Icon: Rotate3d,
+    body: "Drag across the room with one finger to look around, or tap the arrows at the bottom.",
+  },
+  {
+    Icon: Hand,
+    body: "Tap the things on the desk. The monitor, the laptop and the notebook each open a section, and the calendar opens the timeline.",
+  },
+  { Icon: SunMedium, body: PLAY },
+  {
+    Icon: PanelBottom,
+    body: "The bar at the bottom jumps straight to Work, About and Research. The close button, or going back, closes whatever is open.",
+  },
+];
+
 export function HelpMenu({ onClose }: { onClose: () => void }) {
   const [shown, setShown] = useState(false);
+  // Read once when the menu opens. The menu only ever mounts in the browser,
+  // after somebody has pressed the button, so there is no server render to
+  // disagree with.
+  const [touch] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(pointer: coarse)").matches,
+  );
+  const items = touch ? TOUCH_ITEMS : ITEMS;
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -89,9 +121,9 @@ export function HelpMenu({ onClose }: { onClose: () => void }) {
         shown ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0",
       ].join(" ")}
     >
-      <div className="bg-surface border-border rounded-3xl border p-4 shadow-2xl">
+      <div className="bg-surface border-border max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain rounded-3xl border p-4 shadow-2xl">
         <ul className="space-y-5">
-          {ITEMS.map(({ Icon, body }) => (
+          {items.map(({ Icon, body }) => (
             <li key={body} className="flex items-start gap-4">
               <span
                 className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-full"

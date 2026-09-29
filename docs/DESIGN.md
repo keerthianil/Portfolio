@@ -77,12 +77,10 @@ lowers eighteen slats and drops the daylight, the ambient and the rim with
 them, and the slats stack under the headrail rather than sliding away, because
 that is what a venetian blind does.
 
-A desk lamp stood on this desk for one revision and came off it again. It was
-there because the light on the desk used to come from a bar clipped to the top
-of the monitor, which is a real object and is also not a lamp, so the brightest
-thing on the desk came from something nobody could see. It turned out to be one
-object too many on a desk that already has a monitor, a laptop, a notebook, a
-calendar, a mug and a duck on it.
+The light on the desk comes from the bar clipped to the top of the monitor. It
+is a real object with its light at the same position as its geometry, so the
+brightest thing on the desk comes from something you can see, on a desk that
+already has a monitor, a laptop, a notebook, a calendar, a mug and a duck on it.
 
 None of the four is undoable, which is the only reason a portfolio is allowed
 to have any of them.
